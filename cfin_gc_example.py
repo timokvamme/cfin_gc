@@ -559,7 +559,8 @@ for no, trial in enumerate(trialList):
             et_client.sendMsg(msg="et_client needs recalibration - closing file")
             et_client.cleanUp() # save the file before calibration. - TODO  fix so this is not necessary
             calibrate_eyelink_client()
-            et_client = setup_et(win, saveFileEDF=None, calibrateET=ETCalibration,testCalibration=True,calibrateTestTime=calibrateTestTime)
+            et_client = setup_et(win, saveFileEDF=None, calibrateET=False, testCalibration=True,
+                                 calibrateTestTime=calibrateTestTime)
             setDefaultetFixProtocol(etFixProtocolPath=etFixProtocolPath,defaultReFixationProtocol=defaultReFixationProtocol)
             et_client.sendMsg(msg="starting experiment")
             et_client.startRecording()
@@ -592,7 +593,8 @@ for no, trial in enumerate(trialList):
             et_client.sendMsg(msg="et_client needs recalibration - closing file")
             et_client.cleanUp() # save the file before calibration. - TODO  fix so this is not necessary
             calibrate_eyelink_client()
-            et_client = setup_et(win, saveFileEDF=None, calibrateET=ETCalibration,testCalibration=True,calibrateTestTime=calibrateTestTime)
+            et_client = setup_et(win, saveFileEDF=None, calibrateET=False, testCalibration=True,
+                                 calibrateTestTime=calibrateTestTime)
             setDefaultetFixProtocol(etFixProtocolPath=etFixProtocolPath,defaultReFixationProtocol=defaultReFixationProtocol)
             et_client.sendMsg(msg="starting experiment")
             et_client.startRecording()
