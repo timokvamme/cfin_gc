@@ -96,10 +96,10 @@ Dependencies:
 
 Pylink:
     the only working package version I found to work was in MEG service: (stim pc)
-    X:\MEG_service\Eye_Tracking\pylink_forPython3.6_x64
+    X:/MEG_service/Eye_Tracking/pylink_forPython3.6_x64
 
     none of the packages worked at:
-    C:\Users\Public\Documents\EyeLink\SampleExperiments\Python
+    C:/Users/Public\/Documents/EyeLink/SampleExperiments/Python
 
 
 Psycholink:
@@ -108,6 +108,10 @@ Psycholink:
 Psychopy:
     https://www.psychopy.org
 
+
+# Dateset in data.
+the 3 files in data, contains 1 csv of behavioral data,
+and 2 EDF files (eyetracking files), where a recalibration was tested after the 2ed trial.
 
 """
 
@@ -560,6 +564,9 @@ for no, trial in enumerate(trialList):
             et_client.sendMsg(msg="starting experiment")
             et_client.startRecording()
             Recalibrate = False
+            stimFix.draw()
+            win.flip()
+            psychopy.core.wait(1.000)
 
 
         # Gaze Contingency
