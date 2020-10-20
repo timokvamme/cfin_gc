@@ -1,0 +1,31 @@
+This Log File, contains the print arguments from the calibrate_eyelink_2_7.py scriptif the calibration in 27 is not working, this is a usefull log to read through
+sys argument
+py27_calibration.edf
+received --- assuming this is edf file
+creating psychopy win27dow
+created
+Writing to EDF file py27_calibration.edf
+creating elink in 27
+
+The parallel port couldn't be opened
+Set to dummy mode!
+
+
+Tracker found!
+Mouse set to invissible
+running calibration
+2.5324 	WARNING 	Requested an unavailable screen number - using first available.
+3.2098 	ERROR 	Couldn't find image file 'C:\Python\cfin_gc\psychoLink.png'; check path?
+calibration over
+getting actual framerate
+got it!
+120.19317447
+done with function
+
+Error while renaming EDF file!!
+py27_calibration.edf Allready exists!!
+Manually rename the file!!
+Currently saved as XX.EDF !!
+attemping to close win27dow
+os._exit(0)
+writing file to XX.EDF 

@@ -51,6 +51,12 @@ The script has been tested at the MEG lab at Skejby by Timo Kvamme & Chris Baile
 IMPORTANT: Eyetracking is difficult - It is therefore critical that you test the calibration and the
 saving of data (check triggers) before use.
 
+note:
+during calibration, when the white dot is in the center, you will need to press "space", i.e. the red button
+once to start the calibration procedure.
+At the start (of calibration), its important not to tripple press the red button as this means escape,
+and you will skip calibration, usually this can only be fixed by a restart. 3
+
 Psycholink has been written for python version 2.7, however it is possible to use run python 3.6 or higher.
 This can be achived by using 2.7 to calibrate the eyetracker and switch to 3.6 once calibration has been performed.
 This is how it is currently, although in the future we might make this simpler.
@@ -87,6 +93,15 @@ needs to recalibrate.
 
 
 Dependencies:
+
+Pylink:
+    the only working package version I found to work was in MEG service: (stim pc)
+    X:\MEG_service\Eye_Tracking\pylink_forPython3.6_x64
+
+    none of the packages worked at:
+    C:\Users\Public\Documents\EyeLink\SampleExperiments\Python
+
+
 Psycholink:
     download "psycholink.py" from here: https://github.com/jonathanvanleeuwen/psychoLink/blob/master/PsychoLink/psychoLink.py
     and put it in the same directory as this script.
@@ -145,7 +160,7 @@ exit_experiment = False # initiation of variable. for eyetracking experiments, i
 ET = True # whether to collect ET data
 ETGC = True # whether to make stimulus presentation Gaze contingent, i.e dependent on the eye-gaze position.
 # it is a good idea to have it as a variable, that potentially can be turned off, if for some reason it causes problems
-ETCalibration = True # whether to calibrate, if false it's assumed the ET has already been calibrated sufficiently
+ETCalibration =True # whether to calibrate, if false it's assumed the ET has already been calibrated sufficiently
 
 
 
@@ -328,7 +343,7 @@ def create_eyelink_client(win, saveFileEDF=None):
     return et_client
 
 
-def calibrate_using_2_7(edf_path="txt.edf"):
+def calibrate_using_2_7(edf_path="py27_calibration.edf"):
 
 
     from subprocess import call
@@ -376,8 +391,9 @@ def calibrate_eyelink_client():
     win.winHandle.set_fullscreen(False)  # disable fullscreen
     win.flip()
 
-    calibrate_using_2_7(edf_path="txt.edf")
+    calibrate_using_2_7(edf_path="py27_calibration.edf")
 
+    psychopy.core.wait(1)
     win.winHandle.maximize()
     win.winHandle.activate()
     win.winHandle.set_fullscreen(fullscreen)  # disable fullscreen
@@ -543,6 +559,7 @@ for no, trial in enumerate(trialList):
             setDefaultetFixProtocol(etFixProtocolPath=etFixProtocolPath,defaultReFixationProtocol=defaultReFixationProtocol)
             et_client.sendMsg(msg="starting experiment")
             et_client.startRecording()
+            Recalibrate = False
 
 
         # Gaze Contingency
@@ -572,6 +589,11 @@ for no, trial in enumerate(trialList):
             setDefaultetFixProtocol(etFixProtocolPath=etFixProtocolPath,defaultReFixationProtocol=defaultReFixationProtocol)
             et_client.sendMsg(msg="starting experiment")
             et_client.startRecording()
+            stimFix.draw()
+            win.flip()
+            psychopy.core.wait(1.000)
+            Recalibrate = False
+
 
         et_client.sendMsg(msg="problemWithFixation_prestim %s" % problemWithFixation)
 
@@ -611,6 +633,10 @@ for no, trial in enumerate(trialList):
 
     if exit_experiment:
         break
+
+instruction_text.setText("Experiment Complete")
+instruction_text.draw()
+win.flip()
 
 print("performing et_client cleanUp. Transfering the file over the network form the eyetracking PC to Stim PC")
 et_client.cleanUp()
