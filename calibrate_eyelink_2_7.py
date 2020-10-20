@@ -25,7 +25,7 @@ myMon.setSizePix((displayResolution[0],displayResolution[1]))
 myMon.saveMon()
 win27 = psychopy.visual.Window(size=displayResolution, monitor=myMon,  # name of the PsychoPy Monitor Config file if used.
                              units="deg",  # coordinate space to use.
-                             fullscr=fullscreen,  # We need full screen mode.
+                             fullscr=True,  # We need full screen mode.
                              allowGUI=False,  # We wanta it to be borderless
                              colorSpace='rgb',
                              screen=1, color=backgroundColor,viewScale = 1.0)

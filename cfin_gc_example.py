@@ -104,6 +104,8 @@ from psychopy import gui
 import numpy as np
 import psychoLinkHax_3_6 as pl
 from math import atan2, degrees
+from constants import *
+
 
 # --------------- SETTINGS ---------------------------#
 # folder settings
@@ -111,11 +113,9 @@ saveFolder = os.getcwd() + "/data"
 if not os.path.isdir(saveFolder): os.makedirs(saveFolder)  # Creates save folder if it doesn't exist
 
 # display settings
-displayResolution = [1920,1080]
+# - see constants.py for more settings
+
 fullscreen = False
-monWidth = 67.5 # get the correct values in cm
-monDistance = 90
-monHeight = 38.5
 default_hz = 120.0 # the fallback refresh rate used by the eytracker if et_client.getActualFrameRate fails
 
 # keyboard settings
@@ -129,13 +129,10 @@ fixPos = 0,0
 textPosAbove = 0,6
 flash_pos_left = -7,0
 fixHeight = 1.5
-textHeightETclient = 0.3
 gazeDotRadius = 0.3
 flash_size = 1.0
 continueText = "press %s to continue"% continueKeys[0]
 flashText = "How Many Flashes?\n\n press %s to recalibrate eyetracker" % recalibrateKey
-foregroundColor  = flashColor = [1,1,1]
-backgroundColor = [0,0,0] #
 inter_trial_interval = 3.000 # in seconds
 
 # execution settings
