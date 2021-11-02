@@ -14,5 +14,5 @@ Set to dummy mode!
 Tracker found!
 Mouse set to invissible
 running calibration
-2.6790 	WARNING 	Requested an unavailable screen number - using first available.
-3.9784 	ERROR 	Couldn't find image file 'C:\Python\cfin_gc\psychoLink.png'; check path?
+2.3925 	WARNING 	Requested an unavailable screen number - using first available.
+8.7849 	ERROR 	Couldn't find image C:\Users\stimuser\PycharmProjects\cfin_gc\psychoLink.png; check path? (tried: C:\Users\stimuser\PycharmProjects\cfin_gc\psychoLink.png)

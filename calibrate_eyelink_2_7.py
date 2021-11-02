@@ -12,24 +12,20 @@ print("This Log File, contains the print arguments from the calibrate_eyelink_2_
 
 
 # get the edf file.
+print("sys argument")
+print(sys.argv[1])
+print("received --- assuming this is edf file")
 
-try:
-    print("sys argument")
-    print(sys.argv[1])
-    print("received --- assuming this is edf file")
+edf_path = sys.argv[1]
 
-    edf_path = sys.argv[1]
-
-    print("creating psychopy win27dow")
-except:
-    edf_path = "edf_sys_arg_failed" + time.strftime('(%Y-%m-%d %H-%M-%S',time.localtime()) + ').EDF'
+print("creating psychopy win27dow")
 
 myMon = psychopy.monitors.Monitor("Default", width=monWidth, distance=monDistance)
 myMon.setSizePix((displayResolution[0],displayResolution[1]))
 myMon.saveMon()
 win27 = psychopy.visual.Window(size=displayResolution, monitor=myMon,  # name of the PsychoPy Monitor Config file if used.
                              units="deg",  # coordinate space to use.
-                             fullscr=False,  # We need full screen mode.
+                             fullscr=True,  # We need full screen mode.
                              allowGUI=False,  # We wanta it to be borderless
                              colorSpace='rgb',
                              screen=1, color=backgroundColor,viewScale = 1.0)

@@ -2811,7 +2811,7 @@ class IntroScreen(object):
         space_per_lines = int(font_height * 2.5)
         total_line_height = space_per_lines * line_count
         topline_y = int(min(total_line_height / 1.5, self.display_size[1] / 2 - self.display_size[1] / 5.5))
-        left_margin = self.display_size[0] / 2.1
+        left_margin = -self.display_size[0] / 2.1
         color = (0, 0, 0)
         color = [1, 1, 1]
 
