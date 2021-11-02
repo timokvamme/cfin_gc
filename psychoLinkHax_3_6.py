@@ -1194,7 +1194,7 @@ class eyeLink:
     # Initiate Eyetracker or use mouse if no eyetracker found
     # =========================================================================
     def __init__(self, win, fileName='XX.EDF', fileDest=False,
-                 screenWidth=68, screenHeight=38.5, screenDist=83, displayResolution=[1920, 1080], address="100.1.1.1",
+                 screenWidth=40, screenHeight=25.5, screenDist=60, displayResolution=[1920, 1080], address="100.1.1.1",
                  # screenWidth/screenDist at skejby århus
                  dummyMode=False, textSize=1):
         """

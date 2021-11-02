@@ -337,7 +337,7 @@ def create_eyelink_client(win, saveFileEDF=None):
 
     if saveFileEDF == None:
         saveFileEDF = saveFolder +  '/subject_' + str(subjectID) +  '_' +  time.strftime('(%Y-%m-%d %H-%M-%S',
-                                                                                         time.localtime()) + ').EDF'
+                                                                                          time.localtime()) + ').EDF'
 
     print('Writing to EDF file {0}'.format(saveFileEDF))
     # creates the eyelink client.
@@ -444,13 +444,11 @@ def setup_et(win, saveFileEDF=None, calibrateET=True,testCalibration=True,calibr
         """
 
 
-    #
-    # if calibrateET:
-    #     calibrate_eyelink_client()
+
+    if calibrateET:
+        calibrate_eyelink_client()
 
     et_client = create_eyelink_client(win, saveFileEDF=saveFileEDF)
-
-    et_client.calibrate()
 
     try:
         et_client.hz = win.getActualFrameRate()
@@ -575,9 +573,9 @@ for no, trial in enumerate(trialList):
 
         # Gaze Contingency
         correctFixation, problemWithFixation,Recalibrate, StopGC,Refocusing = et_client.waitForFixation(fixDot=stimFix, maxDist=etMaxDist,
-                                                                                                        maxWait=etMaxWait, nRings=etNRings,
-                                                                                                        fixTime=etFixTime,
-                                                                                                        etFixProtocolPath=etFixProtocolPath)  # participant need to look at fixation for 200 ms. can respond with "3" instead of space to try again.
+                                                                                                                    maxWait=etMaxWait, nRings=etNRings,
+                                                                                                                    fixTime=etFixTime,
+                                                                                                                    etFixProtocolPath=etFixProtocolPath)  # participant need to look at fixation for 200 ms. can respond with "3" instead of space to try again.
         if Refocusing: # if the rings have appeared, getting the participant to refocus, its natural that
             # some time passes before other experimental stimuli is presented.
             stimFix.draw()
