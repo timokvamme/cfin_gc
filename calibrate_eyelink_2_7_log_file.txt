@@ -14,18 +14,5 @@ Set to dummy mode!
 Tracker found!
 Mouse set to invissible
 running calibration
-2.3019 	WARNING 	Requested an unavailable screen number - using first available.
-3.4072 	ERROR 	Couldn't find image C:\Users\stimuser\PycharmProjects\cfin_gc\psychoLink.png; check path? (tried: C:\Users\stimuser\PycharmProjects\cfin_gc\psychoLink.png)
-calibration over
-getting actual framerate
-got it!
-59.8468158547
-done with function
-
-Error while renaming EDF file!!
-py27_calibration.edf Allready exists!!
-Manually rename the file!!
-Currently saved as XX.EDF !!
-attemping to close win27dow
-os._exit(0)
-writing file to XX.EDF 
+2.6790 	WARNING 	Requested an unavailable screen number - using first available.
+3.9784 	ERROR 	Couldn't find image file 'C:\Python\cfin_gc\psychoLink.png'; check path?

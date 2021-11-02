@@ -121,7 +121,7 @@ from __future__ import division
 import os, psychopy, random, time, csv, subprocess
 from psychopy import gui
 import numpy as np
-import psychoLinkHax_3_6 as pl
+import psychoLink as pl
 from math import atan2, degrees
 from constants import *
 
@@ -147,7 +147,7 @@ quitKeys = ["escape"]
 fixPos = 0,0
 textPosAbove = 0,6
 flash_pos_left = -7,0
-fixHeight = 1.5
+fixHeight = 0.1
 gazeDotRadius = 0.3
 flash_size = 1.0
 continueText = "press %s to continue"% continueKeys[0]
@@ -444,7 +444,7 @@ def setup_et(win, saveFileEDF=None, calibrateET=True,testCalibration=True,calibr
         """
 
 
-    #
+    # #
     # if calibrateET:
     #     calibrate_eyelink_client()
 

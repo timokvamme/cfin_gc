@@ -25,7 +25,8 @@ except:
     pd = False
     warn = 'Pandas not imported!\nmakeTrialList will return array and not dataframe!\nSaving calibration will not work!'
     warnings.warn(warn, Warning)
-import Tkinter as tk
+import tkinter as tk
+import tkinter.filedialog as filedialog
 import scipy
 from scipy import misc
 import math
@@ -1241,35 +1242,33 @@ class eyeLink:
     different script. To initiate the eyetracker the window units has to be
     set to pix
 
-    import psychoLink as pl
-    from psychopy import visual, monitors
-    mon = monitors.Monitor('testMonitor',width=47,distance=75)
-    win = visual.Window(units='pix',monitor=mon,size=(1680,1050),
-    colorSpace='rgb',color = (255,255,255), screen = 0, fullscr=False)
-    tracker = pl.eyeLink(win, fileName='someName.EDF', fileDest = "C:\Users\User1\Desktop\\")
+    >>> import psychoLink as pl
+    >>> from psychopy import visual, monitors
+    >>> mon = monitors.Monitor('testMonitor',width=47,distance=75)
+    >>> win = visual.Window(units='pix',monitor=mon,size=(1680,1050),
+    colorSpace='rgb255',color = (255,255,255), screen = 0, fullscr=False)
+    >>> tracker = pl.eyeLink(win, fileName='someName.EDF', fileDest = "C:\\Users\\User1\Desktop\\")
 
     The absolute minimum of inputs required to initiate the eyetracker. Keep in
     mind that to get correct distances etc, the values for distance and width
     should be set for each eyetracker setup, but it is not required. It is not
     a good idea to only use the default settings
 
-    import psychoLink as pl
-    from psychopy import visual
-    win = visual.Window(units='pix')
-    tracker = pl.eyeLink(win)
+    >>> import psychoLink as pl
+    >>> from psychopy import visual
+    >>> win = visual.Window(units='pix')
+    >>> tracker = pl.eyeLink(win)
     """
 
     # =========================================================================
     # Initiate Eyetracker or use mouse if no eyetracker found
     # =========================================================================
     def __init__(self, win, fileName='XX.EDF', fileDest=False,
-                 screenWidth=68, screenHeight=38.5, screenDist=83, displayResolution=[1920, 1080], address="100.1.1.1",
-                 # screenWidth/screenDist at skejby århus
-                 dummyMode=False, textSize=1):
+                 screenWidth=47.5, screenDist=75, address="100.1.1.1",
+                 dummyMode=False):
         """
         see pl.tracker documentation
         """
-        self.textSize = textSize
         self.win = win
         address = str(address)
         self.EDFfileName = str(fileName)
@@ -1279,10 +1278,6 @@ class eyeLink:
         self.ABORTED = False
         self.fileDest = fileDest
         self.PPort = sendPortCode()
-        self.displayResolution = displayResolution
-        self.screenWidth = screenWidth
-        self.screenHeight = screenHeight
-        self.screenDist = screenDist
 
         try:
             if not dummyMode:
@@ -1292,26 +1287,34 @@ class eyeLink:
                 pl.flushGetkeyQueue()
                 self.mode = 'Real'
                 self.mouse.setVisible(0)
-                print '\nTracker found!'
-                print 'Mouse set to invissible'
-                # drawText(self.win, 'Press "SPACE" to setup EyeTracker!', textSize=textSize)
-                # self.win.flip()
+                print('\nTracker found!')
+                print('Mouse set to invissible')
+                drawText(self.win, 'Press "SPACE" to setup EyeTracker!')
+                self.win.flip()
             else:
                 2 / 0
         except:
             # or for dummy mode connection
             self.mode = 'Dummy'
             if pl:
-                self.pylink = pl.EyeLink(None)
-                error = '\n\tNo eye-tracker found at: "' + address + \
-                        '"\n\tEntering DummyMode\n' + \
-                        '\tUsing Mouse Position\n\n\tPress "Space" to start'
+                try:
+                    self.pylink = pl.EyeLink(None)
+                    error = '\n\tNo eye-tracker found at: "' + address + \
+                            '\n\tEntering DummyMode\n' + \
+                            '\tUsing Mouse Position\n\n\tPress "Space" to start'
+                except:
+                    self.pylink = False
+                    error = '\n\tPylink module not found!' + \
+                            '\n\tCheck for correct pylink installation' + \
+                            '\n\tEntering DummyMode\n' + \
+                            '\tUsing Mouse Position\n\n\tPress "Space" to start'
             else:
                 self.pylink = False
                 error = '\n\tPylink module not found!' + \
-                        '"\n\tEntering DummyMode\n' + \
+                        '\n\tCheck for correct pylink installation' + \
+                        '\n\tEntering DummyMode\n' + \
                         '\tUsing Mouse Position\n\n\tPress "Space" to start'
-            print("\nError: %s" % error)
+            print(("\nError: %s" % error))
             self.mouse.setVisible(1)
             drawText(self.win, error)
             self.win.flip()
@@ -1324,7 +1327,6 @@ class eyeLink:
             self.pxPerDeg = angleToPixels(1, screenD, screenW, win.size)
         except:
             self.pxPerDeg = angleToPixels(1, screenDist, screenWidth, win.size)
-
 
     # =========================================================================
     # Set settings for eyetracker
@@ -1374,7 +1376,8 @@ class eyeLink:
     # =========================================================================
     # Running drift correct and calibration procedure (make psychopy screen)
     # =========================================================================
-    def setCalibrationOptions(self, foreCol=[0, 0, 0], backCol=[150, 150, 150], calDiam=10, holeDiam=2, colorDepth=32, targSound="on", corrSound="on", incSound="on", caltype='HV9', calTime=1000):
+    def setCalibrationOptions(self, foreCol=[0, 0, 0], backCol=[150, 150, 150], calDiam=10, holeDiam=2, colorDepth=32,
+                              targSound="on", corrSound="on", incSound="on", caltype='HV9', calTime=1000):
         """
         Set the calibration options for the eyetracker calibration.
         Is automatically set when initiating the eyetracker. When auto
@@ -2223,235 +2226,6 @@ class eyeLink:
         self.stopRecording()
         return correctFixation
 
-    def waitForFixationCustom(self, fixDot, maxDist=None,
-                              maxWait=None, nRings=None, fixTime=None,
-                              etFixProtocolPath=os.getcwd() + "/etFixProtocol.txt"):
-        """
-        Wait for the start of a fixation in the area around a fixDot.
-        The function does not use eyelink events, but rather waits until
-        a certain number of gaze samples are all within the boundary.
-        If after a second there still has not been enough contiguous samples
-        within the boundary, contracting circles will be shown around the
-        fixDot. If after the set maximum time not enough contiguous samples
-        have been detected, it will prompt the user for recalibration or
-        validation.
-
-        Press escape to prematurely exit.
-
-        If running in dummy mode it uses the mouse position.
-        This function clears the psychopy window and only draws the fixDot.
-
-        Parameters
-        ----------
-        fixDot : psychopy visual shapestim
-            The stimulus to use for fixation detection. usually this will be
-            a psychopy visual.Circle.
-        maxDist : int or float
-            The maximum allowed distance from the center of the fixDot. In
-            pixels. If set to 0, it uses two degrees of visual angle. The
-            degrees of visual angle are determined based on the psychopy
-            monitor width and distance properties.
-        maxWait : int or float
-            The maximum time to wait for a correct fixation before
-            prompting the user about recalibration. In seconds.
-        nRings : int
-            The number of rings to use for constricting circles
-        fixTime : int
-            The duration of contiguous samples within the boundary that are
-            required for successful fixation.
-
-        etFixProtocolPath: string - by Timo Kvamme
-            How to Handle incorrect fixations.
-            allowed by the "user", or by the "experimenter" - where experimenter is the ol'school Psycholink way
-
-
-        Returns
-        -------
-        correctFixation : Bool
-            True if the fixation was correct
-            False if the fixation was incorrect
-
-        True
-
-        """
-        Recalibrate = False
-        StopGC = False
-        Refocusing = False
-
-        incorrectFixationTextUser = 'Either you are not fixating on the target or \n' + \
-                                    'the eyetracker needs to be recalibrated\n\n' \
-                                    'Press Green to try again\n\n' \
-                                    'else call the experimenter\n\n'
-
-        incorrectFixationTextExperimenter = 'Be ready to fixate on fixation cross' \
-                                            '\n\n' \
-                                            'Space \t\t: Retry fixation\n' \
-                                            'C \t\t: Re-calibrate\n' + \
-                                            'V \t\t: Validate\n' + \
-                                            'D \t\t: Drift-correct\n' + \
-                                            'Q \t\t: Continue without fixation control'
-
-        incorrectFixationrTextUserNowFixed = 'Good.\n\n' \
-                                             'Press green to continue'
-
-        # get refreshRate of screen
-        hz = self.hz
-        problemWithFixation = False
-        # self.startRecording()
-        if self.mode == 'Real':
-            self.pylink.sendCommand("record_status_message=Fixation_control")
-        correctFixation = False
-        trStart = time.time()
-
-        try:
-            if np.sum(fixDot.fillColor == self.win.color) == 3:
-                lineColor = fixDot.lineColor
-            else:
-                lineColor = fixDot.fillColor
-        except:
-            lineColor = "white"
-
-        # Detrmine the moving ring properties
-        if maxDist == 0:
-            maxDist = self.pxPerDeg * 2
-        perimMaxRad = maxDist
-        rad = perimMaxRad
-        self.drawFixBoundary(fixDot.pos[0], fixDot.pos[1], rad)
-        radList = []
-        for i in range(int(hz / 0.5)):
-            rad = rad - (perimMaxRad / (hz / 0.5)) * (2 - (rad / perimMaxRad))
-            if rad >= 0:
-                radList.append(rad)
-        radList = np.array(radList)
-        rIdx = [np.floor((len(radList) / nRings) * (i + 1)) - 1 for i in range(nRings)]
-
-        # Make the circ stim
-        concCirc = visual.Circle(self.win, radius=perimMaxRad, fillColorSpace='rgb',
-                                 lineColorSpace='rgb', lineColor=lineColor,
-                                 fillColor=self.win.color, edges=50, pos=fixDot.pos)
-        sampCount = 0
-        stopCount = fixTime / (1000.0 / hz)  # stops after approx 200 ms
-        while (time.time() - trStart) < maxWait:
-
-            XY = self.getCurSamp()
-            avgXY = pixelsToAngleWH((int(XY[0]), int(XY[1])), self.screenDist,
-                                    (self.screenWidth, self.screenHeight),
-                                    (self.displayResolution[0], self.displayResolution[1]))
-            distance = distBetweenPoints(avgXY, fixDot.pos)
-
-
-            print("fixDot.pos %s" % fixDot.pos)
-            print("XY %s" % XY )
-            print("avgX %s avgY %s" % (avgXY[0],avgXY[1]))
-            print("distance %s" % distance)
-
-
-
-            # Check if sample is within boundary
-            if distance < maxDist:
-                sampCount += 1
-            else:
-                sampCount = 0
-
-            # If enough samples within boundary
-            if sampCount >= stopCount:
-                correctFixation = True
-                break
-
-            # Draw animated fix boundary
-            if time.time() - trStart > 1:
-                # Get the stim radius
-                Refocusing = True
-                radList = np.roll(radList, -1)
-                rads = [radList[int(i)] for i in rIdx]
-                # Draw the larger circle first
-                for rad in np.sort(rads)[::-1]:
-                    concCirc.radius = rad
-                    concCirc.setRadius(rad)
-                    concCirc.draw()
-                    if nRings == 1 and rad == np.min(radList):
-                        if np.sum(concCirc.lineColor == self.win.color) == 3:
-                            concCirc.lineColor = fixDot.fillColor
-                        elif np.sum(concCirc.lineColor == fixDot.fillColor) == 3:
-                            concCirc.lineColor = self.win.color
-
-                # self.win.getMovieFrame()  # Defaults to front buffer, I.e. what's on screen now.
-                # self.win.saveMovieFrames('screenshot' + str(trStart) + ".png")
-
-            fixDot.draw()
-            self.win.flip()
-
-            if checkAbort():
-                break
-
-        # only draw fixDot
-        fixDot.draw()
-        self.win.flip()
-
-        # If no fixation detected
-        if not correctFixation:
-            problemWithFixation = True
-
-            try:
-                reFixationProtocolFile = open(etFixProtocolPath, "r")
-                reFixationProtocol = reFixationProtocolFile.readlines()[0]
-                print("etFixProtocolPath opened and incorrectFixationProtocol set to %s" % reFixationProtocol)
-                reFixationProtocolFile.close()
-            except:
-                print("could not open etFixProtocolPath, incorrectFixationProtocol set to user")
-                reFixationProtocol = "user"
-
-            if reFixationProtocol == "user":
-                drawText(self.win, incorrectFixationTextUser, textKey=[0], textSize=self.textSize)
-                # self.win.getMovieFrame()  # Defaults to front buffer, I.e. what's on screen now.
-                # self.win.saveMovieFrames('screenshot' + "incorrectFixation" + ".png")
-
-                whatToDo = getKey(['3', 'c'])
-
-                if whatToDo[0] == 'c':
-                    reFixationProtocol = "expr"
-
-
-                elif whatToDo[0] == '3':
-                    correctFixation = self.waitForFixationCustom(fixDot=fixDot, maxDist=maxDist,maxWait=maxWait, nRings=nRings,
-                                                                                                                    fixTime=fixTime,
-                                                                                                                    etFixProtocolPath=etFixProtocolPath)
-
-                    drawText(self.win, incorrectFixationrTextUserNowFixed, textKey=[0], textSize=self.textSize)
-
-
-            if reFixationProtocol == "expr":
-                drawText(self.win, incorrectFixationTextExperimenter, textKey=[0], textSize=self.textSize)
-                # self.win.getMovieFrame()  # Defaults to front buffer, I.e. what's on screen now.
-                # self.win.saveMovieFrames('screenshot' + "incorrectFixation" + ".png")
-                whatToDo = getKey(['c', 'space', 'q', 'd'])
-                if whatToDo[0] == 'c':
-                    correctFixation = False
-                    problemWithFixation = True
-                    Recalibrate = True
-
-                elif whatToDo[0] == 'space':
-                    correctFixation = self.waitForFixation(fixDot=fixDot, maxDist=maxDist,maxWait=maxWait, nRings=nRings,
-                                                                                                                    fixTime=fixTime,
-                                                                                                                    etFixProtocolPath=etFixProtocolPath)
-                elif whatToDo[0] == 'q' or whatToDo[0] == 'escape':
-                    correctFixation = False
-                    # elif whatToDo[0] == 'v':   # removed, as i need to use 2.7 to calibrate
-                    #     calibrationValidation(self.win,
-                    #                           self,
-                    #                           nrPoints=9,
-                    #                           dotColor=self.foreCol,
-                    #                           pxPerDegree=self.pxPerDeg,
-                    #                           saveFile=False)
-                    StopGC = True
-
-                elif whatToDo[0] == 'd':
-                    drawText(self.win, "Fixate on the upcoming fixation cross", textSize=self.textSize)
-                    time.sleep(1.0)
-                    self.driftCorrect(fixDot)
-
-        return correctFixation, problemWithFixation, Recalibrate, StopGC, Refocusing
-
     # Check abort
     def checkAbort(self):
         """
@@ -2555,253 +2329,253 @@ class eyeLink:
 # ==============================================================================
 # Enter a save filename
 # ==============================================================================
-# def giveFileName(windowName='Please enter Filename'):
-#     fileGui = tk.Tk()
-#     fileGui.withdraw()
-#     fileGui.lift()
-#     fileGui.attributes('-topmost', True)
-#     fileDir = filedialog.asksaveasfilename(title=windowName)
-#     fileGui.destroy()
-#     return fileDir
-#
-#
-# class getParticipantInfo(tk.Tk):
-#     """
-#     This class is useful for getting participant and session information.
-#     Use this at the start of each experiment to get the participant number,
-#     date of birth etc
-#
-#     Returns
-#     -------
-#     info.info : OrderedDict
-#         A dictionary with participant information
-#
-#     Examples
-#     --------
-#     >>> import psychoLink as pl
-#     >>> info = pl.getParticipantInfo() # initiate
-#     >>> info.classRun() # Run
-#     >>> ppInfo = info.info #Save information to dict
-#     >>> ppInfo
-#     OrderedDict([('ppNr', 1),
-#                  ('sessionNr', 1),
-#                  ('ppGender', 'Male'),
-#                  ('ppHandedness', 'Right'),
-#                  ('ppOccCorrection', 'No'),
-#                  ('ppLeftEye', 0.0),
-#                  ('ppRightEye', 0.0),
-#                  ('ppBirthDay', '1/1/1960'),
-#                  ('curDate', '27/03/2018'),
-#                  ('saveAs', 'PP1S1')])
-#     """
-#
-#     def __init__(self):
-#         tk.Tk.__init__(self)
-#         # Set default values with the data type required
-#         self.title('Get participant info')
-#         self.xSize = 600
-#         self.ySize = 600
-#         self.padx = 10
-#         self.pady = 5
-#         self.topDist = 20
-#         self.borderWidth = 5
-#         self.textFont = ('Helvetica', 12)
-#         self.groupFount = ('Helvetica', 9)
-#         self.instruct = 'Please enter information'
-#         self.addToTrialParse = tk.StringVar()
-#         self.currentDate = time.strftime("%d/%m/%Y")
-#         self.saveAs = ''
-#
-#     # We want to put some instructions in the GUI
-#     def makeInstructions(self):
-#         self.dispInstruct = tk.StringVar()
-#         self.dispInstruct.set(self.instruct)
-#         instr = tk.Label(self,
-#                          textvariable=self.dispInstruct,
-#                          font=self.textFont)
-#         instr.pack(pady=self.topDist)
-#
-#     def makeExperimentInfo(self):
-#         subGroup = tk.LabelFrame(self,
-#                                  text='Experiment info',
-#                                  padx=self.padx,
-#                                  pady=self.pady,
-#                                  borderwidth=self.borderWidth,
-#                                  font=self.textFont)
-#         subGroup.grid(row=0, columnspan=7, sticky='W',
-#                       padx=5, pady=5, ipadx=5, ipady=5)
-#         subGroup.pack()
-#
-#         # Subject nr entry
-#         subjectNrLabel = tk.Label(subGroup, text="Participant Nr:")
-#         sessionNrLabel = tk.Label(subGroup, text="Session Nr:")
-#         subjectNrLabel.grid(row=0, column=0)
-#         sessionNrLabel.grid(row=1, column=0)
-#
-#         subjectNr = list(range(1, 51))
-#         sessionNr = list(range(1, 11))
-#         self.subjectNrOptions = tk.StringVar()
-#         self.sessionNrOptions = tk.StringVar()
-#         self.subjectNrOptions.set(subjectNr[0])
-#         self.sessionNrOptions.set(sessionNr[0])
-#         self.subjectNrEntry = tk.OptionMenu(subGroup, self.subjectNrOptions, *subjectNr)
-#         self.sessionNrEntry = tk.OptionMenu(subGroup, self.sessionNrOptions, *sessionNr)
-#         self.subjectNrEntry.grid(row=0, column=1)
-#         self.sessionNrEntry.grid(row=1, column=1)
-#
-#         saveAsButton = tk.Button(subGroup,
-#                                  text="Save as",
-#                                  command=self.saveFileName)
-#         saveAsButton.grid(row=2, column=1)
-#
-#     def makeDemoGraph(self):
-#         demoGroup = tk.LabelFrame(self,
-#                                   text='Demographics',
-#                                   padx=self.padx,
-#                                   pady=self.pady,
-#                                   borderwidth=self.borderWidth,
-#                                   font=self.textFont)
-#         demoGroup.grid(row=0, columnspan=7, sticky='W',
-#                        padx=5, pady=5, ipadx=5, ipady=5)
-#         demoGroup.pack()
-#
-#         # Age entry
-#         ageLabel = tk.Label(demoGroup, text="Date of birth:")
-#         dayLabel = tk.Label(demoGroup, text="day")
-#         monthLabel = tk.Label(demoGroup, text="month")
-#         yearLabel = tk.Label(demoGroup, text="year")
-#         ageLabel.grid(row=1, column=0)
-#         dayLabel.grid(row=0, column=1)
-#         monthLabel.grid(row=0, column=2)
-#         yearLabel.grid(row=0, column=3)
-#
-#         day = list(range(1, 32))
-#         month = list(range(1, 13))
-#         year = list(range(1960, 2020))
-#         self.dayOptions = tk.StringVar()
-#         self.dayOptions.set(day[0])
-#         self.monthOptions = tk.StringVar()
-#         self.monthOptions.set(month[0])
-#         self.yearOptions = tk.StringVar()
-#         self.yearOptions.set(year[0])
-#         self.ageEntryDay = tk.OptionMenu(demoGroup, self.dayOptions, *day)
-#         self.ageEntryMonth = tk.OptionMenu(demoGroup, self.monthOptions, *month)
-#         self.ageEntryYear = tk.OptionMenu(demoGroup, self.yearOptions, *year)
-#
-#         self.ageEntryDay.grid(row=1, column=1)
-#         self.ageEntryMonth.grid(row=1, column=2)
-#         self.ageEntryYear.grid(row=1, column=3)
-#
-#         # Eye entry
-#         eyeLabel = tk.Label(demoGroup, text="Occular correction")
-#         rightEyeLabel = tk.Label(demoGroup, text="Right eye")
-#         leftEyeLabel = tk.Label(demoGroup, text="Left eye")
-#         eyeLabel.grid(row=3, column=0)
-#         rightEyeLabel.grid(row=2, column=2)
-#         leftEyeLabel.grid(row=2, column=3)
-#
-#         correction = ['No', 'Glasses', 'Contacts: Soft', 'Contacts: Hard']
-#         right = np.round(np.arange(-5, 5, 0.1), 2)
-#         left = np.round(np.arange(-5, 5, 0.1), 2)
-#         self.correctionOptions = tk.StringVar()
-#         self.correctionOptions.set(correction[0])
-#         self.rightOptions = tk.StringVar()
-#         self.rightOptions.set(0)
-#         self.leftOptions = tk.StringVar()
-#         self.leftOptions.set(0)
-#         self.correctionEntry = tk.OptionMenu(demoGroup, self.correctionOptions, *correction)
-#         self.rightEntry = tk.OptionMenu(demoGroup, self.rightOptions, *right)
-#         self.leftEntry = tk.OptionMenu(demoGroup, self.leftOptions, *left)
-#
-#         self.correctionEntry.grid(row=3, column=1)
-#         self.rightEntry.grid(row=3, column=2)
-#         self.leftEntry.grid(row=3, column=3)
-#
-#         # handedness entry
-#         handOptions = ['Right', 'Left', 'Ambidextrous']
-#         handLabel = tk.Label(demoGroup, text="Handedness:")
-#         self.handOptions = tk.StringVar()
-#         self.handOptions.set(handOptions[0])
-#         self.handEntry = tk.OptionMenu(demoGroup, self.handOptions, *handOptions)
-#         handLabel.grid(row=4, column=0)
-#         self.handEntry.grid(row=4, column=1)
-#
-#         # Gender entry
-#         genderOptions = ['Male', 'Female', 'Other']
-#         genderLabel = tk.Label(demoGroup, text="Gender:")
-#         self.genderOptions = tk.StringVar()
-#         self.genderOptions.set(genderOptions[0])
-#         self.genderEntry = tk.OptionMenu(demoGroup, self.genderOptions, *genderOptions)
-#         genderLabel.grid(row=5, column=0)
-#         self.genderEntry.grid(row=5, column=1)
-#
-#     # make the button which closes everything
-#     def makeStartButton(self):
-#         closeButton = tk.Button(self,
-#                                 text="Start!",
-#                                 command=self.start)
-#         closeButton.pack(side=tk.BOTTOM)
-#
-#     # Here we make and then run the classifier GUI
-#     def classRun(self):
-#         self.makeInstructions()
-#
-#         self.makeExperimentInfo()
-#
-#         self.makeDemoGraph()
-#
-#         self.makeStartButton()
-#
-#         # This starts the GUI
-#         self.geometry('{}x{}'.format(self.xSize, self.ySize))
-#         self.attributes('-topmost', True)
-#         tk.Tk.mainloop(self)
-#
-#     def getAge(self):
-#         currDate = [int(i) for i in self.currentDate.split('/')]
-#         birthDay = [int(i) for i in self.birthDay.split('/')]
-#         del self.birthDay
-#         return currDate[-1] - birthDay[-1] - ((currDate[-2], currDate[-3]) < (birthDay[-2], birthDay[-3]))
-#
-#     def saveInfo(self):
-#         from collections import OrderedDict
-#         par = OrderedDict()
-#         par['ppNr'] = self.ppNr
-#         par['sessionNr'] = self.sessionNr
-#         par['ppGender'] = self.gender
-#         par['ppHandedness'] = self.handedness
-#         par['ppOccCorrection'] = self.occularCorrection
-#         par['ppLeftEye'] = self.leftEyeCorrection
-#         par['ppRightEye'] = self.rightEyeCorrection
-#         par['ppAge'] = self.getAge()
-#         par['curDate'] = self.currentDate
-#         par['saveAs'] = self.saveAs
-#         self.info = par
-#
-#     # =========================================================================
-#     # Define what happens when buttons are pressed
-#     # =========================================================================
-#     # This stops and destroys the GUI
-#     def start(self):
-#         self.ppNr = int(self.subjectNrOptions.get())
-#         self.sessionNr = int(self.sessionNrOptions.get())
-#         self.handedness = self.handOptions.get()
-#         self.gender = self.genderOptions.get()
-#         self.birthDay = str(self.dayOptions.get()) + '/' + \
-#                         str(self.monthOptions.get()) + '/' + \
-#                         str(self.yearOptions.get())
-#         self.occularCorrection = self.correctionOptions.get()
-#         self.rightEyeCorrection = float(self.rightOptions.get())
-#         self.leftEyeCorrection = float(self.leftOptions.get())
-#
-#         if len(self.saveAs) == 0:
-#             self.saveAs = 'PP' + str(self.ppNr) + 'S' + str(self.sessionNr)
-#
-#         self.saveInfo()
-#         self.destroy()
-#
-#     def saveFileName(self):
-#         self.saveAs = giveFileName()
+def giveFileName(windowName='Please enter Filename'):
+    fileGui = tk.Tk()
+    fileGui.withdraw()
+    fileGui.lift()
+    fileGui.attributes('-topmost', True)
+    fileDir = filedialog.asksaveasfilename(title=windowName)
+    fileGui.destroy()
+    return fileDir
+
+
+class getParticipantInfo(tk.Tk):
+    """
+    This class is useful for getting participant and session information.
+    Use this at the start of each experiment to get the participant number,
+    date of birth etc
+
+    Returns
+    -------
+    info.info : OrderedDict
+        A dictionary with participant information
+
+    Examples
+    --------
+    >>> import psychoLink as pl
+    >>> info = pl.getParticipantInfo() # initiate
+    >>> info.classRun() # Run
+    >>> ppInfo = info.info #Save information to dict
+    >>> ppInfo
+    OrderedDict([('ppNr', 1),
+                 ('sessionNr', 1),
+                 ('ppGender', 'Male'),
+                 ('ppHandedness', 'Right'),
+                 ('ppOccCorrection', 'No'),
+                 ('ppLeftEye', 0.0),
+                 ('ppRightEye', 0.0),
+                 ('ppBirthDay', '1/1/1960'),
+                 ('curDate', '27/03/2018'),
+                 ('saveAs', 'PP1S1')])
+    """
+
+    def __init__(self):
+        tk.Tk.__init__(self)
+        # Set default values with the data type required
+        self.title('Get participant info')
+        self.xSize = 600
+        self.ySize = 600
+        self.padx = 10
+        self.pady = 5
+        self.topDist = 20
+        self.borderWidth = 5
+        self.textFont = ('Helvetica', 12)
+        self.groupFount = ('Helvetica', 9)
+        self.instruct = 'Please enter information'
+        self.addToTrialParse = tk.StringVar()
+        self.currentDate = time.strftime("%d/%m/%Y")
+        self.saveAs = ''
+
+    # We want to put some instructions in the GUI
+    def makeInstructions(self):
+        self.dispInstruct = tk.StringVar()
+        self.dispInstruct.set(self.instruct)
+        instr = tk.Label(self,
+                         textvariable=self.dispInstruct,
+                         font=self.textFont)
+        instr.pack(pady=self.topDist)
+
+    def makeExperimentInfo(self):
+        subGroup = tk.LabelFrame(self,
+                                 text='Experiment info',
+                                 padx=self.padx,
+                                 pady=self.pady,
+                                 borderwidth=self.borderWidth,
+                                 font=self.textFont)
+        subGroup.grid(row=0, columnspan=7, sticky='W',
+                      padx=5, pady=5, ipadx=5, ipady=5)
+        subGroup.pack()
+
+        # Subject nr entry
+        subjectNrLabel = tk.Label(subGroup, text="Participant Nr:")
+        sessionNrLabel = tk.Label(subGroup, text="Session Nr:")
+        subjectNrLabel.grid(row=0, column=0)
+        sessionNrLabel.grid(row=1, column=0)
+
+        subjectNr = list(range(1, 51))
+        sessionNr = list(range(1, 11))
+        self.subjectNrOptions = tk.StringVar()
+        self.sessionNrOptions = tk.StringVar()
+        self.subjectNrOptions.set(subjectNr[0])
+        self.sessionNrOptions.set(sessionNr[0])
+        self.subjectNrEntry = tk.OptionMenu(subGroup, self.subjectNrOptions, *subjectNr)
+        self.sessionNrEntry = tk.OptionMenu(subGroup, self.sessionNrOptions, *sessionNr)
+        self.subjectNrEntry.grid(row=0, column=1)
+        self.sessionNrEntry.grid(row=1, column=1)
+
+        saveAsButton = tk.Button(subGroup,
+                                 text="Save as",
+                                 command=self.saveFileName)
+        saveAsButton.grid(row=2, column=1)
+
+    def makeDemoGraph(self):
+        demoGroup = tk.LabelFrame(self,
+                                  text='Demographics',
+                                  padx=self.padx,
+                                  pady=self.pady,
+                                  borderwidth=self.borderWidth,
+                                  font=self.textFont)
+        demoGroup.grid(row=0, columnspan=7, sticky='W',
+                       padx=5, pady=5, ipadx=5, ipady=5)
+        demoGroup.pack()
+
+        # Age entry
+        ageLabel = tk.Label(demoGroup, text="Date of birth:")
+        dayLabel = tk.Label(demoGroup, text="day")
+        monthLabel = tk.Label(demoGroup, text="month")
+        yearLabel = tk.Label(demoGroup, text="year")
+        ageLabel.grid(row=1, column=0)
+        dayLabel.grid(row=0, column=1)
+        monthLabel.grid(row=0, column=2)
+        yearLabel.grid(row=0, column=3)
+
+        day = list(range(1, 32))
+        month = list(range(1, 13))
+        year = list(range(1960, 2020))
+        self.dayOptions = tk.StringVar()
+        self.dayOptions.set(day[0])
+        self.monthOptions = tk.StringVar()
+        self.monthOptions.set(month[0])
+        self.yearOptions = tk.StringVar()
+        self.yearOptions.set(year[0])
+        self.ageEntryDay = tk.OptionMenu(demoGroup, self.dayOptions, *day)
+        self.ageEntryMonth = tk.OptionMenu(demoGroup, self.monthOptions, *month)
+        self.ageEntryYear = tk.OptionMenu(demoGroup, self.yearOptions, *year)
+
+        self.ageEntryDay.grid(row=1, column=1)
+        self.ageEntryMonth.grid(row=1, column=2)
+        self.ageEntryYear.grid(row=1, column=3)
+
+        # Eye entry
+        eyeLabel = tk.Label(demoGroup, text="Occular correction")
+        rightEyeLabel = tk.Label(demoGroup, text="Right eye")
+        leftEyeLabel = tk.Label(demoGroup, text="Left eye")
+        eyeLabel.grid(row=3, column=0)
+        rightEyeLabel.grid(row=2, column=2)
+        leftEyeLabel.grid(row=2, column=3)
+
+        correction = ['No', 'Glasses', 'Contacts: Soft', 'Contacts: Hard']
+        right = np.round(np.arange(-5, 5, 0.1), 2)
+        left = np.round(np.arange(-5, 5, 0.1), 2)
+        self.correctionOptions = tk.StringVar()
+        self.correctionOptions.set(correction[0])
+        self.rightOptions = tk.StringVar()
+        self.rightOptions.set(0)
+        self.leftOptions = tk.StringVar()
+        self.leftOptions.set(0)
+        self.correctionEntry = tk.OptionMenu(demoGroup, self.correctionOptions, *correction)
+        self.rightEntry = tk.OptionMenu(demoGroup, self.rightOptions, *right)
+        self.leftEntry = tk.OptionMenu(demoGroup, self.leftOptions, *left)
+
+        self.correctionEntry.grid(row=3, column=1)
+        self.rightEntry.grid(row=3, column=2)
+        self.leftEntry.grid(row=3, column=3)
+
+        # handedness entry
+        handOptions = ['Right', 'Left', 'Ambidextrous']
+        handLabel = tk.Label(demoGroup, text="Handedness:")
+        self.handOptions = tk.StringVar()
+        self.handOptions.set(handOptions[0])
+        self.handEntry = tk.OptionMenu(demoGroup, self.handOptions, *handOptions)
+        handLabel.grid(row=4, column=0)
+        self.handEntry.grid(row=4, column=1)
+
+        # Gender entry
+        genderOptions = ['Male', 'Female', 'Other']
+        genderLabel = tk.Label(demoGroup, text="Gender:")
+        self.genderOptions = tk.StringVar()
+        self.genderOptions.set(genderOptions[0])
+        self.genderEntry = tk.OptionMenu(demoGroup, self.genderOptions, *genderOptions)
+        genderLabel.grid(row=5, column=0)
+        self.genderEntry.grid(row=5, column=1)
+
+    # make the button which closes everything
+    def makeStartButton(self):
+        closeButton = tk.Button(self,
+                                text="Start!",
+                                command=self.start)
+        closeButton.pack(side=tk.BOTTOM)
+
+    # Here we make and then run the classifier GUI
+    def classRun(self):
+        self.makeInstructions()
+
+        self.makeExperimentInfo()
+
+        self.makeDemoGraph()
+
+        self.makeStartButton()
+
+        # This starts the GUI
+        self.geometry('{}x{}'.format(self.xSize, self.ySize))
+        self.attributes('-topmost', True)
+        tk.Tk.mainloop(self)
+
+    def getAge(self):
+        currDate = [int(i) for i in self.currentDate.split('/')]
+        birthDay = [int(i) for i in self.birthDay.split('/')]
+        del self.birthDay
+        return currDate[-1] - birthDay[-1] - ((currDate[-2], currDate[-3]) < (birthDay[-2], birthDay[-3]))
+
+    def saveInfo(self):
+        from collections import OrderedDict
+        par = OrderedDict()
+        par['ppNr'] = self.ppNr
+        par['sessionNr'] = self.sessionNr
+        par['ppGender'] = self.gender
+        par['ppHandedness'] = self.handedness
+        par['ppOccCorrection'] = self.occularCorrection
+        par['ppLeftEye'] = self.leftEyeCorrection
+        par['ppRightEye'] = self.rightEyeCorrection
+        par['ppAge'] = self.getAge()
+        par['curDate'] = self.currentDate
+        par['saveAs'] = self.saveAs
+        self.info = par
+
+    # =========================================================================
+    # Define what happens when buttons are pressed
+    # =========================================================================
+    # This stops and destroys the GUI
+    def start(self):
+        self.ppNr = int(self.subjectNrOptions.get())
+        self.sessionNr = int(self.sessionNrOptions.get())
+        self.handedness = self.handOptions.get()
+        self.gender = self.genderOptions.get()
+        self.birthDay = str(self.dayOptions.get()) + '/' + \
+                        str(self.monthOptions.get()) + '/' + \
+                        str(self.yearOptions.get())
+        self.occularCorrection = self.correctionOptions.get()
+        self.rightEyeCorrection = float(self.rightOptions.get())
+        self.leftEyeCorrection = float(self.leftOptions.get())
+
+        if len(self.saveAs) == 0:
+            self.saveAs = 'PP' + str(self.ppNr) + 'S' + str(self.sessionNr)
+
+        self.saveInfo()
+        self.destroy()
+
+    def saveFileName(self):
+        self.saveAs = giveFileName()
 
 
 # =============================================================================
@@ -2882,7 +2656,7 @@ class TextLine(object):
                                         opacity=1.0, contrast=1.0, units='pix',
                                         ori=0.0, antialias=True,
                                         bold=False, italic=False, alignHoriz='center',
-                                        alignVert='center', wrapWidth=self.display_size[0] * .8)
+                                        alignVert=None, wrapWidth=self.display_size[0] * .8)
 
     def draw(self, text=None):
         if text:
@@ -2937,25 +2711,27 @@ class IntroScreen(object):
                                                antialias=True,
                                                bold=True,
                                                italic=False,
-                                               alignHoriz='left',
-                                               alignVert='center',
+                                               alignHoriz=None,
+                                               alignVert=None,
                                                wrapWidth=self.display_size[0] * .8))
 
         self.introlines.append(visual.TextStim(self.window,
                                                text="ENTER: Show eye image",
                                                pos=(
-                                                   left_margin, topline_y - space_per_lines * (len(self.introlines) + 2)),
+                                                   left_margin,
+                                                   topline_y - space_per_lines * (len(self.introlines) + 2)),
                                                height=font_height,
                                                color=color, colorSpace='rgb255',
                                                opacity=1.0, contrast=1.0, units='pix',
                                                ori=0.0, antialias=True,
-                                               bold=False, italic=False, alignHoriz='left',
-                                               alignVert='center', wrapWidth=self.display_size[0] * .8))
+                                               bold=False, italic=False, alignHoriz=None,
+                                               alignVert=None, wrapWidth=self.display_size[0] * .8))
 
         self.introlines.append(visual.TextStim(self.window,
                                                text="C: Start Calibration",
                                                pos=(
-                                                   left_margin, topline_y - space_per_lines * (len(self.introlines) + 2)),
+                                                   left_margin,
+                                                   topline_y - space_per_lines * (len(self.introlines) + 2)),
                                                height=font_height,
                                                color=color,
                                                colorSpace='rgb255',
@@ -2966,91 +2742,99 @@ class IntroScreen(object):
                                                antialias=True,
                                                bold=False,
                                                italic=False,
-                                               alignHoriz='left',
-                                               alignVert='center',
+                                               alignHoriz=None,
+                                               alignVert=None,
                                                wrapWidth=self.display_size[0] * .8))
 
         self.introlines.append(visual.TextStim(self.window,
                                                text="V: Start Validation",
                                                pos=(
-                                                   left_margin, topline_y - space_per_lines * (len(self.introlines) + 2)),
+                                                   left_margin,
+                                                   topline_y - space_per_lines * (len(self.introlines) + 2)),
                                                height=font_height,
                                                color=color, colorSpace='rgb255',
                                                opacity=1.0, contrast=1.0, units='pix',
                                                ori=0.0, antialias=True,
-                                               bold=False, italic=False, alignHoriz='left',
-                                               alignVert='center', wrapWidth=self.display_size[0] * .8))
+                                               bold=False, italic=False, alignHoriz=None,
+                                               alignVert=None, wrapWidth=self.display_size[0] * .8))
 
         self.introlines.append(visual.TextStim(self.window,
                                                text="ESCAPE: Return to Experiment",
                                                pos=(
-                                                   left_margin, topline_y - space_per_lines * (len(self.introlines) + 2)),
+                                                   left_margin,
+                                                   topline_y - space_per_lines * (len(self.introlines) + 2)),
                                                height=font_height,
                                                color=color, colorSpace='rgb255',
                                                opacity=1.0, contrast=1.0, units='pix',
                                                ori=0.0, antialias=True,
-                                               bold=False, italic=False, alignHoriz='left',
-                                               alignVert='center', wrapWidth=self.display_size[0] * .8))
+                                               bold=False, italic=False, alignHoriz=None,
+                                               alignVert=None, wrapWidth=self.display_size[0] * .8))
 
         self.introlines.append(visual.TextStim(self.window,
                                                text="Left / Right Arrow: Switch Camera Views",
                                                pos=(
-                                                   left_margin, topline_y - space_per_lines * (len(self.introlines) + 2)),
+                                                   left_margin,
+                                                   topline_y - space_per_lines * (len(self.introlines) + 2)),
                                                height=font_height,
                                                color=color, colorSpace='rgb255',
                                                opacity=1.0, contrast=1.0, units='pix',
                                                ori=0.0, antialias=True,
-                                               bold=False, italic=False, alignHoriz='left',
-                                               alignVert='center', wrapWidth=self.display_size[0] * .8))
+                                               bold=False, italic=False, alignHoriz=None,
+                                               alignVert=None, wrapWidth=self.display_size[0] * .8))
 
         self.introlines.append(visual.TextStim(self.window,
                                                text="A: Auto-Threshold",
                                                pos=(
-                                                   left_margin, topline_y - space_per_lines * (len(self.introlines) + 2)),
+                                                   left_margin,
+                                                   topline_y - space_per_lines * (len(self.introlines) + 2)),
                                                height=font_height,
                                                color=color, colorSpace='rgb255',
                                                opacity=1.0, contrast=1.0, units='pix',
                                                ori=0.0, antialias=True,
-                                               bold=False, italic=False, alignHoriz='left',
-                                               alignVert='center', wrapWidth=self.display_size[0] * .8))
+                                               bold=False, italic=False, alignHoriz=None,
+                                               alignVert=None, wrapWidth=self.display_size[0] * .8))
 
         self.introlines.append(visual.TextStim(self.window,
                                                text="Up / Down Arrow: Adjust Pupil Threshold",
                                                pos=(
-                                                   left_margin, topline_y - space_per_lines * (len(self.introlines) + 2)),
+                                                   left_margin,
+                                                   topline_y - space_per_lines * (len(self.introlines) + 2)),
                                                height=font_height,
                                                color=color, colorSpace='rgb255',
                                                opacity=1.0, contrast=1.0, units='pix',
                                                ori=0.0, antialias=True,
-                                               bold=False, italic=False, alignHoriz='left',
-                                               alignVert='center', wrapWidth=self.display_size[0] * .8))
+                                               bold=False, italic=False, alignHoriz=None,
+                                               alignVert=None, wrapWidth=self.display_size[0] * .8))
 
         self.introlines.append(visual.TextStim(self.window,
                                                text="+ or -: Adjust CR Threshold.",
                                                pos=(
-                                                   left_margin, topline_y - space_per_lines * (len(self.introlines) + 2)),
+                                                   left_margin,
+                                                   topline_y - space_per_lines * (len(self.introlines) + 2)),
                                                height=font_height,
                                                color=color, colorSpace='rgb255',
                                                opacity=1.0, contrast=1.0, units='pix',
                                                ori=0.0, antialias=True,
-                                               bold=False, italic=False, alignHoriz='left',
-                                               alignVert='center', wrapWidth=self.display_size[0] * .8))
+                                               bold=False, italic=False, alignHoriz=None,
+                                               alignVert=None, wrapWidth=self.display_size[0] * .8))
         self.introlines.append(visual.TextStim(self.window,
                                                text="I: Toggle extra information.",
                                                pos=(
-                                                   left_margin, topline_y - space_per_lines * (len(self.introlines) + 2)),
+                                                   left_margin,
+                                                   topline_y - space_per_lines * (len(self.introlines) + 2)),
                                                height=font_height,
                                                color=color, colorSpace='rgb255',
                                                opacity=1.0, contrast=1.0, units='pix',
                                                ori=0.0, antialias=True,
-                                               bold=False, italic=False, alignHoriz='left',
-                                               alignVert='center', wrapWidth=self.display_size[0] * .8))
+                                               bold=False, italic=False, alignHoriz=None,
+                                               alignVert=None, wrapWidth=self.display_size[0] * .8))
 
     def draw(self):
         if self.im is not None:
             self.im.draw()
         for s in self.introlines:
             s.draw()
+
 
 try:
     class EyeLinkCoreGraphicsPsychopy(pl.EyeLinkCustomDisplay):
@@ -3115,7 +2899,8 @@ try:
             mousStart = (-(self.window.size[0] / 2), self.window.size[1] / 2)
             if self.image_size:
                 mousStart = (
-                    (self.image_size[0] / 2) - (self.window.size[0] / 2), (self.window.size[1] / 2) - (self.image_size[1] / 2))
+                    (self.image_size[0] / 2) - (self.window.size[0] / 2),
+                    (self.window.size[1] / 2) - (self.image_size[1] / 2))
             else:
                 mousStart = (100 - self.window.size[0] / 2, (self.window.size[1] / 2) - 100)
             self.tracker.mouse.setPos(mousStart)
@@ -3134,11 +2919,14 @@ try:
                     elif keycode == 'down':
                         keycode = pl.CURS_DOWN
                     elif keycode == 'left':
-                        keycode = pl.CURS_LEFT; self.setMousStart()
+                        keycode = pl.CURS_LEFT;
+                        self.setMousStart()
                     elif keycode == 'right':
-                        keycode = pl.CURS_RIGHT; self.setMousStart()
+                        keycode = pl.CURS_RIGHT;
+                        self.setMousStart()
                     elif keycode == 'return':
-                        keycode = pl.ENTER_KEY; self.setMousStart()
+                        keycode = pl.ENTER_KEY;
+                        self.setMousStart()
                     elif keycode == 'escape':
                         keycode = pl.ESC_KEY
                     elif keycode == 'space':
