@@ -3230,7 +3230,7 @@ class EyeLinkCoreGraphicsPsychopy(pl.EyeLinkCustomDisplay):
         """
         Prints alert message to psychopy stderr.
         """
-        print msg
+        print(msg)
 
     def play_beep(self, pylink_sound_index):
         """

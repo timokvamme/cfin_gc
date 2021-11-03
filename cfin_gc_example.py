@@ -449,7 +449,7 @@ def setup_et(win, saveFileEDF=None, calibrateET=True,testCalibration=True,calibr
     #     calibrate_eyelink_client()
 
     et_client = create_eyelink_client(win, saveFileEDF=saveFileEDF)
-
+    print("calibrate")
     et_client.calibrate()
 
     try:

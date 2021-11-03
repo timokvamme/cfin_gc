@@ -1196,7 +1196,7 @@ class eyeLink:
     def __init__(self, win, fileName='XX.EDF', fileDest=False,
                  screenWidth=40, screenHeight=25.5, screenDist=60, displayResolution=[1920, 1080], address="100.1.1.1",
                  # screenWidth/screenDist at skejby århus
-                 dummyMode=False, textSize=1):
+                 dummyMode=False, textSize=0.1):
         """
         see pl.tracker documentation
         """
@@ -1244,7 +1244,7 @@ class eyeLink:
                         '\tUsing Mouse Position\n\n\tPress "Space" to start'
             print("\nError: %s" % error)
             self.mouse.setVisible(1)
-            drawText(self.win, error)
+            drawText(self.win, error,textSize=textSize)
             self.win.flip()
 
         self.setEyeLinkSettings(screenW=win.size[0], screenH=win.size[1])
@@ -1391,7 +1391,7 @@ class eyeLink:
             # Set calibration point duration
             self.pylink.sendCommand("automatic_calibration_pacing=%d" % self.calTime)
             # Set sounds
-            #pl.setCalibrationSounds(self.targSound, self.corrSound, self.incSound)
+            pl.setCalibrationSounds(self.targSound, self.corrSound, self.incSound)
             self.pylink.doTrackerSetup()
             genv.clear_cal_display()
             self.win.flip()
@@ -2779,11 +2779,11 @@ class IntroScreen(object):
                                                units='pix',
                                                ori=0.0,
                                                antialias=True,
-                                               bold=True,
+                                               bold=False,
                                                italic=False,
                                                # alignHoriz='left',
                                                # alignVert='center',
-                                               wrapWidth=self.display_size[0] * .8))
+                                               wrapWidth=self.display_size[0] * .8)) # self.display_size[0] * .8
 
         self.introlines.append(visual.TextStim(self.window,
                                                text="ENTER: Show eye image",
@@ -2911,7 +2911,7 @@ class IntroScreen(object):
                                                opacity=1.0, contrast=1.0, units='pix',
                                                ori=0.0, antialias=True,
                                                bold=False, italic=False,
-                                               # , alignHoriz='left',
+                                               # alignHoriz='left',
                                                # alignVert='center',
                                                wrapWidth=self.display_size[0] * .8))
 
@@ -2921,7 +2921,7 @@ class IntroScreen(object):
         for s in self.introlines:
             s.draw()
 
-#
+
 class EyeLinkCoreGraphicsPsychopy(pl.EyeLinkCustomDisplay):
     WINDOW_BACKGROUND_COLOR = (128, 128, 128)
     CALIBRATION_POINT_OUTER_RADIUS = 15.0, 15.0
@@ -2991,18 +2991,12 @@ class EyeLinkCoreGraphicsPsychopy(pl.EyeLinkCustomDisplay):
         self.tracker.mouse.setPos(mousStart)
 
     def get_input_key(self):
-
-
         if self.tracker.activeState:
             allowedKeys = ['up', 'down', 'left', 'right', 'return', 'escape',
                            'space', 'c', 'v', 'a', 'i', 'num_add',
                            'num_subtract']
             keycode = 0
-            key = getKey(allowedKeys, False)
-            # print(key)
-            key = key[0]
-            #key = "up"
-
+            key = getKey(allowedKeys, False)[0]
             if key != 'NoKey':
                 keycode = key
                 if keycode == 'up':
