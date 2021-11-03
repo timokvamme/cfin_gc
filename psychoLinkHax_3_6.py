@@ -1391,7 +1391,8 @@ class eyeLink:
             # Set calibration point duration
             self.pylink.sendCommand("automatic_calibration_pacing=%d" % self.calTime)
             # Set sounds
-            pl.setCalibrationSounds(self.targSound, self.corrSound, self.incSound)
+#            pl.setCalibrationSounds(self.targSound, self.corrSound, self.incSound)
+            self.win.flip()
             self.pylink.doTrackerSetup()
             genv.clear_cal_display()
             self.win.flip()
@@ -2036,7 +2037,8 @@ class eyeLink:
                     self.window.flip()
         return fix
 
-    def waitForFixation(self, fixDot, maxDist=1.5, maxWait=4, nRings=3, fixTime=200, etFixProtocolPath="Z:\\MINDLAB2018_MEG-TrainingNCC\\rtmeg_pc\\etFixProtocol.txt"):
+    def waitForFixation(self, fixDot, maxDist=1.5, maxWait=4,etRingsAppear=1.5, nRings=3, fixTime=200,
+                        etFixProtocolPath="",test=False):
         """
         Wait for the start of a fixation in the area around a fixDot.
         The function does not use eyelink events, but rather waits until
@@ -2065,6 +2067,9 @@ class eyeLink:
         maxWait : int or float
             The maximum time to wait for a correct fixation before
             prompting the user about recalibration. In seconds.
+        etRingsAppear : int or float
+            the time before rings appear around  the fixation dot
+            instructing the ppt to refocus
         nRings : int
             The number of rings to use for constricting circles
         fixTime : int
@@ -2153,6 +2158,11 @@ class eyeLink:
         concCirc = visual.Circle(self.win, radius=perimMaxRad, fillColorSpace='rgb',
                                  lineColorSpace='rgb', lineColor=lineColor,
                                  fillColor=self.win.color, edges=50, pos=fixDot.pos)
+
+        gazeDot = visual.Circle(self.win, radius=2, fillColorSpace='rgb255', lineColorSpace='rgb255',
+                                         lineColor=[255, 0, 0],
+                                         fillColor=[255, 0, 0], edges=50)
+
         sampCount = 0
         stopCount = fixTime / (1000.0 / hz)  # stops after approx 200 ms
         while (time.time() - trStart) < maxWait:
@@ -2197,9 +2207,12 @@ class eyeLink:
                     correctFixation = True
                     break
 
-            # Draw animated fix boundary
+
+            print("time.time() - trStart {0}".format(time.time() - trStart))
+
             if time.time() - trStart > 1:
                 Refocusing = True
+
                 # Get the stim radius
                 radList = np.roll(radList, -1)
                 rads = [radList[int(i)] for i in rIdx]
@@ -2218,10 +2231,17 @@ class eyeLink:
                 # self.win.saveMovieFrames('screenshot' + str(trStart) + ".png")
 
             fixDot.draw()
+
+            if test:
+                gazeDot.pos = avgXY
+                gazeDot.draw()
+
+
             self.win.flip()
 
             if checkAbort():
                 break
+
 
         # only draw fixDot
         fixDot.draw()

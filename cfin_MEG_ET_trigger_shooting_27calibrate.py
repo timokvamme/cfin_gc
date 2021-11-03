@@ -118,18 +118,40 @@ and 2 EDF files (eyetracking files), where a recalibration was tested after the 
 
 # -------------- IMPORTS -----------------------------#
 from __future__ import division
-import os, psychopy, random, time, csv, subprocess
-from psychopy import gui
+import os, psychopy, random, time, csv, subprocess, itertools, math, platform
+from psychopy import gui, parallel
 import numpy as np
 import psychoLinkHax_3_6 as pl
 from math import atan2, degrees
 from constants import *
 
 
+PLATFORM = platform.platform()
+if 'Linux' in PLATFORM:
+    port = parallel.ParallelPort(address='/dev/parport0')  # on MEG stim PC
+else:  # on Win this will work, on Mac we catch error below
+    port = parallel.ParallelPort(address=0xDFF8)  # on MEG stim PC
+
+try:
+    port.setData(128)
+except NotImplementedError:
+    def setParallelData(data=1):
+        if data > 0:
+            # logging.exp('TRIG %d (Fake)' % code)
+            print('TRIG %d (Fake)' % data)
+            pass
+else:
+    port.setData(0)
+    setParallelData = port.setData
+
+
 # --------------- SETTINGS ---------------------------#
 # folder settings
 saveFolder = os.getcwd() + "/data"
 if not os.path.isdir(saveFolder): os.makedirs(saveFolder)  # Creates save folder if it doesn't exist
+
+port_nuller_sec = 0.025
+
 
 # display settings
 # - see constants.py for more settings
@@ -144,18 +166,33 @@ recalibrateKey = ['c']
 quitKeys = ["escape"]
 
 # stimulus settings
+deg_per_px = math.degrees(math.atan2(.5*monHeight, monDistance)) / (.5*displayResolution[1])
+print('%s degrees correspond to a single pixel' % deg_per_px)
+
 fixPos = 0,0
 textPosAbove = 0,6
-flash_pos_left = -7,0
+
 fixHeight = 1.5
 gazeDotRadius = 0.3
 flash_size = 1.0
 continueText = "press %s to continue"% continueKeys[0]
-flashText = "How Many Flashes?\n\n press %s to recalibrate eyetracker" % recalibrateKey
+flashText = "Look at the flash"
 inter_trial_interval = 3.000 # in seconds
 
+flash_distance = (displayResolution[0] / 2.5) * deg_per_px * 1
+
+pos_names = ["left_bottom","left_center","left_top","center_bottom","center_center","center_top","right_bottom","right_center","right_top"]
+trigger_codes = range(1,10)
+
+pos_names_tigger_codes = dict(zip(pos_names,trigger_codes))
+
+print("The Trigger Codes Used:")
+print("----------------------------------------------------------")
+print(pos_names_tigger_codes)
+print("----------------------------------------------------------")
+
 # execution settings
-N_trials = 10
+#N trials is set by the xy pos further down, search for "ypos" to see
 exit_experiment = False # initiation of variable. for eyetracking experiments, its best to safely quit the experiment
 # saving the eyetracking data when doing so.
 
@@ -290,8 +327,8 @@ gazeDot = psychopy.visual.Circle(win, radius=gazeDotRadius, fillColorSpace='rgb2
                                  lineColor=[255, 0, 0],
                                  fillColor=[255, 0, 0], edges=50)
 
-flash_left = psychopy.visual.Circle(win=win,units="deg",radius=flash_size,fillColor=flashColor
-                                    ,lineColor=flashColor,pos=flash_pos_left)
+flash_dot = psychopy.visual.Circle(win=win, units="deg", radius=flash_size, fillColor=flashColor
+                                   , lineColor=flashColor, pos=0,0)
 
 instruction_text_above = psychopy.visual.TextStim(win, color=foregroundColor, pos=textPosAbove, height=fixHeight, text=continueText,
                                                   wrapWidth=20)
@@ -302,6 +339,10 @@ instruction_text = psychopy.visual.TextStim(win, color=foregroundColor, pos=fixP
 
 
 # ----------------- DEFINITIONS ----------------------#
+
+def port_nuller(sec=port_nuller_sec):
+    psychopy.core.wait(sec)
+    setParallelData(data=0)  # null the port
 
 
 
@@ -337,7 +378,7 @@ def create_eyelink_client(win, saveFileEDF=None):
 
     if saveFileEDF == None:
         saveFileEDF = saveFolder +  '/subject_' + str(subjectID) +  '_' +  time.strftime('(%Y-%m-%d %H-%M-%S',
-                                                                                         time.localtime()) + ').EDF'
+                                                                                          time.localtime()) + ').EDF'
 
     print('Writing to EDF file {0}'.format(saveFileEDF))
     # creates the eyelink client.
@@ -444,13 +485,11 @@ def setup_et(win, saveFileEDF=None, calibrateET=True,testCalibration=True,calibr
         """
 
 
-    #
-    # if calibrateET:
-    #     calibrate_eyelink_client()
+
+    if calibrateET:
+        calibrate_eyelink_client()
 
     et_client = create_eyelink_client(win, saveFileEDF=saveFileEDF)
-    print("calibrate")
-    et_client.calibrate()
 
     try:
         et_client.hz = win.getActualFrameRate()
@@ -503,11 +542,19 @@ def setup_et(win, saveFileEDF=None, calibrateET=True,testCalibration=True,calibr
 
 # setup saving of behavioral data:
 saveFile = saveFolder + '/subject_' + str(subjectID) + '_' + time.strftime('(%Y-%m-%d %H-%M-%S',time.localtime()) + ').csv'
+
+ypos = xpos = [-1,0,1]
+xypos = [r for r in itertools.product(ypos, xpos)]
+xypos_pos = dict(zip(xypos,pos_names))
+
+np.random.shuffle(xypos)
+
 trialList = []
-for no in range(N_trials):
+for no in range(len(xypos)):
     trial = {"no":no,"ans":np.nan,"rt":np.nan,"problemWithFixation_prestim":False,
              "time_eyelinkWaitForFixation_prestim":np.nan,
-             'time_eyelinkBeginTrial':np.nan}
+             'time_eyelinkBeginTrial':np.nan,
+             'dotpos':xypos[no]}
     trialList += [trial]
 
 behavfile = open(saveFile,"w")
@@ -535,6 +582,9 @@ for no, trial in enumerate(trialList):
     clock.reset()
     stimFix.draw()
     win.flip()
+
+
+    flash_dot.pos = flash_distance * trial["dotpos"][0], flash_distance * trial["dotpos"][1]
 
     # initial fixation cross
     while clock.getTime() < inter_trial_interval:
@@ -575,9 +625,10 @@ for no, trial in enumerate(trialList):
 
         # Gaze Contingency
         correctFixation, problemWithFixation,Recalibrate, StopGC,Refocusing = et_client.waitForFixation(fixDot=stimFix, maxDist=etMaxDist,
-                                                                                                        maxWait=etMaxWait, nRings=etNRings,
-                                                                                                        fixTime=etFixTime,
-                                                                                                        etFixProtocolPath=etFixProtocolPath)  # participant need to look at fixation for 200 ms. can respond with "3" instead of space to try again.
+                                                                                                                    maxWait=etMaxWait, nRings=etNRings,
+                                                                                                                    fixTime=etFixTime,
+                                                                                                                    etFixProtocolPath=etFixProtocolPath)  # participant need to look at fixation for 200 ms. can respond with "3" instead of space to try again.
+
         if Refocusing: # if the rings have appeared, getting the participant to refocus, its natural that
             # some time passes before other experimental stimuli is presented.
             stimFix.draw()
@@ -617,18 +668,33 @@ for no, trial in enumerate(trialList):
         trial["time_eyelinkBeginTrial"] = et_client.getTime()
         # send MEG data trigger here if possible
 
-
-
-    flash_left.draw()
-    win.flip()
-
-    psychopy.core.wait(0.100)
-    win.flip()
-    psychopy.core.wait(1.000)
-
+    flash_dot.draw()
     instruction_text.setText(flashText)
     instruction_text.draw()
     win.flip()
+
+    # Gaze Contingency
+    correctFixation, problemWithFixation, Recalibrate, StopGC, Refocusing = \
+        et_client.waitForFixation(fixDot=flash_dot, maxDist=etMaxDist,maxWait=etMaxWait,nRings=etNRings,
+                                  fixTime=etFixTime,etFixProtocolPath=etFixProtocolPath)
+    # participant need to look at fixation for 200 ms. can respond with "3" instead of space to try again.
+
+
+    print("sending a trigger to the MEG data along with a tigger to the Eyetracking data "
+          "\ntrial dot pos is {0}"
+          "\nthat is located in  {1}"
+          "\nthis is trigger {2}"
+          .format(trial["dotpos"],xypos_pos[trial["dotpos"]],trigger_codes[xypos_pos[trial["dotpos"]]]))
+
+    setParallelData(trigger_codes[xypos_pos[trial["dotpos"]]])
+    port_nuller()
+
+    et_client.sendMsg(msg="trigger sent to MEG data along with a trigger to ET")
+
+    instruction_text.setText("press any key to continue")
+    instruction_text.draw()
+    win.flip()
+
 
     response = psychopy.event.waitKeys(keyList=ansKeys + quitKeys + recalibrateKey)
     trial['rt'] = clock.getTime()
@@ -643,7 +709,6 @@ for no, trial in enumerate(trialList):
 
     csvWriter.writerow(trial.values());behavfile.flush()
     et_client.stopTrial()
-
     if exit_experiment:
         break
 

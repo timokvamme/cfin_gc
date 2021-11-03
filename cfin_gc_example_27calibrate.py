@@ -125,7 +125,7 @@ import psychoLinkHax_3_6 as pl
 from math import atan2, degrees
 from constants import *
 
-
+#
 # --------------- SETTINGS ---------------------------#
 # folder settings
 saveFolder = os.getcwd() + "/data"
@@ -134,7 +134,7 @@ if not os.path.isdir(saveFolder): os.makedirs(saveFolder)  # Creates save folder
 # display settings
 # - see constants.py for more settings
 
-fullscreen = False
+fullscreen = True
 default_hz = 120.0 # the fallback refresh rate used by the eytracker if et_client.getActualFrameRate fails
 
 # keyboard settings
@@ -157,6 +157,7 @@ inter_trial_interval = 3.000 # in seconds
 # execution settings
 N_trials = 10
 exit_experiment = False # initiation of variable. for eyetracking experiments, its best to safely quit the experiment
+test=True
 # saving the eyetracking data when doing so.
 
 # Eyetracking settings (defaults)
@@ -170,8 +171,9 @@ ETCalibration =True # whether to calibrate, if false it's assumed the ET has alr
 
 # Eyetracking Settings - Gaze Contingency
 
-etMaxDist = 3.0 # the max distance (in degrees) gaze should be from fixation cross before participant is instructed to refixate
+etMaxDist = 1.5 # the max distance (in degrees) gaze should be from fixation cross before participant is instructed to refixate
 etMaxWait = 4.0 #The maximum time to wait for a correct fixation before prompting the user about refixation. In seconds.
+etRingsAppear = 1.5 # the time before the rings appear
 etNRings= 3 # The number of rings to use for constricting circles, that help the participant refixate on the cross
 etFixTime=200 # The duration of contiguous samples within the boundary that are required for successful fixation.
 # (the eyelink has a default 1000hz sampling rate, so 200 = 200ms of data).
@@ -572,10 +574,12 @@ for no, trial in enumerate(trialList):
 
 
         # Gaze Contingency
-        correctFixation, problemWithFixation,Recalibrate, StopGC,Refocusing = et_client.waitForFixation(fixDot=stimFix, maxDist=etMaxDist,
-                                                                                                                    maxWait=etMaxWait, nRings=etNRings,
-                                                                                                                    fixTime=etFixTime,
-                                                                                                                    etFixProtocolPath=etFixProtocolPath)  # participant need to look at fixation for 200 ms. can respond with "3" instead of space to try again.
+        correctFixation, problemWithFixation,Recalibrate, StopGC,Refocusing = \
+            et_client.waitForFixation(fixDot=stimFix, maxDist=etMaxDist,maxWait=etMaxWait,etRingsAppear=etRingsAppear,
+                                      nRings=etNRings,fixTime=etFixTime,
+                                      etFixProtocolPath=etFixProtocolPath,test=test)
+        # participant need to look at fixation for 200 ms. can respond with "3" instead of space to try again.
+
         if Refocusing: # if the rings have appeared, getting the participant to refocus, its natural that
             # some time passes before other experimental stimuli is presented.
             stimFix.draw()
@@ -640,6 +644,8 @@ for no, trial in enumerate(trialList):
         exit_experiment = True
 
     csvWriter.writerow(trial.values());behavfile.flush()
+    et_client.stopTrial()
+
 
     if exit_experiment:
         break
