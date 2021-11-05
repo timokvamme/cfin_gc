@@ -245,9 +245,9 @@ def getKey(allowedKeys=['left', 'right'], waitForKey=True, timeOut=0):
 
 def drawText(win,
              text='No text specified!',
-             textKey=['space'],
+             textKey=['space','1','6'],
              wrapWidth=900,
-             textSize=25,
+             textSize=1,
              textColor=[1,1, 1]):
     """
     Draw a string on a psychopy window and waits for a keypress, always tries
@@ -2808,11 +2808,15 @@ class IntroScreen(object):
         self.window = psychopy_win
         line_count = 25
         font_height = self.display_size[1] / 50
+        font_width = self.display_size[0] / 140
+        buttons_radius = font_height / 2.5
+
+        button_spacing = font_height
+
         space_per_lines = int(font_height * 2.5)
         total_line_height = space_per_lines * line_count
         topline_y = int(min(total_line_height / 1.5, self.display_size[1] / 2 - self.display_size[1] / 5.5))
         left_margin = -self.display_size[0] / 2.1
-        color = (0, 0, 0)
         color = [1, 1, 1]
 
         # Make sure that the text can be read
@@ -2824,7 +2828,7 @@ class IntroScreen(object):
         self.im = None
         try:
             imLoc = os.path.dirname(os.path.realpath(__file__)) + '\\psychoLink.png'
-            im = visual.ImageStim(self.window, imLoc)
+            im = visual.ImageStim(self.window, imLoc,units="pix")
             self.im = im
             scaleFactor = self.display_size[0] / 1920.0
             self.im.setSize([scaleFactor * i for i in self.im.size])
@@ -2835,9 +2839,10 @@ class IntroScreen(object):
             pass
 
         self.introlines = []
+        self.respboxbuttons = []
 
         self.introlines.append(visual.TextStim(self.window,
-                                               text="PsychoLink",
+                                               text="CFIN-PsychoLink",
                                                pos=(left_margin, topline_y - space_per_lines * 2),
                                                height=int(font_height * 1.66),
                                                color=color,
@@ -2865,6 +2870,22 @@ class IntroScreen(object):
                                                bold=False, italic=False, alignHoriz='left',
                                                alignVert='center', wrapWidth=self.display_size[0] * .8))
 
+        # enter button
+
+        self.respboxbuttons.append(visual.Circle(self.window, radius=buttons_radius, fillColorSpace='rgb255', lineColorSpace='rgb255',
+                                         lineColor=[0, 0, 255],
+                                         fillColor=[0, 0, 255], edges=50,units='pix',
+                                    pos=(left_margin + (font_width * len(self.introlines[-1].text))  ,topline_y - space_per_lines * (len(self.introlines)  + 1)),))
+
+        self.respboxbuttons.append(
+            visual.Circle(self.window, radius=buttons_radius, fillColorSpace='rgb255', lineColorSpace='rgb255',
+                          lineColor=[0, 0, 255],
+                          fillColor=[0, 0, 255], edges=50, units='pix',
+                          pos=(left_margin + (font_width * len(self.introlines[-1].text)) + button_spacing,
+                               topline_y - space_per_lines * (len(self.introlines) + 1)), ))
+
+
+
         self.introlines.append(visual.TextStim(self.window,
                                                text="C: Start Calibration",
                                                pos=(
@@ -2884,6 +2905,11 @@ class IntroScreen(object):
                                                alignVert='center',
                                                wrapWidth=self.display_size[0] * .8))
 
+        self.respboxbuttons.append(visual.Circle(self.window, radius=buttons_radius, fillColorSpace='rgb255', lineColorSpace='rgb255',
+                                         lineColor=[255, 0, 0],
+                                         fillColor=[255, 0, 0], edges=50,units='pix',
+                                    pos=(left_margin + (font_width * len(self.introlines[-1].text))  ,topline_y - space_per_lines * (len(self.introlines)  + 1)),))
+
         self.introlines.append(visual.TextStim(self.window,
                                                text="V: Start Validation",
                                                pos=(
@@ -2895,6 +2921,17 @@ class IntroScreen(object):
                                                ori=0.0, antialias=True,
                                                bold=False, italic=False, alignHoriz='left',
                                                alignVert='center', wrapWidth=self.display_size[0] * .8))
+
+        self.respboxbuttons.append(visual.Circle(self.window, radius=buttons_radius, fillColorSpace='rgb255', lineColorSpace='rgb255',
+                                         lineColor=[255, 0, 0],
+                                         fillColor=[255, 0, 0], edges=50,units='pix',
+                                    pos=(left_margin + (font_width * len(self.introlines[-1].text))  ,topline_y - space_per_lines * (len(self.introlines)  + 1)),))
+
+        self.respboxbuttons.append(visual.Circle(self.window, radius=buttons_radius, fillColorSpace='rgb255', lineColorSpace='rgb255',
+                                         lineColor=[255, 0, 0],
+                                         fillColor=[255, 0, 0], edges=50,units='pix',
+                                    pos=(left_margin + (font_width * len(self.introlines[-1].text)) + button_spacing  ,topline_y - space_per_lines * (len(self.introlines)  + 1)),))
+
 
         self.introlines.append(visual.TextStim(self.window,
                                                text="ESCAPE: Return to Experiment",
@@ -2908,6 +2945,25 @@ class IntroScreen(object):
                                                bold=False, italic=False, alignHoriz='left',
                                                alignVert='center', wrapWidth=self.display_size[0] * .8))
 
+        self.respboxbuttons.append(visual.Circle(self.window, radius=buttons_radius, fillColorSpace='rgb255', lineColorSpace='rgb255',
+                                         lineColor=[0, 0, 255],
+                                         fillColor=[0, 0, 255], edges=50,units='pix',
+                                    pos=(left_margin + (font_width * len(self.introlines[-1].text))  ,topline_y - space_per_lines * (len(self.introlines)  + 1)),))
+
+        self.respboxbuttons.append(
+            visual.Circle(self.window, radius=buttons_radius, fillColorSpace='rgb255', lineColorSpace='rgb255',
+                          lineColor=[0, 0, 255],
+                          fillColor=[0, 0, 255], edges=50, units='pix',
+                          pos=(left_margin + (font_width * len(self.introlines[-1].text)) + button_spacing,
+                               topline_y - space_per_lines * (len(self.introlines) + 1)), ))
+
+        self.respboxbuttons.append(
+            visual.Circle(self.window, radius=buttons_radius, fillColorSpace='rgb255', lineColorSpace='rgb255',
+                          lineColor=[0, 0, 255],
+                          fillColor=[0, 0, 255], edges=50, units='pix',
+                          pos=(left_margin + (font_width * len(self.introlines[-1].text)) + (button_spacing * 2),
+                               topline_y - space_per_lines * (len(self.introlines) + 1)), ))
+
         self.introlines.append(visual.TextStim(self.window,
                                                text="Left / Right Arrow: Switch Camera Views",
                                                pos=(
@@ -2920,6 +2976,13 @@ class IntroScreen(object):
                                                bold=False, italic=False, alignHoriz='left',
                                                alignVert='center', wrapWidth=self.display_size[0] * .8))
 
+        self.respboxbuttons.append(visual.Circle(self.window, radius=buttons_radius, fillColorSpace='rgb255', lineColorSpace='rgb255',
+                                         lineColor=[255, 255, 0],
+                                         fillColor=[255, 255, 0], edges=50,units='pix',
+                                    pos=(left_margin + (font_width * len(self.introlines[-1].text)) - 85  ,topline_y - space_per_lines * (len(self.introlines)  + 1)),))
+
+
+
         self.introlines.append(visual.TextStim(self.window,
                                                text="A: Auto-Threshold",
                                                pos=(
@@ -2931,6 +2994,14 @@ class IntroScreen(object):
                                                ori=0.0, antialias=True,
                                                bold=False, italic=False, alignHoriz='left',
                                                alignVert='center', wrapWidth=self.display_size[0] * .8))
+
+
+        self.respboxbuttons.append(visual.Circle(self.window, radius=buttons_radius, fillColorSpace='rgb255', lineColorSpace='rgb255',
+                                         lineColor=[50, 255, 50],
+                                         fillColor=[50, 255, 50], edges=50,units='pix',
+                                    pos=(left_margin + (font_width * len(self.introlines[-1].text))   ,topline_y - space_per_lines * (len(self.introlines)  + 1)),))
+
+
 
         self.introlines.append(visual.TextStim(self.window,
                                                text="Up / Down Arrow: Adjust Pupil Threshold",
@@ -2967,11 +3038,39 @@ class IntroScreen(object):
                                                bold=False, italic=False, alignHoriz='left',
                                                alignVert='center', wrapWidth=self.display_size[0] * .8))
 
+        self.introlines.append(visual.TextStim(self.window,
+                                               text="SPACE (used later)",
+                                               pos=(
+                                                   left_margin,
+                                                   topline_y - space_per_lines * (len(self.introlines) + 2)),
+                                               height=font_height,
+                                               color=color, colorSpace='rgb',
+                                               opacity=1.0, contrast=1.0, units='pix',
+                                               ori=0.0, antialias=True,
+                                               bold=False, italic=False, alignHoriz='left',
+                                               alignVert='center', wrapWidth=self.display_size[0] * .8))
+
+        self.respboxbuttons.append(
+            visual.Circle(self.window, radius=buttons_radius, fillColorSpace='rgb255', lineColorSpace='rgb255',
+                          lineColor=[0, 0, 255],
+                          fillColor=[0, 0, 255], edges=50, units='pix',
+                          pos=(left_margin + (font_width * len(self.introlines[-1].text)) ,
+                               topline_y - space_per_lines * (len(self.introlines) + 1)), ))
+
+
+
+
+
+
+
     def draw(self):
         if self.im is not None:
             self.im.draw()
         for s in self.introlines:
             s.draw()
+
+        for b in self.respboxbuttons:
+            b.draw()
 
 
 class EyeLinkCoreGraphicsPsychopy(pl.EyeLinkCustomDisplay):
@@ -3032,6 +3131,7 @@ class EyeLinkCoreGraphicsPsychopy(pl.EyeLinkCustomDisplay):
                                       lineColor=[255, 0, 0],
                                       )
 
+
     def setMousStart(self):
         mousStart = (-(self.window.size[0] / 2), self.window.size[1] / 2)
         if self.image_size:
@@ -3046,7 +3146,9 @@ class EyeLinkCoreGraphicsPsychopy(pl.EyeLinkCustomDisplay):
         if self.tracker.activeState:
             allowedKeys = ['up', 'down', 'left', 'right', 'return', 'escape',
                            'space', 'c', 'v', 'a', 'i', 'num_add',
-                           'num_subtract']
+                           'num_subtract','1','2','3','4','6']
+
+
             keycode = 0
             key = getKey(allowedKeys, False)[0]
             if key != 'NoKey':
@@ -3080,6 +3182,57 @@ class EyeLinkCoreGraphicsPsychopy(pl.EyeLinkCustomDisplay):
                     keycode = ord("+")
                 elif keycode == 'num_subtract':
                     keycode = ord("-")
+
+                # CFIN - MEG specific
+                elif keycode == '1' or keycode == '6': # change image
+
+                    # (1) blue one tap = Space
+                    # (1) blue two taps = Enter
+                    # (1) blue three taps = Escape
+
+                    one_clock = core.Clock()
+                    one_clock_start = one_clock.getTime()
+                    time_to_press = 0.500
+
+                    keycode = ord(" ")
+
+                    while (one_clock.getTime() - one_clock_start)  < time_to_press:
+                        key = getKey(allowedKeys, False)[0]
+                        if key == '1' or key == '6':
+                            keycode = pl.ENTER_KEY
+                            # restart the clock
+                            one_clock_start = one_clock.getTime()
+
+                            while (one_clock.getTime() - one_clock_start) < time_to_press:
+                                key = getKey(allowedKeys, False)[0]
+                                if key == '1' or key == '6':
+                                    keycode = pl.ESC_KEY
+
+                    self.setMousStart()
+
+                elif keycode == '2':# -    # yellow - change image
+                    keycode = pl.CURS_RIGHT;
+                    self.setMousStart()
+
+                elif keycode == '3': # - green  - autothreshold
+                    keycode = ord("a")
+                    # maybe double click does validate.
+
+                elif keycode == '4':  # red - calibrate
+                    # (4) Red = c – calibrate
+                    # (4) Red two taps = v - validate
+
+                    my_clock = core.Clock()
+                    my_clock_start = my_clock.getTime()
+                    time_to_press = 0.500
+
+                    keycode = ord("c")
+
+                    while (my_clock.getTime() - my_clock_start) < time_to_press:
+                        key = getKey(allowedKeys, False)[0]
+                        if key == '4':
+                            keycode = ord("v")
+
                 else:
                     keycode = 0
         else:
@@ -3094,6 +3247,7 @@ class EyeLinkCoreGraphicsPsychopy(pl.EyeLinkCustomDisplay):
         self.blankdisplay.draw()
         self.introscreen.draw()
         self.window.flip()
+
 
     def exit_cal_display(self):
         """Exits calibration display."""

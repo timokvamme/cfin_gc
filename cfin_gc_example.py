@@ -91,6 +91,8 @@ to continue, recalibrate, driftcorrect or continue without gc, if they are unatt
 (which just me, will happen). I.e. sometimes participants just need an extra change, other times, the ET
 needs to recalibrate.
 
+note: hitting "p" will quit the program, can be changed using the varible "forceQuitKey"
+
 
 Dependencies:
 
@@ -122,6 +124,7 @@ import os, psychopy, random, time, csv, subprocess
 from psychopy import gui
 import numpy as np
 import psychoLinkHax_3_6 as pl
+from psychoLinkHax_3_6 import pixelsToAngleWH
 from math import atan2, degrees
 from constants import *
 
@@ -134,14 +137,15 @@ if not os.path.isdir(saveFolder): os.makedirs(saveFolder)  # Creates save folder
 # display settings
 # - see constants.py for more settings
 
-fullscreen = False
+fullscreen = True
 default_hz = 120.0 # the fallback refresh rate used by the eytracker if et_client.getActualFrameRate fails
 
 # keyboard settings
 ansKeys = ['1', '2', '3', '4']
-continueKeys = ["3"]
+continueKeys = ['1','3']
 recalibrateKey = ['c']
 quitKeys = ["escape"]
+forceQuitKey = ["p"]
 
 # stimulus settings
 fixPos = 0,0
@@ -157,6 +161,7 @@ inter_trial_interval = 3.000 # in seconds
 # execution settings
 N_trials = 10
 exit_experiment = False # initiation of variable. for eyetracking experiments, its best to safely quit the experiment
+test = True
 # saving the eyetracking data when doing so.
 
 # Eyetracking settings (defaults)
@@ -236,12 +241,18 @@ interpreter_python27 = 'C:/Program Files (x86)/PsychoPy2/python.exe'
 # the script allows the following responsebox presses to lead to control the psycholink interface
 # Eye tracking Cheat Sheet
 
-# (1) Blue = LEFT - change image
-# (2) Yellow = c – calibrate
-# (3) Green = a – auto threshold
-# (4) Red one tap = Space
-# (4) Red two taps = Enter
-# (4) Red three taps = Escape
+# (1) Red one tap = Space
+# (1) Red two taps = Enter
+# (1) Red three taps = Escape
+
+# (2) Blue = LEFT - change image
+# (3) Yellow = a – auto threshold
+# (4) Green = c – calibrate
+# (4) Green two taps = v - validate
+
+
+
+
 
 # this means that the only thing you need to do at outside the MSR during calibration, is to press on the participants
 # eye, with the mouse on the eyetracking PC. This is done after the participants head is fully in the helmet,
@@ -262,6 +273,7 @@ sub_info_dlg.addField("Eyetracking?", ET)
 sub_info_dlg.addField("Eyetracking GCMode?", ETGC)
 sub_info_dlg.addField("calibrateET?", ETCalibration)
 sub_info_dlg.addField("etMaxDist", etMaxDist)
+sub_info_dlg.addField("test (show gaze dot)", test)
 
 sub_info_dlg.show()
 if sub_info_dlg.OK:  # user clicked OK button
@@ -270,6 +282,7 @@ if sub_info_dlg.OK:  # user clicked OK button
     ETGC = sub_info_dlg.data[2]
     ETCalibration = sub_info_dlg.data[3]
     etMaxDist = sub_info_dlg.data[4]
+    test = sub_info_dlg.data[5]
 
 else:
     print('User Pressed Cancel')
@@ -298,6 +311,15 @@ instruction_text_above = psychopy.visual.TextStim(win, color=foregroundColor, po
 
 instruction_text = psychopy.visual.TextStim(win, color=foregroundColor, pos=fixPos, height=fixHeight, text=continueText,
                                             wrapWidth=20)
+
+
+
+def cleanQuit(et_client, forceQuitKey = forceQuitKey):
+    print("Clean Quit performed")
+    et_client.sendMsg(msg="got key {0} which is set as forceQuitKey in script - "
+                          "running et_client.cleanUp() and closing file safely and closing script".format(forceQuitKey))
+    et_client.cleanUp()  # save the file before calibration.
+    psychopy.core.quit()
 
 
 
@@ -388,7 +410,7 @@ def calibrate_eyelink_client():
 
 
 
-    subprocess.call([path_to_ahk_exe, os.getcwd() + "/" + path_to_ahk_start_respbox_calibrate])
+    #subprocess.call([path_to_ahk_exe, os.getcwd() + "/" + path_to_ahk_start_respbox_calibrate])
 
 
     win.winHandle.minimize()
@@ -404,7 +426,7 @@ def calibrate_eyelink_client():
     win.winHandle.set_fullscreen(fullscreen)  # disable fullscreen
     win.flip()
 
-    subprocess.call([path_to_ahk_exe, os.getcwd() + "/" + path_to_ahk_quit_respbox_calibrate])
+    #subprocess.call([path_to_ahk_exe, os.getcwd() + "/" + path_to_ahk_quit_respbox_calibrate])
 
 
 
@@ -445,12 +467,12 @@ def setup_et(win, saveFileEDF=None, calibrateET=True,testCalibration=True,calibr
 
 
     #
-    # if calibrateET:
-    #     calibrate_eyelink_client()
+    if calibrateET:
+        calibrate_eyelink_client()
 
     et_client = create_eyelink_client(win, saveFileEDF=saveFileEDF)
     print("calibrate")
-    et_client.calibrate()
+    #et_client.calibrate()
 
     try:
         et_client.hz = win.getActualFrameRate()
@@ -460,7 +482,7 @@ def setup_et(win, saveFileEDF=None, calibrateET=True,testCalibration=True,calibr
         print("did not get actual framerate")
 
     if testCalibration:
-        from psychoLinkHax_3_6 import pixelsToAngleWH
+
 
         if testCalibration:
             start = time.time()
@@ -520,6 +542,10 @@ if ET:
     et_client.sendMsg(msg="starting experiment")
     et_client.startRecording()
 
+    print("before adding global")
+    psychopy.event.globalKeys.clear()
+    psychopy.event.globalKeys.add(forceQuitKey[0], psychopy.core.quit)
+    psychopy.event.globalKeys.add(forceQuitKey[0], cleanQuit)
 
 # start experiment
 win.flip()
@@ -538,6 +564,15 @@ for no, trial in enumerate(trialList):
 
     # initial fixation cross
     while clock.getTime() < inter_trial_interval:
+        if test:
+            pos = et_client.getCurSamp()  # gets current eyetracking sample, x, y,
+            pos_to_deg = pixelsToAngleWH((int(pos[0]), int(pos[1])), monDistance, (monWidth, monHeight),
+                                         (displayResolution[0], displayResolution[1]))
+
+            gazeDot.setPos(pos_to_deg)
+            stimFix.draw()
+            gazeDot.draw()
+            win.flip()
         pass
 
     # Gaze Contingency Check.
@@ -577,7 +612,7 @@ for no, trial in enumerate(trialList):
         correctFixation, problemWithFixation,Recalibrate, StopGC,Refocusing = et_client.waitForFixation(fixDot=stimFix, maxDist=etMaxDist,
                                                                                                         maxWait=etMaxWait, nRings=etNRings,
                                                                                                         fixTime=etFixTime,
-                                                                                                        etFixProtocolPath=etFixProtocolPath)  # participant need to look at fixation for 200 ms. can respond with "3" instead of space to try again.
+                                                                                                        etFixProtocolPath=etFixProtocolPath,test=test)  # participant need to look at fixation for 200 ms. can respond with "3" instead of space to try again.
         if Refocusing: # if the rings have appeared, getting the participant to refocus, its natural that
             # some time passes before other experimental stimuli is presented.
             stimFix.draw()
@@ -653,7 +688,6 @@ win.flip()
 
 print("performing et_client cleanUp. Transfering the file over the network form the eyetracking PC to Stim PC")
 et_client.cleanUp()
-subprocess.call([path_to_ahk_exe, os.getcwd() + "/" + path_to_ahk_quit_respbox_calibrate])
 print("closing")
 psychopy.core.quit()
 

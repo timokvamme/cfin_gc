@@ -32,6 +32,9 @@ from tkinter import filedialog
 import scipy
 from scipy import misc
 import math
+from constants import *
+
+
 #import matplotlib.pyplot as plt
 
 
@@ -247,9 +250,9 @@ def getKey(allowedKeys=['left', 'right'], waitForKey=True, timeOut=0):
 
 def drawText(win,
              text='No text specified!',
-             textKey=['space'],
+             textKey=['space','1','6'],
              wrapWidth=900,
-             textSize=25,
+             textSize=1,
              textColor=[0, 0, 0]):
     """
     Draw a string on a psychopy window and waits for a keypress, always tries
@@ -294,7 +297,7 @@ def drawText(win,
         textColor = [1,1,1]
 
     textDisp = visual.TextStim(win, text=text, wrapWidth=wrapWidth,
-                               height=textSize, colorSpace='rgb',
+                               height=textSize, colorSpace='rgb255',
                                color=textColor)
     textDisp.draw()
     time = core.Clock()
@@ -811,7 +814,7 @@ def calibrationValidation(win, tracker, topLeft=False, nrPoints=9, dotColor=[0, 
         The number of calibration points to use, allowed input:\n
         9,13,15 or 25
     dotColor : list, [R,G,B]
-        The RGB color of the validation dot
+        The rgb255 color of the validation dot
     pxPerDegree : float
         The number of pixels that equal 1 visual degree
     saveFile : Bool
@@ -857,8 +860,8 @@ def calibrationValidation(win, tracker, topLeft=False, nrPoints=9, dotColor=[0, 
     OuterDot = visual.Circle(win,
                              radius=10,
                              lineWidth=1,
-                             fillColorSpace='rgb',
-                             lineColorSpace='rgb',
+                             fillColorSpace='rgb255',
+                             lineColorSpace='rgb255',
                              lineColor=bgColor,
                              fillColor=dotColor,
                              edges=40,
@@ -867,8 +870,8 @@ def calibrationValidation(win, tracker, topLeft=False, nrPoints=9, dotColor=[0, 
     InnerDot = visual.Circle(win,
                              radius=1,
                              lineWidth=1,
-                             fillColorSpace='rgb',
-                             lineColorSpace='rgb',
+                             fillColorSpace='rgb255',
+                             lineColorSpace='rgb255',
                              lineColor=bgColor,
                              fillColor=bgColor,
                              edges=40,
@@ -879,14 +882,14 @@ def calibrationValidation(win, tracker, topLeft=False, nrPoints=9, dotColor=[0, 
                             start=(-0.5, -0.5),
                             end=(0.5, 0.5),
                             lineWidth=1,
-                            lineColorSpace='rgb',
+                            lineColorSpace='rgb255',
                             lineColor=lineColor,
                             )
 
     # Initiate text
     text = visual.TextStim(win,
                            text='',
-                           colorSpace='rgb',
+                           colorSpace='rgb255',
                            color=textColor)
 
     def drawDots(point):
@@ -1194,7 +1197,7 @@ class eyeLink:
     # Initiate Eyetracker or use mouse if no eyetracker found
     # =========================================================================
     def __init__(self, win, fileName='XX.EDF', fileDest=False,
-                 screenWidth=40, screenHeight=25.5, screenDist=60, displayResolution=[1920, 1080], address="100.1.1.1",
+                 screenWidth=67.5, screenHeight=38.5, screenDist=90, displayResolution=[1920, 1080], address="100.1.1.1",
                  # screenWidth/screenDist at skejby århus
                  dummyMode=False, textSize=0.1):
         """
@@ -1328,9 +1331,9 @@ class eyeLink:
         Parameters
         ----------
             foreCol : list, [R,G,B]
-                The RGB values of the calibration dot
+                The rgb255 values of the calibration dot
             backCol : list, [R,G,B]
-                The RGB values of the background color
+                The rgb255 values of the background color
             calDiam : int
                 The diameter of the calibration dot in pixels
             holeDiam : list, [R,G,B]
@@ -2094,6 +2097,8 @@ class eyeLink:
         True
 
         """
+
+
         Recalibrate = False
         StopGC = False
         Refocusing = False
@@ -2155,11 +2160,11 @@ class eyeLink:
         rIdx = [np.floor((len(radList) / nRings) * (i + 1)) - 1 for i in range(nRings)]
 
         # Make the circ stim
-        concCirc = visual.Circle(self.win, radius=perimMaxRad, fillColorSpace='rgb',
-                                 lineColorSpace='rgb', lineColor=lineColor,
+        concCirc = visual.Circle(self.win, radius=perimMaxRad, fillColorSpace='rgb255',
+                                 lineColorSpace='rgb255', lineColor=[255,0,0],
                                  fillColor=self.win.color, edges=50, pos=fixDot.pos)
 
-        gazeDot = visual.Circle(self.win, radius=2, fillColorSpace='rgb255', lineColorSpace='rgb255',
+        gazeDot = visual.Circle(self.win, radius=1, fillColorSpace='rgb255', lineColorSpace='rgb255',
                                          lineColor=[255, 0, 0],
                                          fillColor=[255, 0, 0], edges=50)
 
@@ -2173,11 +2178,15 @@ class eyeLink:
                                         (self.displayResolution[0], self.displayResolution[1]))
 
                 distance = distBetweenPoints(avgXY, fixDot.pos)
-                # print("fixDot.pos %s" % fixDot.pos)
-                # print("XY %s" % XY)
-                # print("avgX %s avgY %s" % (avgXY[0], avgXY[1]))
-                # print("distance %s" % distance)
 
+                if test:
+                    print("fixDot.pos %s" % fixDot.pos)
+                    print("XY %s" % XY)
+                    print("avgX %s avgY %s" % (avgXY[0], avgXY[1]))
+                    print("distance %s" % distance)
+
+                    gazeDot.setPos(avgXY)
+                    gazeDot.draw()
 
 
                 # Check if sample is within boundary
@@ -2208,7 +2217,7 @@ class eyeLink:
                     break
 
 
-            print("time.time() - trStart {0}".format(time.time() - trStart))
+            #print("time.time() - trStart {0}".format(time.time() - trStart))
 
             if time.time() - trStart > 1:
                 Refocusing = True
@@ -2274,7 +2283,7 @@ class eyeLink:
                 elif whatToDo[0] == '3':
                     correctFixation = self.waitForFixation(fixDot=fixDot, maxDist=maxDist,maxWait=maxWait, nRings=nRings,
                                                                                                                     fixTime=fixTime,
-                                                                                                                    etFixProtocolPath=etFixProtocolPath)
+                                                                                                                    etFixProtocolPath=etFixProtocolPath,test=test)
 
                     drawText(self.win, incorrectFixationrTextUserNowFixed, textKey=[0], textSize=self.textSize)
 
@@ -2292,7 +2301,7 @@ class eyeLink:
                 elif whatToDo[0] == 'space':
                     correctFixation = self.waitForFixation(fixDot=fixDot, maxDist=maxDist,maxWait=maxWait, nRings=nRings,
                                                                                                                     fixTime=fixTime,
-                                                                                                                    etFixProtocolPath=etFixProtocolPath)
+                                                                                                                    etFixProtocolPath=etFixProtocolPath,test=test)
                 elif whatToDo[0] == 'q' or whatToDo[0] == 'escape':
                     correctFixation = False
                     # elif whatToDo[0] == 'v':   # removed, as i need to use 2.7 to calibrate
@@ -2674,9 +2683,9 @@ class FixationTarget(object):
             pos=(0, 0),
             lineWidth=1.0,
             lineColor=psychopy_eyelink_graphics.CALIBRATION_POINT_OUTER_COLOR,
-            lineColorSpace='rgb',
+            lineColorSpace='rgb255',
             fillColor=psychopy_eyelink_graphics.CALIBRATION_POINT_OUTER_COLOR,
-            fillColorSpace='rgb',
+            fillColorSpace='rgb255',
             radius=psychopy_eyelink_graphics.CALIBRATION_POINT_OUTER_RADIUS,
             name='CP_OUTER',
             units='pix',
@@ -2686,9 +2695,9 @@ class FixationTarget(object):
             psychopy_eyelink_graphics.window,
             pos=(0, 0), lineWidth=1.0,
             lineColor=psychopy_eyelink_graphics.CALIBRATION_POINT_INNER_COLOR,
-            lineColorSpace='rgb',
+            lineColorSpace='rgb255',
             fillColor=psychopy_eyelink_graphics.CALIBRATION_POINT_INNER_COLOR,
-            fillColorSpace='rgb',
+            fillColorSpace='rgb255',
             radius=psychopy_eyelink_graphics.CALIBRATION_POINT_INNER_RADIUS,
             name='CP_INNER',
             units='pix',
@@ -2712,9 +2721,9 @@ class BlankScreen(object):
         self.color = color
         self.background = visual.Rect(self.win, w, h,
                                       lineColor=self.color,
-                                      lineColorSpace='rgb',
+                                      lineColorSpace='rgb255',
                                       fillColor=self.color,
-                                      fillColorSpace='rgb',
+                                      fillColorSpace='rgb255',
                                       units='pix',
                                       name='BACKGROUND',
                                       opacity=1.0,
@@ -2741,7 +2750,7 @@ class TextLine(object):
                                         text="****************",
                                         pos=(0, 0),
                                         height=30,
-                                        color=color, colorSpace='rgb',
+                                        color=color, colorSpace='rgb255',
                                         opacity=1.0, contrast=1.0, units='pix',
                                         ori=0.0, antialias=True,
                                         bold=False, italic=False, alignHoriz='center',
@@ -2789,11 +2798,11 @@ class IntroScreen(object):
         self.introlines = []
 
         self.introlines.append(visual.TextStim(self.window,
-                                               text="PsychoLink",
+                                               text="CFIN-PsychoLink",
                                                pos=(left_margin, topline_y - space_per_lines * 2),
                                                height=int(font_height * 1.66),
                                                color=color,
-                                               colorSpace='rgb',
+                                               colorSpace='rgb255',
                                                opacity=1.0,
                                                contrast=1.0,
                                                units='pix',
@@ -2811,7 +2820,7 @@ class IntroScreen(object):
                                                    left_margin,
                                                    topline_y - space_per_lines * (len(self.introlines) + 2)),
                                                height=font_height,
-                                               color=color, colorSpace='rgb',
+                                               color=color, colorSpace='rgb255',
                                                opacity=1.0, contrast=1.0, units='pix',
                                                ori=0.0, antialias=True,
                                                bold=False, italic=False,
@@ -2826,7 +2835,7 @@ class IntroScreen(object):
                                                    topline_y - space_per_lines * (len(self.introlines) + 2)),
                                                height=font_height,
                                                color=color,
-                                               colorSpace='rgb',
+                                               colorSpace='rgb255',
                                                opacity=1.0,
                                                contrast=1.0,
                                                units='pix',
@@ -2844,7 +2853,7 @@ class IntroScreen(object):
                                                    left_margin,
                                                    topline_y - space_per_lines * (len(self.introlines) + 2)),
                                                height=font_height,
-                                               color=color, colorSpace='rgb',
+                                               color=color, colorSpace='rgb255',
                                                opacity=1.0, contrast=1.0, units='pix',
                                                ori=0.0, antialias=True,
                                                bold=False, italic=False,
@@ -2858,7 +2867,7 @@ class IntroScreen(object):
                                                    left_margin,
                                                    topline_y - space_per_lines * (len(self.introlines) + 2)),
                                                height=font_height,
-                                               color=color, colorSpace='rgb',
+                                               color=color, colorSpace='rgb255',
                                                opacity=1.0, contrast=1.0, units='pix',
                                                ori=0.0, antialias=True,
                                                bold=False, italic=False,
@@ -2872,7 +2881,7 @@ class IntroScreen(object):
                                                    left_margin,
                                                    topline_y - space_per_lines * (len(self.introlines) + 2)),
                                                height=font_height,
-                                               color=color, colorSpace='rgb',
+                                               color=color, colorSpace='rgb255',
                                                opacity=1.0, contrast=1.0, units='pix',
                                                ori=0.0, antialias=True,
                                                bold=False, italic=False,
@@ -2886,7 +2895,7 @@ class IntroScreen(object):
                                                    left_margin,
                                                    topline_y - space_per_lines * (len(self.introlines) + 2)),
                                                height=font_height,
-                                               color=color, colorSpace='rgb',
+                                               color=color, colorSpace='rgb255',
                                                opacity=1.0, contrast=1.0, units='pix',
                                                ori=0.0, antialias=True,
                                                bold=False, italic=False,
@@ -2900,7 +2909,7 @@ class IntroScreen(object):
                                                    left_margin,
                                                    topline_y - space_per_lines * (len(self.introlines) + 2)),
                                                height=font_height,
-                                               color=color, colorSpace='rgb',
+                                               color=color, colorSpace='rgb255',
                                                opacity=1.0, contrast=1.0, units='pix',
                                                ori=0.0, antialias=True,
                                                bold=False, italic=False,
@@ -2914,7 +2923,7 @@ class IntroScreen(object):
                                                    left_margin,
                                                    topline_y - space_per_lines * (len(self.introlines) + 2)),
                                                height=font_height,
-                                               color=color, colorSpace='rgb',
+                                               color=color, colorSpace='rgb255',
                                                opacity=1.0, contrast=1.0, units='pix',
                                                ori=0.0, antialias=True,
                                                bold=False, italic=False,
@@ -2927,7 +2936,7 @@ class IntroScreen(object):
                                                    left_margin,
                                                    topline_y - space_per_lines * (len(self.introlines) + 2)),
                                                height=font_height,
-                                               color=color, colorSpace='rgb',
+                                               color=color, colorSpace='rgb255',
                                                opacity=1.0, contrast=1.0, units='pix',
                                                ori=0.0, antialias=True,
                                                bold=False, italic=False,
@@ -2961,7 +2970,7 @@ class EyeLinkCoreGraphicsPsychopy(pl.EyeLinkCustomDisplay):
         window.winHandle.activate()
         self.tracker = tracker
         self.imgstim_size = None
-        self.rgb_index_array = None
+        self.rgb255_index_array = None
 
         self.keys = []
         self.mouse_pos = []
@@ -2996,7 +3005,7 @@ class EyeLinkCoreGraphicsPsychopy(pl.EyeLinkCustomDisplay):
                                       start=(0, 0),
                                       end=(0, 0),
                                       lineWidth=1,
-                                      lineColorSpace='rgb',
+                                      lineColorSpace='rgb255',
                                       lineColor=[255, 0, 0],
                                       )
 
@@ -3010,11 +3019,14 @@ class EyeLinkCoreGraphicsPsychopy(pl.EyeLinkCustomDisplay):
             mousStart = (100 - self.window.size[0] / 2, (self.window.size[1] / 2) - 100)
         self.tracker.mouse.setPos(mousStart)
 
+
     def get_input_key(self):
         if self.tracker.activeState:
             allowedKeys = ['up', 'down', 'left', 'right', 'return', 'escape',
                            'space', 'c', 'v', 'a', 'i', 'num_add',
-                           'num_subtract']
+                           'num_subtract','1','2','3','4','6']
+
+
             keycode = 0
             key = getKey(allowedKeys, False)[0]
             if key != 'NoKey':
@@ -3048,11 +3060,67 @@ class EyeLinkCoreGraphicsPsychopy(pl.EyeLinkCustomDisplay):
                     keycode = ord("+")
                 elif keycode == 'num_subtract':
                     keycode = ord("-")
+
+                # CFIN - MEG specific
+                elif keycode == '1' or keycode == '6': # change image
+
+                    # (1) blue one tap = Space
+                    # (1) blue two taps = Enter
+                    # (1) blue three taps = Escape
+
+                    one_clock = core.Clock()
+                    one_clock_start = one_clock.getTime()
+                    time_to_press = 0.500
+
+                    keycode = ord(" ")
+
+                    while (one_clock.getTime() - one_clock_start)  < time_to_press:
+                        key = getKey(allowedKeys, False)[0]
+                        if key == '1' or key == '6':
+                            keycode = pl.ENTER_KEY
+                            # restart the clock
+                            one_clock_start = one_clock.getTime()
+
+                            while (one_clock.getTime() - one_clock_start) < time_to_press:
+                                key = getKey(allowedKeys, False)[0]
+                                if key == '1' or key == '6':
+                                    keycode = pl.ESC_KEY
+
+                    self.setMousStart()
+
+                elif keycode == '2':# -    # yellow - change image
+                    keycode = pl.CURS_RIGHT;
+                    self.setMousStart()
+
+
+                    keycode = ord("a")
+
+
+                elif keycode == '3': # - green  - autothreshold
+                    keycode = ord("a")
+                    # maybe double click does validate.
+
+                elif keycode == '4':  # red - calibrate
+                    # (4) Red = c – calibrate
+                    # (4) Red two taps = v - validate
+
+                    my_clock = core.Clock()
+                    my_clock_start = my_clock.getTime()
+                    time_to_press = 0.500
+
+                    keycode = ord("c")
+
+                    while (my_clock.getTime() - my_clock_start) < time_to_press:
+                        key = getKey(allowedKeys, False)[0]
+                        if key == '4':
+                            keycode = ord("v")
+
                 else:
                     keycode = 0
         else:
             return None
         return [pl.KeyInput(keycode, 0)]
+
 
     def setup_cal_display(self):
         """
@@ -3095,8 +3163,8 @@ class EyeLinkCoreGraphicsPsychopy(pl.EyeLinkCustomDisplay):
         self.size = (width, height)
         self.clear_cal_display()
         self.last_mouse_state = -1
-        if self.rgb_index_array is None:
-            self.rgb_index_array = np.zeros((height, width), dtype=np.uint8)
+        if self.rgb255_index_array is None:
+            self.rgb255_index_array = np.zeros((height, width), dtype=np.uint8)
 
     def exit_image_display(self):
         """Exits the image display."""
@@ -3115,7 +3183,7 @@ class EyeLinkCoreGraphicsPsychopy(pl.EyeLinkCustomDisplay):
             self.imagetitlestim = visual.TextStim(self.window,
                                                   text=text,
                                                   pos=(0, self.window.size[1] / 2 - 15), height=28,
-                                                  color=color, colorSpace='rgb',
+                                                  color=color, colorSpace='rgb255',
                                                   opacity=1.0, contrast=1.0, units='pix',
                                                   ori=0.0, antialias=True,
                                                   bold=False, italic=False, alignHoriz='center',
@@ -3131,7 +3199,7 @@ class EyeLinkCoreGraphicsPsychopy(pl.EyeLinkCustomDisplay):
         """
         for i in range(width):
             try:
-                self.rgb_index_array[line - 1, i] = buff[i]
+                self.rgb255_index_array[line - 1, i] = buff[i]
             except Exception as e:
                 print(e)
 
@@ -3140,16 +3208,16 @@ class EyeLinkCoreGraphicsPsychopy(pl.EyeLinkCustomDisplay):
         if line == totlines:
             try:
                 # Remove the black edges
-                imW, imH = self.rgb_index_array.shape
-                frameRSide = self.rgb_index_array[:, imW / 2:]
-                frameLhalf = self.rgb_index_array[imH / 2:, :]
+                imW, imH = self.rgb255_index_array.shape
+                frameRSide = self.rgb255_index_array[:, imW / 2:]
+                frameLhalf = self.rgb255_index_array[imH / 2:, :]
                 if np.median(frameRSide) == 0 and np.median(frameLhalf) == 0:
-                    im = self.rgb_index_array[:imW / 2, :imH / 2]
+                    im = self.rgb255_index_array[:imW / 2, :imH / 2]
                     self.image_scale = 2
                 else:
-                    im = self.rgb_index_array
+                    im = self.rgb255_index_array
                     self.image_scale = 4
-                image = scipy.misc.toimage(im, pal=self.rgb_pallete, mode='P')
+                image = scipy.misc.toimage(im, pal=self.rgb255_pallete, mode='P')
                 if self.imgstim_size is None:
                     maxsz = self.width / 2
                     mx = 1.0
@@ -3187,10 +3255,10 @@ class EyeLinkCoreGraphicsPsychopy(pl.EyeLinkCustomDisplay):
         """
         self.clear_cal_display()
         sz = len(r)
-        self.rgb_pallete = np.zeros((sz, 3), dtype=np.uint8)
+        self.rgb255_pallete = np.zeros((sz, 3), dtype=np.uint8)
         i = 0
         while i < sz:
-            self.rgb_pallete[i:] = int(r[i]), int(g[i]), int(b[i])
+            self.rgb255_pallete[i:] = int(r[i]), int(g[i]), int(b[i])
             i += 1
 
     def alert_printf(self, msg):
@@ -3229,7 +3297,7 @@ class EyeLinkCoreGraphicsPsychopy(pl.EyeLinkCustomDisplay):
                            start=(0, 0),
                            end=(0, 0),
                            lineWidth=1,
-                           lineColorSpace='rgb',
+                           lineColorSpace='rgb255',
                            lineColor=[0, 255, 0],
                            )
         # Draw line 1
