@@ -544,7 +544,7 @@ if ET:
 
     print("before adding global")
     psychopy.event.globalKeys.clear()
-    psychopy.event.globalKeys.add(forceQuitKey[0], psychopy.core.quit)
+  #  psychopy.event.globalKeys.add(forceQuitKey[0], psychopy.core.quit)
     psychopy.event.globalKeys.add(forceQuitKey[0], cleanQuit)
 
 # start experiment
@@ -557,14 +557,16 @@ response = psychopy.event.waitKeys(keyList=continueKeys)
 
 # run trials
 for no, trial in enumerate(trialList):
-    print(no)
+    print("trial no: {0}".format(no))
     clock.reset()
     stimFix.draw()
     win.flip()
 
+
     # initial fixation cross
     while clock.getTime() < inter_trial_interval:
-        if test:
+        if test and ET:
+            et_client.startTrial(trialNr=no)
             pos = et_client.getCurSamp()  # gets current eyetracking sample, x, y,
             pos_to_deg = pixelsToAngleWH((int(pos[0]), int(pos[1])), monDistance, (monWidth, monHeight),
                                          (displayResolution[0], displayResolution[1]))
@@ -580,8 +582,7 @@ for no, trial in enumerate(trialList):
     # furthermore it handles the scenario where you might want to
 
     if ET and ETGC:# pre-stim GC cehck
-
-        et_client.startTrial(trialNr=no)  # starts eyetracking recording.
+        if not test:et_client.startTrial(trialNr=no)
         et_client.logVar('trial_Nr', no)
 
         print("Wait for Fixation at StimFIX - mystimfix - prestim")

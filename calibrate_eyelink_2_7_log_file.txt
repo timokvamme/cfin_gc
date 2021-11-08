@@ -17,7 +17,7 @@ running calibration
 calibration over
 getting actual framerate
 got it!
-119.987377324
+119.960604937
 done with function
 
 Error while renaming EDF file!!
@@ -25,6 +25,6 @@ py27_calibration.edf Allready exists!!
 Manually rename the file!!
 Currently saved as XX.EDF !!
 attemping to close win27dow
-1.6529 	WARNING 	Requested an unavailable screen number - using first available.
+1.6961 	WARNING 	Requested an unavailable screen number - using first available.
 os._exit(0)
 writing file to XX.EDF 

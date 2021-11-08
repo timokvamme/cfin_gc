@@ -2168,10 +2168,15 @@ class eyeLink:
                                          lineColor=[255, 0, 0],
                                          fillColor=[255, 0, 0], edges=50)
 
+        test_text = visual.TextStim(self.win, color= [1,1,1], pos=(0,-5), height=1,
+                                                    text="",
+                                                    wrapWidth=20)
+
         sampCount = 0
         stopCount = fixTime / (1000.0 / hz)  # stops after approx 200 ms
         while (time.time() - trStart) < maxWait:
             if self.mode != 'Dummy':
+                print("Non-Dummy Mode")
                 XY = self.getCurSamp()
                 avgXY = pixelsToAngleWH((int(XY[0]), int(XY[1])), self.screenDist,
                                         (self.screenWidth, self.screenHeight),
@@ -2184,7 +2189,11 @@ class eyeLink:
                     print("XY %s" % XY)
                     print("avgX %s avgY %s" % (avgXY[0], avgXY[1]))
                     print("distance %s" % distance)
-
+                    test_text.setText("FixDot.pos {0}\n"
+                                      "XY {1}\n"
+                                      "avgX {2}\n avgY {3}\n"
+                                      "distance {4}".format(fixDot.pos,XY,avgXY[0], avgXY[1],distance))
+                    test_text.draw()
                     gazeDot.setPos(avgXY)
                     gazeDot.draw()
 
@@ -2198,10 +2207,12 @@ class eyeLink:
                 # If enough samples within boundary
                 if sampCount >= stopCount:
                     correctFixation = True
+                    print("correctFixation! Non-Dummy mode")
                     break
 
 
             else:
+                print("Dummy Mode")
                 avgXY = self.getCurSamp()
                 distance = distBetweenPoints(avgXY, fixDot.pos)
 
@@ -2214,6 +2225,7 @@ class eyeLink:
                 # If enough samples within boundary
                 if sampCount >= stopCount:
                     correctFixation = True
+                    print("correctFixation! Dummy mode!")
                     break
 
 
@@ -2281,6 +2293,7 @@ class eyeLink:
 
 
                 elif whatToDo[0] == '3':
+                    print("recursive waitForFixation")
                     correctFixation = self.waitForFixation(fixDot=fixDot, maxDist=maxDist,maxWait=maxWait, nRings=nRings,
                                                                                                                     fixTime=fixTime,
                                                                                                                     etFixProtocolPath=etFixProtocolPath,test=test)
@@ -2299,6 +2312,7 @@ class eyeLink:
                     Recalibrate = True
 
                 elif whatToDo[0] == 'space':
+                    print("recursive expr waitForFixation")
                     correctFixation = self.waitForFixation(fixDot=fixDot, maxDist=maxDist,maxWait=maxWait, nRings=nRings,
                                                                                                                     fixTime=fixTime,
                                                                                                                     etFixProtocolPath=etFixProtocolPath,test=test)
