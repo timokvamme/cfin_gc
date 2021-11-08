@@ -561,20 +561,20 @@ for no, trial in enumerate(trialList):
     clock.reset()
     stimFix.draw()
     win.flip()
+    if test and ET:
+        et_client.startTrial(trialNr=no)
 
 
     # initial fixation cross
     while clock.getTime() < inter_trial_interval:
-        if test and ET:
-            et_client.startTrial(trialNr=no)
-            pos = et_client.getCurSamp()  # gets current eyetracking sample, x, y,
-            pos_to_deg = pixelsToAngleWH((int(pos[0]), int(pos[1])), monDistance, (monWidth, monHeight),
-                                         (displayResolution[0], displayResolution[1]))
+        pos = et_client.getCurSamp()  # gets current eyetracking sample, x, y,
+        pos_to_deg = pixelsToAngleWH((int(pos[0]), int(pos[1])), monDistance, (monWidth, monHeight),
+                                     (displayResolution[0], displayResolution[1]))
 
-            gazeDot.setPos(pos_to_deg)
-            stimFix.draw()
-            gazeDot.draw()
-            win.flip()
+        gazeDot.setPos(pos_to_deg)
+        stimFix.draw()
+        gazeDot.draw()
+        win.flip()
         pass
 
     # Gaze Contingency Check.
@@ -613,7 +613,7 @@ for no, trial in enumerate(trialList):
         correctFixation, problemWithFixation,Recalibrate, StopGC,Refocusing = et_client.waitForFixation(fixDot=stimFix, maxDist=etMaxDist,
                                                                                                         maxWait=etMaxWait, nRings=etNRings,
                                                                                                         fixTime=etFixTime,
-                                                                                                        etFixProtocolPath=etFixProtocolPath,test=test)  # participant need to look at fixation for 200 ms. can respond with "3" instead of space to try again.
+                                                                                                        etFixProtocolPath=etFixProtocolPath,test=test,gazeDot=gazeDot)  # participant need to look at fixation for 200 ms. can respond with "3" instead of space to try again.
         if Refocusing: # if the rings have appeared, getting the participant to refocus, its natural that
             # some time passes before other experimental stimuli is presented.
             stimFix.draw()
@@ -621,10 +621,12 @@ for no, trial in enumerate(trialList):
             psychopy.core.wait(refocusingTime)
 
         if StopGC:
+            print("stop GC")
             ETGC = False
             et_client.sendMsg(msg="experimenter pressed q - stopping GC")
 
         if Recalibrate:
+            print("Recalibrate -")
             print("problem with calibration - need to recalibrate")
             instruction_text.setText("Recalibrating Eyetracker.. please wait")
             instruction_text.draw()
@@ -665,6 +667,9 @@ for no, trial in enumerate(trialList):
     instruction_text.setText(flashText)
     instruction_text.draw()
     win.flip()
+
+
+    psychopy.event.clearEvents()
 
     response = psychopy.event.waitKeys(keyList=ansKeys + quitKeys + recalibrateKey)
     trial['rt'] = clock.getTime()

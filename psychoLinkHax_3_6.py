@@ -1448,7 +1448,7 @@ class eyeLink:
         --------
         >>> tracker.startTrial(10)
         """
-        #self.startRecording()
+        self.startRecording()
         time.sleep(10 / 1000.0)
         self.sendMsg('start_trial')
         if self.mode == 'Real':
@@ -2041,7 +2041,7 @@ class eyeLink:
         return fix
 
     def waitForFixation(self, fixDot, maxDist=1.5, maxWait=4,etRingsAppear=1.5, nRings=3, fixTime=200,
-                        etFixProtocolPath="",test=False):
+                        etFixProtocolPath="",test=False,gazeDot=None):
         """
         Wait for the start of a fixation in the area around a fixDot.
         The function does not use eyelink events, but rather waits until
@@ -2097,7 +2097,7 @@ class eyeLink:
         True
 
         """
-
+        self.startRecording()
 
         Recalibrate = False
         StopGC = False
@@ -2164,11 +2164,12 @@ class eyeLink:
                                  lineColorSpace='rgb255', lineColor=[255,0,0],
                                  fillColor=self.win.color, edges=50, pos=fixDot.pos)
 
-        gazeDot = visual.Circle(self.win, radius=1, fillColorSpace='rgb255', lineColorSpace='rgb255',
-                                         lineColor=[255, 0, 0],
-                                         fillColor=[255, 0, 0], edges=50)
+        if gazeDot == None:
+            gazeDot = visual.Circle(self.win, radius=0.5, fillColorSpace='rgb255', lineColorSpace='rgb255',
+                                             lineColor=[255, 0, 0],
+                                             fillColor=[255, 0, 0], edges=50)
 
-        test_text = visual.TextStim(self.win, color= [1,1,1], pos=(0,-5), height=1,
+        test_text = visual.TextStim(self.win, color= [1,1,1], pos=(0,-5), height=textHeightETclient,
                                                     text="",
                                                     wrapWidth=20)
 
@@ -2190,9 +2191,9 @@ class eyeLink:
                     print("avgX %s avgY %s" % (avgXY[0], avgXY[1]))
                     print("distance %s" % distance)
                     test_text.setText("FixDot.pos {0}\n"
-                                      "XY {1}\n"
-                                      "avgX {2}\n avgY {3}\n"
-                                      "distance {4}".format(fixDot.pos,XY,avgXY[0], avgXY[1],distance))
+                                      "X {1:.5f}, Y {2:.5f}\n"
+                                      "avgX {3:.5f}\n avgY {4:.5f}\n"
+                                      "distance {5:.5f}".format(fixDot.pos,float(XY[0]),float(XY[1]),float(avgXY[0]), float(avgXY[1]),float(distance)))
                     test_text.draw()
                     gazeDot.setPos(avgXY)
                     gazeDot.draw()
@@ -2270,6 +2271,7 @@ class eyeLink:
 
         # If no fixation detected
         if not correctFixation:
+            event.clearEvents()
             problemWithFixation = True
 
             try:
