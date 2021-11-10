@@ -1,0 +1,55 @@
+
+Gaze Contingency
+
+- done - skriv email om 27 at det virker.
+- show fb with psycholink creator to Chris.
+- done - add the global quit psychopy - make sure that ET is saved.
+        - test it
+
+- done remove ahk
+- remove user/experimenter, just have "c", be able to change
+        - test removal of ahk
+        - test global cleanup
+        - document global cleanup.
+
+- test "c" to change user/experimenter
+
+- gui add så man kan se hvad man skal trygge
+        - Done test
+        - fix button positions
+        - fix so head is first camera image. (press enter)
+        - fix so buttons are there when calibration dot appears, and at validation / or continue
+
+
+
+- cfin meg_trigger shooting game
+- fix shooting game documentation
+- done  red rings are not there
+- do i need to close the file to recalibrate, closing and recalibration, and saving. test that all data is there.
+
+
+- colorspace, test using different colorspaces than rgb255.
+- maybe fix so color space is recalculated if its "rgb" only
+
+- create a tutorial for dynamically rearangement of stimuli, like Laurits, but simpler.
+- create a music reward therapy example
+
+- create a PTB version of gc flash.
+    - https://www.youtube.com/watch?v=NS1_lJUpWKU
+    - https://www.youtube.com/watch?v=GjHZjgDbedQ
+    - https://www.youtube.com/watch?v=bhZyCCT0HTI
+    - document these on the wiki
+
+- make a clean versiokn of CFIN GC, with more documentation, names of scripts that makes sense
+- and a documentation on the wiki. (videos?)
+
+
+
+RT-MEG
+- rt_meg
+
+
+Extra
+- make 3x python calibration work.
+- binocular
+
