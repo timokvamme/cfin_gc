@@ -11,12 +11,10 @@ except:
 
     pl = False
     warnings.warn('Pylink not found, running dummy mode', Warning)
-
-import time
+import os, sys, platform, time
 import numpy as np
 from psychopy import visual, core, event
-import os
-import sys
+
 
 try:
     import pandas as pd
@@ -27,12 +25,17 @@ except:
     warn = 'Pandas not imported!\nmakeTrialList will return array and not dataframe!\nSaving calibration will not work!'
     warnings.warn(warn, Warning)
 
-import tkinter as tk
-from tkinter import filedialog
+if int(platform.python_version()[0]) > 2:
+    import tkinter as tk
+    import tkinter.filedialog as filedialog
+else:
+    import Tkinter as tk
+    import tkFileDialog as filedialog
+
 import scipy
 from scipy import misc
 import math
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 
 # =============================================================================
@@ -247,10 +250,10 @@ def getKey(allowedKeys=['left', 'right'], waitForKey=True, timeOut=0):
 
 def drawText(win,
              text='No text specified!',
-             textKey=['space'],
+             textKey=['space','1','6'],
              wrapWidth=900,
              textSize=1,
-             textColor=[0, 0, 0]):
+             textColor=[1,1, 1]):
     """
     Draw a string on a psychopy window and waits for a keypress, always tries
     to draw the text in the center of the screen.
@@ -291,10 +294,9 @@ def drawText(win,
 
     if np.sum(np.array(textColor) == 0) == 3 and np.sum(win.color < 100) == 3:
         textColor = [255, 255, 255]
-        textColor = [1,1,1]
 
     textDisp = visual.TextStim(win, text=text, wrapWidth=wrapWidth,
-                               height=textSize, colorSpace='rgb',
+                               height=textSize, colorSpace='rgb255',
                                color=textColor)
     textDisp.draw()
     time = core.Clock()
@@ -857,8 +859,8 @@ def calibrationValidation(win, tracker, topLeft=False, nrPoints=9, dotColor=[0, 
     OuterDot = visual.Circle(win,
                              radius=10,
                              lineWidth=1,
-                             fillColorSpace='rgb',
-                             lineColorSpace='rgb',
+                             fillColorSpace='rgb255',
+                             lineColorSpace='rgb255',
                              lineColor=bgColor,
                              fillColor=dotColor,
                              edges=40,
@@ -867,8 +869,8 @@ def calibrationValidation(win, tracker, topLeft=False, nrPoints=9, dotColor=[0, 
     InnerDot = visual.Circle(win,
                              radius=1,
                              lineWidth=1,
-                             fillColorSpace='rgb',
-                             lineColorSpace='rgb',
+                             fillColorSpace='rgb255',
+                             lineColorSpace='rgb255',
                              lineColor=bgColor,
                              fillColor=bgColor,
                              edges=40,
@@ -879,14 +881,14 @@ def calibrationValidation(win, tracker, topLeft=False, nrPoints=9, dotColor=[0, 
                             start=(-0.5, -0.5),
                             end=(0.5, 0.5),
                             lineWidth=1,
-                            lineColorSpace='rgb',
+                            lineColorSpace='rgb255',
                             lineColor=lineColor,
                             )
 
     # Initiate text
     text = visual.TextStim(win,
                            text='',
-                           colorSpace='rgb',
+                           colorSpace='rgb255',
                            color=textColor)
 
     def drawDots(point):
@@ -1061,7 +1063,6 @@ class sendPortCode:
     def __init__(self):
         self.setSettings()
         try:
-
             from ctypes import windll
             self.io = windll.dlportio
             self.dummy = False
@@ -1188,19 +1189,92 @@ class sendPortCode:
 # PsychoLink
 # ==============================================================================
 class eyeLink:
+    """
+    Initiates the eyetracker. If no eyetracker is found or pylink is not
+    installed, it enters dummy mode. Is called when the eyeLink class
+    is initiated. It always prints whether or not the eyetracker was
+    initiated or if dummy mode was initiated.
 
+    See : https://github.com/jonathanvanleeuwen/psychoLink/wiki
+    for more documentation and examples.
+
+    All function documentation assumes that the class is initiated as 'tracker'.
+    See the example below for how to correctly initiate the class.
+
+    The class for sending parallel port codes is automatically initiated as
+    tracker.PPort
+
+    All eyelink API code can be accessed using tracker.pylink
+
+    To initiate the eyetracker the window units has to be
+    set to pix
+
+    Parameters
+    ----------
+    win : psychopy window
+        An instance of an active psychopy window on which to draw the text
+    fileName : string
+        The name of the eyedata file. Remeber that it should always end
+        with .EDF
+    fileDest : string
+        The directory to save the eyedata file. Defaults to False. If False
+        the data will be saved in the working directory
+    screenWidth : float or int
+        The with of the screen, in cm. Only works if the psychopy window
+        was initiated without a psychopy monitor object, else uses the psychopy
+        monitor values.
+    screenDist : float or int
+        The distance between the participant and the screen, in cm. Only
+        works if the psychopy window was initiated without a psychopy
+        monitor object, else uses the psychopy monitor values.
+    address : string
+        The network address that is connected to the eyelink. By default
+        this should be "100.1.1.1"
+    dummyMode : Bool
+        If set to True, forces psychoLink into dummy mode
+
+    Returns
+    -------
+    tracker : psychoLink eyetracker class
+        The class used to talk to the eyelink eyetracker\n
+        See: https://github.com/jonathanvanleeuwen/psychoLink/wiki for
+        all included functions. See documentation for each function in this
+        code.
+
+    Examples
+    --------
+    The examples assume that the psychoLink module is imported from a
+    different script. To initiate the eyetracker the window units has to be
+    set to pix
+
+    >>> import cfin_psychoLink as pl
+    >>> from psychopy import visual, monitors
+    >>> mon = monitors.Monitor('testMonitor',width=47,distance=75)
+    >>> win = visual.Window(units='pix',monitor=mon,size=(1680,1050),
+    colorSpace='rgb255',color = (255,255,255), screen = 0, fullscr=False)
+    >>> tracker = pl.eyeLink(win, fileName='someName.EDF', fileDest = "C:\\Users\\User1\Desktop\\")
+
+    The absolute minimum of inputs required to initiate the eyetracker. Keep in
+    mind that to get correct distances etc, the values for distance and width
+    should be set for each eyetracker setup, but it is not required. It is not
+    a good idea to only use the default settings
+
+    >>> import cfin_psychoLink as pl
+    >>> from psychopy import visual
+    >>> win = visual.Window(units='pix')
+    >>> tracker = pl.eyeLink(win)
+    """
 
     # =========================================================================
     # Initiate Eyetracker or use mouse if no eyetracker found
     # =========================================================================
     def __init__(self, win, fileName='XX.EDF', fileDest=False,
-                 screenWidth=68, screenHeight=38.5, screenDist=83, displayResolution=[1920, 1080], address="100.1.1.1",
-                 # screenWidth/screenDist at skejby århus
+                 screenWidth=67, screenHeight=37.5, screenDist=90, displayResolution=[1920, 1080], address="100.1.1.1",
+                 # defau.t screenWidth/screenDist at skejby århus
                  dummyMode=False, textSize=1):
         """
         see pl.tracker documentation
         """
-        self.textSize = textSize
         self.win = win
         address = str(address)
         self.EDFfileName = str(fileName)
@@ -1214,6 +1288,7 @@ class eyeLink:
         self.screenWidth = screenWidth
         self.screenHeight = screenHeight
         self.screenDist = screenDist
+        self.textSize
 
         try:
             if not dummyMode:
@@ -1225,24 +1300,32 @@ class eyeLink:
                 self.mouse.setVisible(0)
                 print('\nTracker found!')
                 print('Mouse set to invissible')
-                # drawText(self.win, 'Press "SPACE" to setup EyeTracker!', textSize=textSize)
-                # self.win.flip()
+                drawText(self.win, 'Press "SPACE" to setup EyeTracker!')
+                self.win.flip()
             else:
-                2 / 0
+                pass
         except:
             # or for dummy mode connection
             self.mode = 'Dummy'
             if pl:
-                self.pylink = pl.EyeLink(None)
-                error = '\n\tNo eye-tracker found at: "' + address + \
-                        '"\n\tEntering DummyMode\n' + \
-                        '\tUsing Mouse Position\n\n\tPress "Space" to start'
+                try:
+                    self.pylink = pl.EyeLink(None)
+                    error = '\n\tNo eye-tracker found at: "' + address + \
+                            '\n\tEntering DummyMode\n' + \
+                            '\tUsing Mouse Position\n\n\tPress "Space" to start'
+                except:
+                    self.pylink = False
+                    error = '\n\tPylink module not found!' + \
+                            '\n\tCheck for correct pylink installation' + \
+                            '\n\tEntering DummyMode\n' + \
+                            '\tUsing Mouse Position\n\n\tPress "Space" to start'
             else:
                 self.pylink = False
                 error = '\n\tPylink module not found!' + \
-                        '"\n\tEntering DummyMode\n' + \
+                        '\n\tCheck for correct pylink installation' + \
+                        '\n\tEntering DummyMode\n' + \
                         '\tUsing Mouse Position\n\n\tPress "Space" to start'
-            print("\nError: %s" % error)
+            print(("\nError: %s" % error))
             self.mouse.setVisible(1)
             drawText(self.win, error)
             self.win.flip()
@@ -1260,11 +1343,7 @@ class eyeLink:
     # Set settings for eyetracker
     # =========================================================================
     # Set recording parameters
-    def setEyeLinkSettings(self,
-                           vel=35,
-                           acc=9500,
-                           screenW=1680,
-                           screenH=1050):
+    def setEyeLinkSettings(self, vel=35, acc=9500, screenW=1680, screenH=1050):
         """
         Manually set eyelink saccade detection parameters.
 
@@ -1308,17 +1387,7 @@ class eyeLink:
     # =========================================================================
     # Running drift correct and calibration procedure (make psychopy screen)
     # =========================================================================
-    def setCalibrationOptions(self,
-                              foreCol=[1, 1, 1],
-                              backCol=[-1, -1, -1],
-                              calDiam=10,
-                              holeDiam=2,
-                              colorDepth=32,
-                              targSound="on",
-                              corrSound="on",
-                              incSound="on",
-                              caltype='HV9',
-                              calTime=1000):
+    def setCalibrationOptions(self, foreCol=[0, 0, 0], backCol=[150, 150, 150], calDiam=10, holeDiam=2, colorDepth=32, targSound="on", corrSound="on", incSound="on", caltype='HV9', calTime=1000):
         """
         Set the calibration options for the eyetracker calibration.
         Is automatically set when initiating the eyetracker. When auto
@@ -1356,7 +1425,6 @@ class eyeLink:
         # Set the options
         if np.sum(np.array(backCol) < 100) == 3 and np.sum(np.array(foreCol) == 0) == 3:
             foreCol = (255, 255, 255)
-            foreCol = [1,1,1]
         self.foreCol = [int(i) for i in foreCol]
         self.backCol = [int(i) for i in backCol]
         self.calDiam = int(calDiam)
@@ -1444,7 +1512,7 @@ class eyeLink:
         --------
         >>> tracker.startTrial(10)
         """
-        #self.startRecording()
+        self.startRecording()
         time.sleep(10 / 1000.0)
         self.sendMsg('start_trial')
         if self.mode == 'Real':
@@ -1537,7 +1605,7 @@ class eyeLink:
             self.pylink.sendMessage(str(msg))
         elif self.mode == 'Dummy':
             msg = 'PsychoLink Log (Dummy): ' + str(msg)
-            print( msg)
+            print(msg)
 
     # Log variable to pyLinkLog
     def logVar(self, varName='noName', value='noValue'):
@@ -1574,7 +1642,7 @@ class eyeLink:
             time.sleep(2 / 1000.0)
         elif self.mode == 'Dummy':
             msg = 'PsychoLink Log (Dummy): ' + msg
-            print( msg)
+            print(msg)
             time.sleep(2 / 1000.0)
 
     def getTime(self):
@@ -1676,7 +1744,7 @@ class eyeLink:
                 x, y = centerToTopLeft(pos, (self.screenW, self.screenH))
                 self.pylink.sendCommand("draw_text=%d %d %d %s " % (x, y, 3, text))
         else:
-            print( text)
+            print(text)
 
     def drawTrialInfo(self, block='NA', tNr=999, tCor=999, tInc=999, tLeft=999):
         """
@@ -1713,7 +1781,7 @@ class eyeLink:
             y = self.screenH - 30
             self.pylink.sendCommand("draw_text=%d %d %d %s " % (x, y, 3, text))
         else:
-            print( text)
+            print(text)
 
     def drawHostImage(self, im):
         """
@@ -1797,7 +1865,7 @@ class eyeLink:
 
                         # Get the newest data sample
 
-    def getCurSamp(self):
+    def getCurSamp(self, mono = True):
         """
         Gets the most recent gaze position sample from the eyelink. This
         sample might be a couple of ms delayed, depending on the eyelink
@@ -1826,21 +1894,27 @@ class eyeLink:
         This is not the case if the eytracker is connected, then the samples
         will be updated every ms (if eyelink at 1000hz).
         """
+
         if self.mode == 'Real':
             curSamp = self.pylink.getNewestSample()
             if curSamp is not None:
-                if curSamp.isRightSample():
-                    gazePos = curSamp.getRightEye().getGaze()
+                newGazePos_left, newGazePos_right = None, None
                 if curSamp.isLeftSample():
-                    gazePos = curSamp.getLeftEye().getGaze()
+                    gazePos_left = curSamp.getLeftEye().getGaze()
+                    newGazePos_left = [gazePos_left[0] - self.screenW / 2, -(gazePos_left[1] - self.screenH / 2)]
+                    if mono: return newGazePos_left
 
-                newGazePos = [0, 0]
-                newGazePos[0] = gazePos[0] - self.screenW / 2
-                newGazePos[1] = -(gazePos[1] - self.screenH / 2)
-                curSamp = newGazePos
+                if curSamp.isRightSample():
+                    gazePos_right = curSamp.getRightEye().getGaze()
+                    newGazePos_right = [gazePos_right[0] - self.screenW / 2, -(gazePos_right[1] - self.screenH / 2)]
+                    if mono: return newGazePos_right
+                return newGazePos_left, newGazePos_right
+
         elif self.mode == 'Dummy':
             curSamp = tuple(self.mouse.getPos())
         return curSamp
+
+
 
     def isGazeOutside(self, maxDist=1.5, position=(0,0)):
 
@@ -1859,7 +1933,6 @@ class eyeLink:
         print("distance %s" % str(distance))
 
 
-
         # Check if sample is within boundary
         if distance > maxDist:
             gazeOutside = 1
@@ -1869,16 +1942,6 @@ class eyeLink:
         print(gazeOutside)
 
         return gazeOutside
-
-
-    def isGazeStable(self):
-
-
-
-        avgXY = self.getCurSamp()
-
-
-        return avgXY
 
     # Get next event
     def getEsacc(self, timeout=4):
@@ -2036,7 +2099,10 @@ class eyeLink:
                     self.window.flip()
         return fix
 
-    def waitForFixation(self, fixDot, maxDist=1.5, maxWait=4, nRings=3, fixTime=200, etFixProtocolPath="Z:\\MINDLAB2018_MEG-TrainingNCC\\rtmeg_pc\\etFixProtocol.txt"):
+    def waitForFixation(self, fixDot, maxDist=1.5, maxWait=4,etRingsAppear=1.5, nRings=3, fixTime=200,
+                        etFixProtocolPath="",test=False,gazeDot=None):
+
+
         """
         Wait for the start of a fixation in the area around a fixDot.
         The function does not use eyelink events, but rather waits until
@@ -2065,14 +2131,14 @@ class eyeLink:
         maxWait : int or float
             The maximum time to wait for a correct fixation before
             prompting the user about recalibration. In seconds.
+        etRingsAppear : int or float
+            the time before rings appear around  the fixation dot
+            instructing the ppt to refocus
         nRings : int
             The number of rings to use for constricting circles
         fixTime : int
             The duration of contiguous samples within the boundary that are
             required for successful fixation.
-        incorrectFixationProtocol: string - inserted by Timo Kvamme
-            How to Handle incorrect fixations.
-            allowed by the "user", or by the "experimenter" - where experimenter is the ol'school Psycholink way
 
 
         Returns
@@ -2089,6 +2155,8 @@ class eyeLink:
         True
 
         """
+        self.startRecording()
+
         Recalibrate = False
         StopGC = False
         Refocusing = False
@@ -2103,14 +2171,14 @@ class eyeLink:
                                     'the eyetracker needs to be recalibrated\n\n' \
                                     'Press Green to try again\n\n' \
                                     'else call the experimenter\n\n' \
-
-
+         \
+         \
         incorrectFixationTextExperimenter = 'Be ready to fixate on fixation cross' \
                                             '\n\n' \
-                                    'Space \t\t: Retry fixation\n' \
-                                    'C \t\t: Re-calibrate - in python 27!\n' + \
-                                    'D \t\t: Drift-correct\n' + \
-                                    'Q \t\t: Continue without fixation control'
+                                            'Space \t\t: Retry fixation\n' \
+                                            'C \t\t: Re-calibrate - in python 27!\n' + \
+                                            'D \t\t: Drift-correct\n' + \
+                                            'Q \t\t: Continue without fixation control'
 
 
 
@@ -2132,7 +2200,7 @@ class eyeLink:
             else:
                 lineColor = fixDot.fillColor
         except:
-            lineColor = "red"
+            lineColor = "white"
 
         # Detrmine the moving ring properties
         if maxDist == 0:
@@ -2151,29 +2219,42 @@ class eyeLink:
 
         # Make the circ stim
         concCirc = visual.Circle(self.win, radius=perimMaxRad, fillColorSpace='rgb255',
-                                 lineColorSpace='rgb255', lineColor=[255, 0, 0],
+                                 lineColorSpace='rgb255', lineColor=[255,0,0],
                                  fillColor=self.win.color, edges=50, pos=fixDot.pos)
 
+        if gazeDot == None:
+            gazeDot = visual.Circle(self.win, radius=0.5, fillColorSpace='rgb255', lineColorSpace='rgb255',
+                                    lineColor=[255, 0, 0],
+                                    fillColor=[255, 0, 0], edges=50)
 
-        concCirc2 = visual.Circle(self.win, radius=perimMaxRad, fillColorSpace='rgb255',
-                                 lineColorSpace='rgb255', lineColor=[255, 0, 0],
-                                 fillColor=self.win.color, edges=50, pos=(3,3))
+        test_text = visual.TextStim(self.win, color= [1,1,1], pos=(0,-5), height=self.text,
+                                    text="",
+                                    wrapWidth=20)
 
         sampCount = 0
         stopCount = fixTime / (1000.0 / hz)  # stops after approx 200 ms
         while (time.time() - trStart) < maxWait:
             if self.mode != 'Dummy':
+                print("Non-Dummy Mode")
                 XY = self.getCurSamp()
                 avgXY = pixelsToAngleWH((int(XY[0]), int(XY[1])), self.screenDist,
                                         (self.screenWidth, self.screenHeight),
                                         (self.displayResolution[0], self.displayResolution[1]))
 
-                distance = distBetweenPoints(XY, fixDot.pos)
-                # print("fixDot.pos %s" % fixDot.pos)
-                # print("XY %s" % XY)
-                # print("avgX %s avgY %s" % (avgXY[0], avgXY[1]))
-                # print("distance %s" % distance)
+                distance = distBetweenPoints(avgXY, fixDot.pos)
 
+                if test:
+                    print("fixDot.pos %s" % fixDot.pos)
+                    print("XY %s" % XY)
+                    print("avgX %s avgY %s" % (avgXY[0], avgXY[1]))
+                    print("distance %s" % distance)
+                    test_text.setText("FixDot.pos {0}\n"
+                                      "X {1:.5f}, Y {2:.5f}\n"
+                                      "avgX {3:.5f}\n avgY {4:.5f}\n"
+                                      "distance {5:.5f}".format(fixDot.pos,float(XY[0]),float(XY[1]),float(avgXY[0]), float(avgXY[1]),float(distance)))
+                    test_text.draw()
+                    gazeDot.setPos(avgXY)
+                    gazeDot.draw()
 
 
                 # Check if sample is within boundary
@@ -2185,10 +2266,12 @@ class eyeLink:
                 # If enough samples within boundary
                 if sampCount >= stopCount:
                     correctFixation = True
+                    print("correctFixation! Non-Dummy mode")
                     break
 
 
             else:
+                print("Dummy Mode")
                 avgXY = self.getCurSamp()
                 distance = distBetweenPoints(avgXY, fixDot.pos)
 
@@ -2201,15 +2284,15 @@ class eyeLink:
                 # If enough samples within boundary
                 if sampCount >= stopCount:
                     correctFixation = True
+                    print("correctFixation! Dummy mode!")
                     break
 
-            # Draw animated fix boundary
-            print("time.time() - trStart {0}".format(time.time() - trStart))
 
-            # Draw animated fix boundary
-            if time.time() - trStart > 1:
-                print("refocus true")
+            #print("time.time() - trStart {0}".format(time.time() - trStart))
+
+            if time.time() - trStart > etRingsAppear:
                 Refocusing = True
+
                 # Get the stim radius
                 radList = np.roll(radList, -1)
                 rads = [radList[int(i)] for i in rIdx]
@@ -2227,13 +2310,18 @@ class eyeLink:
                 # self.win.getMovieFrame()  # Defaults to front buffer, I.e. what's on screen now.
                 # self.win.saveMovieFrames('screenshot' + str(trStart) + ".png")
 
-            concCirc2.draw()
             fixDot.draw()
-            self.win.flip()
 
+            if test:
+                gazeDot.pos = avgXY
+                gazeDot.draw()
+
+
+            self.win.flip()
 
             if checkAbort():
                 break
+
 
         # only draw fixDot
         fixDot.draw()
@@ -2241,6 +2329,7 @@ class eyeLink:
 
         # If no fixation detected
         if not correctFixation:
+            event.clearEvents()
             problemWithFixation = True
 
             try:
@@ -2264,9 +2353,10 @@ class eyeLink:
 
 
                 elif whatToDo[0] == '3':
+                    print("recursive waitForFixation")
                     correctFixation = self.waitForFixation(fixDot=fixDot, maxDist=maxDist,maxWait=maxWait, nRings=nRings,
-                                                                                                                    fixTime=fixTime,
-                                                                                                                    etFixProtocolPath=etFixProtocolPath)
+                                                           fixTime=fixTime,
+                                                           etFixProtocolPath=etFixProtocolPath,test=test)
 
                     drawText(self.win, incorrectFixationrTextUserNowFixed, textKey=[0], textSize=self.textSize)
 
@@ -2282,9 +2372,10 @@ class eyeLink:
                     Recalibrate = True
 
                 elif whatToDo[0] == 'space':
+                    print("recursive expr waitForFixation")
                     correctFixation = self.waitForFixation(fixDot=fixDot, maxDist=maxDist,maxWait=maxWait, nRings=nRings,
-                                                                                                                    fixTime=fixTime,
-                                                                                                                    etFixProtocolPath=etFixProtocolPath)
+                                                           fixTime=fixTime,
+                                                           etFixProtocolPath=etFixProtocolPath,test=test)
                 elif whatToDo[0] == 'q' or whatToDo[0] == 'escape':
                     correctFixation = False
                     # elif whatToDo[0] == 'v':   # removed, as i need to use 2.7 to calibrate
@@ -2303,7 +2394,8 @@ class eyeLink:
 
         return correctFixation, problemWithFixation, Recalibrate, StopGC, Refocusing
 
-    # Check abort
+
+# Check abort
     def checkAbort(self):
         """
         Checks whether escape has been pressed. If escape has been pressed
@@ -2324,13 +2416,13 @@ class eyeLink:
         --------
         Break out of a trial loop and then out of block loop.
 
-        if tracker.checkAbort(): break
-        if tracker.ABORTED: break
+        >>> if tracker.checkAbort(): break
+        >>> if tracker.ABORTED: break
         """
         keys = event.getKeys(['escape'])
         if keys:
             if 'escape' in keys:
-                key, rt = drawText(self.win, 'Stop Experiment?\n\n"Y" \ "N"', ['y', 'n'], textSize=self.textSize)
+                key, rt = drawText(self.win, 'Stop Experiment?\n\n"Y" \ "N"', ['y', 'n'])
                 if key == 'y' or key == 'escape':
                     self.ABORTED = True
                     return True
@@ -2354,7 +2446,7 @@ class eyeLink:
 
         >>> tracker.cleanUp()
         """
-        #drawText(self.win, 'Experiment Finished!\n\nTransferring data!', textKey=[0], textSize=self.textSize)
+        drawText(self.win, 'Transferring data!', textKey=[0])
         self.stopTrial()
         self.activeState = False
         if self.mode == 'Real':
@@ -2397,7 +2489,7 @@ class eyeLink:
                     print('Currently saved as', self.EDFDefaultName, '!!')
         if self.mouse:
             self.mouse.setVisible(1)
-        #self.win.close()
+        self.win.close()
 
 
 # ==============================================================================
@@ -2406,7 +2498,6 @@ class eyeLink:
 # ==============================================================================
 # Enter a save filename
 # ==============================================================================
-
 def giveFileName(windowName='Please enter Filename'):
     fileGui = tk.Tk()
     fileGui.withdraw()
@@ -2430,11 +2521,11 @@ class getParticipantInfo(tk.Tk):
 
     Examples
     --------
-    import psychoLink as pl
-    info = pl.getParticipantInfo() # initiate
-    info.classRun() # Run
-    ppInfo = info.info #Save information to dict
-    ppInfo
+    >>> import cfin_psychoLink as pl
+    >>> info = pl.getParticipantInfo() # initiate
+    >>> info.classRun() # Run
+    >>> ppInfo = info.info #Save information to dict
+    >>> ppInfo
     OrderedDict([('ppNr', 1),
                  ('sessionNr', 1),
                  ('ppGender', 'Male'),
@@ -2490,8 +2581,8 @@ class getParticipantInfo(tk.Tk):
         subjectNrLabel.grid(row=0, column=0)
         sessionNrLabel.grid(row=1, column=0)
 
-        subjectNr = range(1, 51)
-        sessionNr = range(1, 11)
+        subjectNr = list(range(1, 51))
+        sessionNr = list(range(1, 11))
         self.subjectNrOptions = tk.StringVar()
         self.sessionNrOptions = tk.StringVar()
         self.subjectNrOptions.set(subjectNr[0])
@@ -2527,9 +2618,9 @@ class getParticipantInfo(tk.Tk):
         monthLabel.grid(row=0, column=2)
         yearLabel.grid(row=0, column=3)
 
-        day = range(1, 32)
-        month = range(1, 13)
-        year = range(1960, 2020)
+        day = list(range(1, 32))
+        month = list(range(1, 13))
+        year = list(range(1960, 2020))
         self.dayOptions = tk.StringVar()
         self.dayOptions.set(day[0])
         self.monthOptions = tk.StringVar()
@@ -2666,9 +2757,9 @@ class FixationTarget(object):
             pos=(0, 0),
             lineWidth=1.0,
             lineColor=psychopy_eyelink_graphics.CALIBRATION_POINT_OUTER_COLOR,
-            lineColorSpace='rgb',
+            lineColorSpace='rgb255',
             fillColor=psychopy_eyelink_graphics.CALIBRATION_POINT_OUTER_COLOR,
-            fillColorSpace='rgb',
+            fillColorSpace='rgb255',
             radius=psychopy_eyelink_graphics.CALIBRATION_POINT_OUTER_RADIUS,
             name='CP_OUTER',
             units='pix',
@@ -2678,9 +2769,9 @@ class FixationTarget(object):
             psychopy_eyelink_graphics.window,
             pos=(0, 0), lineWidth=1.0,
             lineColor=psychopy_eyelink_graphics.CALIBRATION_POINT_INNER_COLOR,
-            lineColorSpace='rgb',
+            lineColorSpace='rgb255',
             fillColor=psychopy_eyelink_graphics.CALIBRATION_POINT_INNER_COLOR,
-            fillColorSpace='rgb',
+            fillColorSpace='rgb255',
             radius=psychopy_eyelink_graphics.CALIBRATION_POINT_INNER_RADIUS,
             name='CP_INNER',
             units='pix',
@@ -2704,9 +2795,9 @@ class BlankScreen(object):
         self.color = color
         self.background = visual.Rect(self.win, w, h,
                                       lineColor=self.color,
-                                      lineColorSpace='rgb',
+                                      lineColorSpace='rgb255',
                                       fillColor=self.color,
-                                      fillColorSpace='rgb',
+                                      fillColorSpace='rgb255',
                                       units='pix',
                                       name='BACKGROUND',
                                       opacity=1.0,
@@ -2723,17 +2814,14 @@ class TextLine(object):
         self.win = psychopy_win
 
         color = (0, 0, 0)
-        color = [1,1,1]
         if np.sum(psychopy_win.color < 100) == 3:
-            #color = (255, 255, 255)
-            color = [1, 1, 1]
-
+            color = (255, 255, 255)
 
         self.textLine = visual.TextStim(self.win,
                                         text="****************",
                                         pos=(0, 0),
                                         height=30,
-                                        color=color, colorSpace='rgb',
+                                        color=color, colorSpace='rgb255',
                                         opacity=1.0, contrast=1.0, units='pix',
                                         ori=0.0, antialias=True,
                                         bold=False, italic=False, alignHoriz='center',
@@ -2758,11 +2846,10 @@ class IntroScreen(object):
         topline_y = int(min(total_line_height / 1.5, self.display_size[1] / 2 - self.display_size[1] / 5.5))
         left_margin = -self.display_size[0] / 2.1
         color = (0, 0, 0)
-        color = [1, 1, 1]
+
         # Make sure that the text can be read
         if np.sum(psychopy_win.color < 100) == 3:
             color = (255, 255, 255)
-            color = [1, 1, 1]
 
         # Draw psycholink image
         self.im = None
@@ -2781,21 +2868,21 @@ class IntroScreen(object):
         self.introlines = []
 
         self.introlines.append(visual.TextStim(self.window,
-                                               text="PsychoLink",
+                                               text="CFIN-PsychoLink",
                                                pos=(left_margin, topline_y - space_per_lines * 2),
                                                height=int(font_height * 1.66),
                                                color=color,
-                                               colorSpace='rgb',
+                                               colorSpace='rgb255',
                                                opacity=1.0,
                                                contrast=1.0,
                                                units='pix',
                                                ori=0.0,
                                                antialias=True,
-                                               bold=True,
+                                               bold=False,
                                                italic=False,
-                                               alignHoriz='left',
-                                               alignVert='center',
-                                               wrapWidth=self.display_size[0] * .8))
+                                               # alignHoriz='left',
+                                               # alignVert='center',
+                                               wrapWidth=self.display_size[0] * .8)) # self.display_size[0] * .8
 
         self.introlines.append(visual.TextStim(self.window,
                                                text="ENTER: Show eye image",
@@ -2803,11 +2890,13 @@ class IntroScreen(object):
                                                    left_margin,
                                                    topline_y - space_per_lines * (len(self.introlines) + 2)),
                                                height=font_height,
-                                               color=color, colorSpace='rgb',
+                                               color=color, colorSpace='rgb255',
                                                opacity=1.0, contrast=1.0, units='pix',
                                                ori=0.0, antialias=True,
-                                               bold=False, italic=False, alignHoriz='left',
-                                               alignVert='center', wrapWidth=self.display_size[0] * .8))
+                                               bold=False, italic=False,
+                                               # alignHoriz='left',
+                                               # alignVert='center',
+                                               wrapWidth=self.display_size[0] * .8))
 
         self.introlines.append(visual.TextStim(self.window,
                                                text="C: Start Calibration",
@@ -2816,7 +2905,7 @@ class IntroScreen(object):
                                                    topline_y - space_per_lines * (len(self.introlines) + 2)),
                                                height=font_height,
                                                color=color,
-                                               colorSpace='rgb',
+                                               colorSpace='rgb255',
                                                opacity=1.0,
                                                contrast=1.0,
                                                units='pix',
@@ -2824,8 +2913,8 @@ class IntroScreen(object):
                                                antialias=True,
                                                bold=False,
                                                italic=False,
-                                               alignHoriz='left',
-                                               alignVert='center',
+                                               # alignHoriz='left',
+                                               # alignVert='center',
                                                wrapWidth=self.display_size[0] * .8))
 
         self.introlines.append(visual.TextStim(self.window,
@@ -2834,11 +2923,13 @@ class IntroScreen(object):
                                                    left_margin,
                                                    topline_y - space_per_lines * (len(self.introlines) + 2)),
                                                height=font_height,
-                                               color=color, colorSpace='rgb',
+                                               color=color, colorSpace='rgb255',
                                                opacity=1.0, contrast=1.0, units='pix',
                                                ori=0.0, antialias=True,
-                                               bold=False, italic=False, alignHoriz='left',
-                                               alignVert='center', wrapWidth=self.display_size[0] * .8))
+                                               bold=False, italic=False,
+                                               # alignHoriz='left',
+                                               # alignVert='center',
+                                               wrapWidth=self.display_size[0] * .8))
 
         self.introlines.append(visual.TextStim(self.window,
                                                text="ESCAPE: Return to Experiment",
@@ -2846,11 +2937,13 @@ class IntroScreen(object):
                                                    left_margin,
                                                    topline_y - space_per_lines * (len(self.introlines) + 2)),
                                                height=font_height,
-                                               color=color, colorSpace='rgb',
+                                               color=color, colorSpace='rgb255',
                                                opacity=1.0, contrast=1.0, units='pix',
                                                ori=0.0, antialias=True,
-                                               bold=False, italic=False, alignHoriz='left',
-                                               alignVert='center', wrapWidth=self.display_size[0] * .8))
+                                               bold=False, italic=False,
+                                               # alignHoriz='left',
+                                               # alignVert='center',
+                                               wrapWidth=self.display_size[0] * .8))
 
         self.introlines.append(visual.TextStim(self.window,
                                                text="Left / Right Arrow: Switch Camera Views",
@@ -2858,11 +2951,13 @@ class IntroScreen(object):
                                                    left_margin,
                                                    topline_y - space_per_lines * (len(self.introlines) + 2)),
                                                height=font_height,
-                                               color=color, colorSpace='rgb',
+                                               color=color, colorSpace='rgb255',
                                                opacity=1.0, contrast=1.0, units='pix',
                                                ori=0.0, antialias=True,
-                                               bold=False, italic=False, alignHoriz='left',
-                                               alignVert='center', wrapWidth=self.display_size[0] * .8))
+                                               bold=False, italic=False,
+                                               # alignHoriz='left',
+                                               # alignVert='center',
+                                               wrapWidth=self.display_size[0] * .8))
 
         self.introlines.append(visual.TextStim(self.window,
                                                text="A: Auto-Threshold",
@@ -2870,11 +2965,13 @@ class IntroScreen(object):
                                                    left_margin,
                                                    topline_y - space_per_lines * (len(self.introlines) + 2)),
                                                height=font_height,
-                                               color=color, colorSpace='rgb',
+                                               color=color, colorSpace='rgb255',
                                                opacity=1.0, contrast=1.0, units='pix',
                                                ori=0.0, antialias=True,
-                                               bold=False, italic=False, alignHoriz='left',
-                                               alignVert='center', wrapWidth=self.display_size[0] * .8))
+                                               bold=False, italic=False,
+                                               # alignHoriz='left',
+                                               # alignVert='center',
+                                               wrapWidth=self.display_size[0] * .8))
 
         self.introlines.append(visual.TextStim(self.window,
                                                text="Up / Down Arrow: Adjust Pupil Threshold",
@@ -2882,11 +2979,13 @@ class IntroScreen(object):
                                                    left_margin,
                                                    topline_y - space_per_lines * (len(self.introlines) + 2)),
                                                height=font_height,
-                                               color=color, colorSpace='rgb',
+                                               color=color, colorSpace='rgb255',
                                                opacity=1.0, contrast=1.0, units='pix',
                                                ori=0.0, antialias=True,
-                                               bold=False, italic=False, alignHoriz='left',
-                                               alignVert='center', wrapWidth=self.display_size[0] * .8))
+                                               bold=False, italic=False,
+                                               # alignHoriz='left',
+                                               # alignVert='center',
+                                               wrapWidth=self.display_size[0] * .8))
 
         self.introlines.append(visual.TextStim(self.window,
                                                text="+ or -: Adjust CR Threshold.",
@@ -2894,22 +2993,26 @@ class IntroScreen(object):
                                                    left_margin,
                                                    topline_y - space_per_lines * (len(self.introlines) + 2)),
                                                height=font_height,
-                                               color=color, colorSpace='rgb',
+                                               color=color, colorSpace='rgb255',
                                                opacity=1.0, contrast=1.0, units='pix',
                                                ori=0.0, antialias=True,
-                                               bold=False, italic=False, alignHoriz='left',
-                                               alignVert='center', wrapWidth=self.display_size[0] * .8))
+                                               bold=False, italic=False,
+                                               # alignHoriz='left',
+                                               # alignVert='center',
+                                               wrapWidth=self.display_size[0] * .8))
         self.introlines.append(visual.TextStim(self.window,
                                                text="I: Toggle extra information.",
                                                pos=(
                                                    left_margin,
                                                    topline_y - space_per_lines * (len(self.introlines) + 2)),
                                                height=font_height,
-                                               color=color, colorSpace='rgb',
+                                               color=color, colorSpace='rgb255',
                                                opacity=1.0, contrast=1.0, units='pix',
                                                ori=0.0, antialias=True,
-                                               bold=False, italic=False, alignHoriz='left',
-                                               alignVert='center', wrapWidth=self.display_size[0] * .8))
+                                               bold=False, italic=False,
+                                               # alignHoriz='left',
+                                               # alignVert='center',
+                                               wrapWidth=self.display_size[0] * .8))
 
     def draw(self):
         if self.im is not None:
@@ -2917,320 +3020,382 @@ class IntroScreen(object):
         for s in self.introlines:
             s.draw()
 
-#
-# class EyeLinkCoreGraphicsPsychopy(pl.EyeLinkCustomDisplay):
-#     WINDOW_BACKGROUND_COLOR = (128, 128, 128)
-#     CALIBRATION_POINT_OUTER_RADIUS = 15.0, 15.0
-#     CALIBRATION_POINT_OUTER_EDGE_COUNT = 64
-#     CALIBRATION_POINT_OUTER_COLOR = (255, 255, 255)
-#     CALIBRATION_POINT_INNER_RADIUS = 3.0, 3.0
-#     CALIBRATION_POINT_INNER_EDGE_COUNT = 32
-#     CALIBRATION_POINT_INNER_COLOR = (25, 25, 25)
-#
-#     def __init__(self, window, tracker, targetForegroundColor=None,
-#                  targetBackgroundColor=None, screenColor=None,
-#                  targetOuterDiameter=None, targetInnerDiameter=None):
-#         pl.EyeLinkCustomDisplay.__init__(self)
-#
-#         self.window = window
-#         window.winHandle.maximize()
-#         window.winHandle.activate()
-#         self.tracker = tracker
-#         self.imgstim_size = None
-#         self.rgb_index_array = None
-#
-#         self.keys = []
-#         self.mouse_pos = []
-#         self.mouse_button_state = 0
-#         self.width, self.height = self.window.size
-#         self.size = self.window.size
-#         self.image_scale = 1
-#         self.image_size = None
-#
-#         if sys.byteorder == 'little':
-#             self.byteorder = 1
-#         else:
-#             self.byteorder = 0
-#
-#         EyeLinkCoreGraphicsPsychopy.CALIBRATION_POINT_OUTER_COLOR = targetForegroundColor
-#         EyeLinkCoreGraphicsPsychopy.CALIBRATION_POINT_INNER_COLOR = targetBackgroundColor
-#         EyeLinkCoreGraphicsPsychopy.WINDOW_BACKGROUND_COLOR = screenColor
-#         EyeLinkCoreGraphicsPsychopy.CALIBRATION_POINT_OUTER_RADIUS = targetOuterDiameter / 2.0, targetOuterDiameter / 2.0
-#         EyeLinkCoreGraphicsPsychopy.CALIBRATION_POINT_INNER_RADIUS = targetInnerDiameter / 2.0, targetInnerDiameter / 2.0
-#
-#         self.blankdisplay = BlankScreen(self.window, self.WINDOW_BACKGROUND_COLOR)
-#         self.textmsg = TextLine(self.window)
-#         self.introscreen = IntroScreen(self.window)
-#         self.fixationpoint = FixationTarget(self)
-#         self.imagetitlestim = None
-#         self.eye_image = None
-#         self.state = None
-#         self.size = (0, 0)
-#         self.extra_info = False
-#         self.setup_cal_display()
-#         self.lineToDraw = visual.Line(self.window,
-#                                       start=(0, 0),
-#                                       end=(0, 0),
-#                                       lineWidth=1,
-#                                       lineColorSpace='rgb',
-#                                       lineColor=[255, 0, 0],
-#                                       )
-#
-#     def setMousStart(self):
-#         mousStart = (-(self.window.size[0] / 2), self.window.size[1] / 2)
-#         if self.image_size:
-#             mousStart = (
-#                 (self.image_size[0] / 2) - (self.window.size[0] / 2),
-#                 (self.window.size[1] / 2) - (self.image_size[1] / 2))
-#         else:
-#             mousStart = (100 - self.window.size[0] / 2, (self.window.size[1] / 2) - 100)
-#         self.tracker.mouse.setPos(mousStart)
-#
-#     def get_input_key(self):
-#         if self.tracker.activeState:
-#             allowedKeys = ['up', 'down', 'left', 'right', 'return', 'escape',
-#                            'space', 'c', 'v', 'a', 'i', 'num_add',
-#                            'num_subtract']
-#             keycode = 0
-#             key = getKey(allowedKeys, False)[0]
-#             if key != 'NoKey':
-#                 keycode = key
-#                 if keycode == 'up':
-#                     keycode = pl.CURS_UP
-#                 elif keycode == 'down':
-#                     keycode = pl.CURS_DOWN
-#                 elif keycode == 'left':
-#                     keycode = pl.CURS_LEFT;
-#                     self.setMousStart()
-#                 elif keycode == 'right':
-#                     keycode = pl.CURS_RIGHT;
-#                     self.setMousStart()
-#                 elif keycode == 'return':
-#                     keycode = pl.ENTER_KEY;
-#                     self.setMousStart()
-#                 elif keycode == 'escape':
-#                     keycode = pl.ESC_KEY
-#                 elif keycode == 'space':
-#                     keycode = ord(" ")
-#                 elif keycode == 'c':
-#                     keycode = ord("c")
-#                 elif keycode == 'v':
-#                     keycode = ord("v")
-#                 elif keycode == 'a':
-#                     keycode = ord("a")
-#                 elif keycode == 'i':
-#                     keycode = self.extra_info = not self.extra_info
-#                 elif keycode == 'num_add':
-#                     keycode = ord("+")
-#                 elif keycode == 'num_subtract':
-#                     keycode = ord("-")
-#                 else:
-#                     keycode = 0
-#         else:
-#             return None
-#         return [pl.KeyInput(keycode, 0)]
-#
-#     def setup_cal_display(self):
-#         """
-#         Sets up the initial calibration display, which contains a menu with
-#         instructions.
-#         """
-#         self.blankdisplay.draw()
-#         self.introscreen.draw()
-#         self.window.flip()
-#
-#     def exit_cal_display(self):
-#         """Exits calibration display."""
-#         self.clear_cal_display()
-#
-#     def clear_cal_display(self):
-#         """Clears the calibration display"""
-#         self.blankdisplay.draw()
-#         self.window.flip()
-#
-#     def erase_cal_target(self):
-#         """Removes any visible calibration target graphic from display."""
-#         self.clear_cal_display()
-#
-#     def draw_cal_target(self, x, y):
-#         """
-#         Draws calibration target.
-#         """
-#         # convert to psychopy pix coords
-#         x = x - self.window.size[0] / 2
-#         y = -(y - self.window.size[1] / 2)
-#         self.blankdisplay.draw()
-#         self.fixationpoint.draw((x, y))
-#         self.window.flip()
-#
-#     def setup_image_display(self, width, height):
-#         """
-#         Initialize the index array that will contain camera image data.
-#         """
-#
-#         self.size = (width, height)
-#         self.clear_cal_display()
-#         self.last_mouse_state = -1
-#         if self.rgb_index_array is None:
-#             self.rgb_index_array = np.zeros((height, width), dtype=np.uint8)
-#
-#     def exit_image_display(self):
-#         """Exits the image display."""
-#         self.clear_cal_display()
-#         self.setup_cal_display()
-#
-#     def image_title(self, text):
-#         """
-#         Display the current camera, Pupil, and CR thresholds above
-#         the camera image when in Camera Setup Mode.
-#         """
-#         color = (0, 0, 0)
-#         if np.sum(self.window.color < 100) == 3:
-#             color = (255, 255, 255)
-#         if self.imagetitlestim is None:
-#             self.imagetitlestim = visual.TextStim(self.window,
-#                                                   text=text,
-#                                                   pos=(0, self.window.size[1] / 2 - 15), height=28,
-#                                                   color=color, colorSpace='rgb',
-#                                                   opacity=1.0, contrast=1.0, units='pix',
-#                                                   ori=0.0, antialias=True,
-#                                                   bold=False, italic=False, alignHoriz='center',
-#                                                   alignVert='top', wrapWidth=self.window.size[0] * .8)
-#         else:
-#             self.imagetitlestim.setText(text)
-#         # self.imagetitlestim.draw()
-#
-#     def draw_image_line(self, width, line, totlines, buff):
-#         """
-#         Collects all lines for an eye image, saves the image,
-#         then creates a psychopy imagestim from it.
-#         """
-#         for i in range(width):
-#             try:
-#                 self.rgb_index_array[line - 1, i] = buff[i]
-#             except Exception as e:
-#                 print(e)
-#
-#         # Once all lines have been collected, go through the hoops needed
-#         # to display the frame as an image; scaled to fit the display resolution.
-#         if line == totlines:
-#             try:
-#                 # Remove the black edges
-#                 imW, imH = self.rgb_index_array.shape
-#                 frameRSide = self.rgb_index_array[:, imW / 2:]
-#                 frameLhalf = self.rgb_index_array[imH / 2:, :]
-#                 if np.median(frameRSide) == 0 and np.median(frameLhalf) == 0:
-#                     im = self.rgb_index_array[:imW / 2, :imH / 2]
-#                     self.image_scale = 2
-#                 else:
-#                     im = self.rgb_index_array
-#                     self.image_scale = 4
-#                 image = scipy.misc.toimage(im, pal=self.rgb_pallete, mode='P')
-#                 if self.imgstim_size is None:
-#                     maxsz = self.width / 2
-#                     mx = 1.0
-#                     while (mx + 1) * self.size[0] <= maxsz:
-#                         mx += 1.0
-#                     self.imgstim_size = int(self.size[0] * mx), int(self.size[1] * mx)
-#                 image = image.resize(self.imgstim_size)
-#                 self.image_size = image.size
-#                 # Does not require saveing to temp file
-#                 if self.eye_image is None:
-#                     self.eye_image = visual.ImageStim(self.window, image)
-#                 else:
-#                     self.eye_image.setImage(image)
-#
-#                 # Redraw the Camera Setup Mode graphics
-#                 self.blankdisplay.draw()
-#                 self.introscreen.draw()
-#                 self.eye_image.draw()
-#                 if self.imagetitlestim:
-#                     self.imagetitlestim.draw()
-#                 if self.extra_info:
-#                     self.draw_cross_hair()
-#                 self.window.flip()
-#
-#             except Exception as e:
-#                 print(e)
-#
-#     def set_image_palette(self, r, g, b):
-#         """
-#         Set color palette ued by host pc when sending images.
-#         Saves the different r,g,b values provided by the eyelink host palette.
-#         When building up each eye image frame, eyelink sends the palette
-#         index for each pixel; so an eyelink eye image frame can be a 2D lookup
-#         array into this palette.
-#         """
-#         self.clear_cal_display()
-#         sz = len(r)
-#         self.rgb_pallete = np.zeros((sz, 3), dtype=np.uint8)
-#         i = 0
-#         while i < sz:
-#             self.rgb_pallete[i:] = int(r[i]), int(g[i]), int(b[i])
-#             i += 1
-#
-#     def alert_printf(self, msg):
-#         """
-#         Prints alert message to psychopy stderr.
-#         """
-#         print(msg)
-#
-#     def play_beep(self, pylink_sound_index):
-#         """
-#         """
-#         # if pylink_sound_index == pl.CAL_TARG_BEEP:
-#         #    pass
-#         if pylink_sound_index == pl.CAL_ERR_BEEP or pylink_sound_index == pl.DC_ERR_BEEP:
-#             self.textmsg.draw('Calibration Failed or Incomplete.\nPress "Enter" to return')
-#             self.window.flip()
-#         elif pylink_sound_index == pl.CAL_GOOD_BEEP:
-#             txt = 'Press "v" or "Enter" to continue'
-#             self.textmsg.draw(txt)
-#             self.window.flip()
-#
-#     def draw_line(self, x1, y1, x2, y2, color_index):
-#         """ Used to draw crosshair, color does not work """
-#         if self.image_size:
-#             # It asumes the image is in the top left
-#             x1, y1 = topLeftToCenter((x1 * self.image_scale, y1 * self.image_scale), self.image_size)
-#             x2, y2 = topLeftToCenter((x2 * self.image_scale, y2 * self.image_scale), self.image_size)
-#             self.lineToDraw.setStart((x1, y1))
-#             self.lineToDraw.setEnd((x2, y2))
-#             self.lineToDraw.draw()
-#
-#     def draw_lozenge(self, x, y, width, height, color_index):
-#         """ Color does not work, Do not know what this does"""
-#         x1, y1 = topLeftToCenter((x, y), self.window.size)
-#         line = visual.Line(self.window,
-#                            start=(0, 0),
-#                            end=(0, 0),
-#                            lineWidth=1,
-#                            lineColorSpace='rgb',
-#                            lineColor=[0, 255, 0],
-#                            )
-#         # Draw line 1
-#         line.start = (x - (width / 2), y)
-#         line.end = (x, y + (width / 2))
-#         line.draw()
-#         # Draw line 2
-#         line.start = (x + (width / 2), y)
-#         line.end = (x, y + (height / 2))
-#         line.draw()
-#         # Draw line 3
-#         line.start = (x - (width / 2), y)
-#         line.end = (x, y - (height / 2))
-#         line.draw()
-#         # Draw line 4
-#         line.start = (x + (width / 2), y)
-#         line.end = (x, y - (height / 2))
-#         line.draw()
-#
-#     def record_abort_hide(self):
-#         """ No idea what this is """
-#         pass
-#
-#     def get_mouse_state(self):
-#         """  """
-#         state = self.tracker.mouse.getPressed()
-#         pos = centerToTopLeft(self.tracker.mouse.getPos(), self.window.size)
-#         return pos, state[0]
+try:
+    class EyeLinkCoreGraphicsPsychopy(pl.EyeLinkCustomDisplay):
+        WINDOW_BACKGROUND_COLOR = (128, 128, 128)
+        CALIBRATION_POINT_OUTER_RADIUS = 15.0, 15.0
+        CALIBRATION_POINT_OUTER_EDGE_COUNT = 64
+        CALIBRATION_POINT_OUTER_COLOR = (255, 255, 255)
+        CALIBRATION_POINT_INNER_RADIUS = 3.0, 3.0
+        CALIBRATION_POINT_INNER_EDGE_COUNT = 32
+        CALIBRATION_POINT_INNER_COLOR = (25, 25, 25)
+
+        def __init__(self, window, tracker, targetForegroundColor=None,
+                     targetBackgroundColor=None, screenColor=None,
+                     targetOuterDiameter=None, targetInnerDiameter=None):
+            pl.EyeLinkCustomDisplay.__init__(self)
+
+            self.window = window
+            window.winHandle.maximize()
+            window.winHandle.activate()
+            self.tracker = tracker
+            self.imgstim_size = None
+            self.rgb_index_array = None
+
+            self.keys = []
+            self.mouse_pos = []
+            self.mouse_button_state = 0
+            self.width, self.height = self.window.size
+            self.size = self.window.size
+            self.image_scale = 1
+            self.image_size = None
+
+            if sys.byteorder == 'little':
+                self.byteorder = 1
+            else:
+                self.byteorder = 0
+
+            EyeLinkCoreGraphicsPsychopy.CALIBRATION_POINT_OUTER_COLOR = targetForegroundColor
+            EyeLinkCoreGraphicsPsychopy.CALIBRATION_POINT_INNER_COLOR = targetBackgroundColor
+            EyeLinkCoreGraphicsPsychopy.WINDOW_BACKGROUND_COLOR = screenColor
+            EyeLinkCoreGraphicsPsychopy.CALIBRATION_POINT_OUTER_RADIUS = targetOuterDiameter / 2.0, targetOuterDiameter / 2.0
+            EyeLinkCoreGraphicsPsychopy.CALIBRATION_POINT_INNER_RADIUS = targetInnerDiameter / 2.0, targetInnerDiameter / 2.0
+
+            self.blankdisplay = BlankScreen(self.window, self.WINDOW_BACKGROUND_COLOR)
+            self.textmsg = TextLine(self.window)
+            self.introscreen = IntroScreen(self.window)
+            self.fixationpoint = FixationTarget(self)
+            self.imagetitlestim = None
+            self.eye_image = None
+            self.state = None
+            self.size = (0, 0)
+            self.extra_info = False
+            self.setup_cal_display()
+            self.lineToDraw = visual.Line(self.window,
+                                          start=(0, 0),
+                                          end=(0, 0),
+                                          lineWidth=1,
+                                          lineColorSpace='rgb255',
+                                          lineColor=[255, 0, 0],
+                                          )
+
+        def setMousStart(self):
+            mousStart = (-(self.window.size[0] / 2), self.window.size[1] / 2)
+            if self.image_size:
+                mousStart = (
+                    (self.image_size[0] / 2) - (self.window.size[0] / 2), (self.window.size[1] / 2) - (self.image_size[1] / 2))
+            else:
+                mousStart = (100 - self.window.size[0] / 2, (self.window.size[1] / 2) - 100)
+            self.tracker.mouse.setPos(mousStart)
+
+    def get_input_key(self):
+        if self.tracker.activeState:
+            allowedKeys = ['up', 'down', 'left', 'right', 'return', 'escape',
+                           'space', 'c', 'v', 'a', 'i', 'num_add',
+                           'num_subtract','1','2','3','4','6']
+
+
+            keycode = 0
+            key = getKey(allowedKeys, False)[0]
+            if key != 'NoKey':
+                keycode = key
+                if keycode == 'up':
+                    keycode = pl.CURS_UP
+                elif keycode == 'down':
+                    keycode = pl.CURS_DOWN
+                elif keycode == 'left':
+                    keycode = pl.CURS_LEFT;
+                    self.setMousStart()
+                elif keycode == 'right':
+                    keycode = pl.CURS_RIGHT;
+                    self.setMousStart()
+                elif keycode == 'return':
+                    keycode = pl.ENTER_KEY;
+                    self.setMousStart()
+                elif keycode == 'escape':
+                    keycode = pl.ESC_KEY
+                elif keycode == 'space':
+                    keycode = ord(" ")
+                elif keycode == 'c':
+                    keycode = ord("c")
+                elif keycode == 'v':
+                    keycode = ord("v")
+                elif keycode == 'a':
+                    keycode = ord("a")
+                elif keycode == 'i':
+                    keycode = self.extra_info = not self.extra_info
+                elif keycode == 'num_add':
+                    keycode = ord("+")
+                elif keycode == 'num_subtract':
+                    keycode = ord("-")
+
+                # CFIN - MEG specific
+                elif keycode == '1' or keycode == '6': # change image
+
+                    # (1) blue one tap = Space
+                    # (1) blue two taps = Enter
+                    # (1) blue three taps = Escape
+
+                    one_clock = core.Clock()
+                    one_clock_start = one_clock.getTime()
+                    time_to_press = 0.500
+
+                    keycode = ord(" ")
+
+                    while (one_clock.getTime() - one_clock_start)  < time_to_press:
+                        key = getKey(allowedKeys, False)[0]
+                        if key == '1' or key == '6':
+                            keycode = pl.ENTER_KEY
+                            # restart the clock
+                            one_clock_start = one_clock.getTime()
+
+                            while (one_clock.getTime() - one_clock_start) < time_to_press:
+                                key = getKey(allowedKeys, False)[0]
+                                if key == '1' or key == '6':
+                                    keycode = pl.ESC_KEY
+
+                    self.setMousStart()
+
+                elif keycode == '2':# -    # yellow - change image
+                    keycode = pl.CURS_RIGHT;
+                    self.setMousStart()
+
+
+                    keycode = ord("a")
+
+
+                elif keycode == '3': # - green  - autothreshold
+                    keycode = ord("a")
+                    # maybe double click does validate.
+
+                elif keycode == '4':  # red - calibrate
+                    # (4) Red = c – calibrate
+                    # (4) Red two taps = v - validate
+
+                    my_clock = core.Clock()
+                    my_clock_start = my_clock.getTime()
+                    time_to_press = 0.500
+
+                    keycode = ord("c")
+
+                    while (my_clock.getTime() - my_clock_start) < time_to_press:
+                        key = getKey(allowedKeys, False)[0]
+                        if key == '4':
+                            keycode = ord("v")
+
+                else:
+                    keycode = 0
+        else:
+            return None
+        return [pl.KeyInput(keycode, 0)]
+
+        def setup_cal_display(self):
+            """
+            Sets up the initial calibration display, which contains a menu with
+            instructions.
+            """
+            self.blankdisplay.draw()
+            self.introscreen.draw()
+            self.window.flip()
+
+        def exit_cal_display(self):
+            """Exits calibration display."""
+            self.clear_cal_display()
+
+        def clear_cal_display(self):
+            """Clears the calibration display"""
+            self.blankdisplay.draw()
+            self.window.flip()
+
+        def erase_cal_target(self):
+            """Removes any visible calibration target graphic from display."""
+            self.clear_cal_display()
+
+        def draw_cal_target(self, x, y):
+            """
+            Draws calibration target.
+            """
+            # convert to psychopy pix coords
+            x = x - self.window.size[0] / 2
+            y = -(y - self.window.size[1] / 2)
+            self.blankdisplay.draw()
+            self.fixationpoint.draw((x, y))
+            self.window.flip()
+
+        def setup_image_display(self, width, height):
+            """
+            Initialize the index array that will contain camera image data.
+            """
+
+            self.size = (width, height)
+            self.clear_cal_display()
+            self.last_mouse_state = -1
+            if self.rgb_index_array is None:
+                self.rgb_index_array = np.zeros((height, width), dtype=np.uint8)
+
+        def exit_image_display(self):
+            """Exits the image display."""
+            self.clear_cal_display()
+            self.setup_cal_display()
+
+        def image_title(self, text):
+            """
+            Display the current camera, Pupil, and CR thresholds above
+            the camera image when in Camera Setup Mode.
+            """
+            color = (0, 0, 0)
+            if np.sum(self.window.color < 100) == 3:
+                color = (255, 255, 255)
+            if self.imagetitlestim is None:
+                self.imagetitlestim = visual.TextStim(self.window,
+                                                      text=text,
+                                                      pos=(0, self.window.size[1] / 2 - 15), height=28,
+                                                      color=color, colorSpace='rgb255',
+                                                      opacity=1.0, contrast=1.0, units='pix',
+                                                      ori=0.0, antialias=True,
+                                                      bold=False, italic=False, alignHoriz='center',
+                                                      alignVert='top', wrapWidth=self.window.size[0] * .8)
+            else:
+                self.imagetitlestim.setText(text)
+            # self.imagetitlestim.draw()
+
+        def draw_image_line(self, width, line, totlines, buff):
+            """
+            Collects all lines for an eye image, saves the image,
+            then creates a psychopy imagestim from it.
+            """
+            for i in range(width):
+                try:
+                    self.rgb_index_array[line - 1, i] = buff[i]
+                except Exception as e:
+                    print(e)
+
+            # Once all lines have been collected, go through the hoops needed
+            # to display the frame as an image; scaled to fit the display resolution.
+            if line == totlines:
+                try:
+                    # Remove the black edges
+                    imW, imH = self.rgb_index_array.shape
+                    frameRSide = self.rgb_index_array[:, imW / 2:]
+                    frameLhalf = self.rgb_index_array[imH / 2:, :]
+                    if np.median(frameRSide) == 0 and np.median(frameLhalf) == 0:
+                        im = self.rgb_index_array[:imW / 2, :imH / 2]
+                        self.image_scale = 2
+                    else:
+                        im = self.rgb_index_array
+                        self.image_scale = 4
+                    image = scipy.misc.toimage(im, pal=self.rgb_pallete, mode='P')
+                    if self.imgstim_size is None:
+                        maxsz = self.width / 2
+                        mx = 1.0
+                        while (mx + 1) * self.size[0] <= maxsz:
+                            mx += 1.0
+                        self.imgstim_size = int(self.size[0] * mx), int(self.size[1] * mx)
+                    image = image.resize(self.imgstim_size)
+                    self.image_size = image.size
+                    # Does not require saveing to temp file
+                    if self.eye_image is None:
+                        self.eye_image = visual.ImageStim(self.window, image)
+                    else:
+                        self.eye_image.setImage(image)
+
+                    # Redraw the Camera Setup Mode graphics
+                    self.blankdisplay.draw()
+                    self.introscreen.draw()
+                    self.eye_image.draw()
+                    if self.imagetitlestim:
+                        self.imagetitlestim.draw()
+                    if self.extra_info:
+                        self.draw_cross_hair()
+                    self.window.flip()
+
+                except Exception as err:
+                    print(err)
+
+        def set_image_palette(self, r, g, b):
+            """
+            Set color palette ued by host pc when sending images.
+            Saves the different r,g,b values provided by the eyelink host palette.
+            When building up each eye image frame, eyelink sends the palette
+            index for each pixel; so an eyelink eye image frame can be a 2D lookup
+            array into this palette.
+            """
+            self.clear_cal_display()
+            sz = len(r)
+            self.rgb_pallete = np.zeros((sz, 3), dtype=np.uint8)
+            i = 0
+            while i < sz:
+                self.rgb_pallete[i:] = int(r[i]), int(g[i]), int(b[i])
+                i += 1
+
+        def alert_printf(self, msg):
+            """
+            Prints alert message to psychopy stderr.
+            """
+            print(msg)
+
+        def play_beep(self, pylink_sound_index):
+            """
+            """
+            # if pylink_sound_index == pl.CAL_TARG_BEEP:
+            #    pass
+            if pylink_sound_index == pl.CAL_ERR_BEEP or pylink_sound_index == pl.DC_ERR_BEEP:
+                self.textmsg.draw('Calibration Failed or Incomplete.\nPress "Enter" to return')
+                self.window.flip()
+            elif pylink_sound_index == pl.CAL_GOOD_BEEP:
+                txt = 'Press "v" or "Enter" to continue'
+                self.textmsg.draw(txt)
+                self.window.flip()
+
+        def draw_line(self, x1, y1, x2, y2, color_index):
+            """ Used to draw crosshair, color does not work """
+            if self.image_size:
+                # It asumes the image is in the top left
+                x1, y1 = topLeftToCenter((x1 * self.image_scale, y1 * self.image_scale), self.image_size)
+                x2, y2 = topLeftToCenter((x2 * self.image_scale, y2 * self.image_scale), self.image_size)
+                self.lineToDraw.setStart((x1, y1))
+                self.lineToDraw.setEnd((x2, y2))
+                self.lineToDraw.draw()
+
+        def draw_lozenge(self, x, y, width, height, color_index):
+            """ Color does not work, Do not know what this does"""
+            x1, y1 = topLeftToCenter((x, y), self.window.size)
+            line = visual.Line(self.window,
+                               start=(0, 0),
+                               end=(0, 0),
+                               lineWidth=1,
+                               lineColorSpace='rgb255',
+                               lineColor=[0, 255, 0],
+                               )
+            # Draw line 1
+            line.start = (x - (width / 2), y)
+            line.end = (x, y + (width / 2))
+            line.draw()
+            # Draw line 2
+            line.start = (x + (width / 2), y)
+            line.end = (x, y + (height / 2))
+            line.draw()
+            # Draw line 3
+            line.start = (x - (width / 2), y)
+            line.end = (x, y - (height / 2))
+            line.draw()
+            # Draw line 4
+            line.start = (x + (width / 2), y)
+            line.end = (x, y - (height / 2))
+            line.draw()
+
+        def record_abort_hide(self):
+            """ No idea what this is """
+            pass
+
+        def get_mouse_state(self):
+            """  """
+            state = self.tracker.mouse.getPressed()
+            pos = centerToTopLeft(self.tracker.mouse.getPos(), self.window.size)
+            return pos, state[0]
+except:
+    EyeLinkCoreGraphicsPsychopy = 'Unable to load pylink module:\npl.EyeLinkCustomDisplay\n\nCheck for correct pylink installation.'
+    print(EyeLinkCoreGraphicsPsychopy)
+
+
+

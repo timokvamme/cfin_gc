@@ -2042,6 +2042,8 @@ class eyeLink:
 
     def waitForFixation(self, fixDot, maxDist=1.5, maxWait=4,etRingsAppear=1.5, nRings=3, fixTime=200,
                         etFixProtocolPath="",test=False,gazeDot=None):
+
+
         """
         Wait for the start of a fixation in the area around a fixDot.
         The function does not use eyelink events, but rather waits until

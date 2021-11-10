@@ -1,1 +1,0 @@
-﻿Run, %A_ScriptDir%\control_psycholink_resp_box.ahk

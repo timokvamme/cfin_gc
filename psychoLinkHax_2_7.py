@@ -2486,7 +2486,7 @@ class getParticipantInfo(tk.Tk):
 
     Examples
     --------
-    >>> import psychoLink as pl
+    >>> import cfin_psychoLink as pl
     >>> info = pl.getParticipantInfo() # initiate
     >>> info.classRun() # Run
     >>> ppInfo = info.info #Save information to dict

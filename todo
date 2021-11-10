@@ -1,10 +1,21 @@
 
 Gaze Contingency
 
+-test  calibrate_eyelink_2_7  using  cfin_psychoLink
+- test cfin_psychoLink in general.
+
+test new example_gc_flash
+write_MEG trigger shooting
+
+
+
+
 - done - skriv email om 27 at det virker.
-- show fb with psycholink creator to Chris.
+- done show fb with psycholink creator to Chris.
 - done - add the global quit psychopy - make sure that ET is saved.
         - test it
+
+- skriv til SR research.
 
 - done remove ahk
 - remove user/experimenter, just have "c", be able to change
@@ -43,6 +54,9 @@ Gaze Contingency
 - make a clean versiokn of CFIN GC, with more documentation, names of scripts that makes sense
 - and a documentation on the wiki. (videos?)
 
+
+- documentation
+- constants screenWidth=67, screenHeight=37.5, screenDist=90
 
 
 RT-MEG
