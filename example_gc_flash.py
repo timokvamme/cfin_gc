@@ -123,8 +123,8 @@ from __future__ import division
 import os, psychopy, random, time, csv, subprocess
 from psychopy import gui
 import numpy as np
-import psychoLinkHax_3_6 as pl
-from psychoLinkHax_3_6 import pixelsToAngleWH
+import cfin_psychoLink as pl
+from cfin_psychoLink import pixelsToAngleWH
 from math import atan2, degrees
 from constants import *
 
@@ -160,9 +160,9 @@ inter_trial_interval = 3.000 # in seconds
 
 # execution settings
 N_trials = 10
-exit_experiment = False # initiation of variable. for eyetracking experiments, its best to safely quit the experiment
 test = True
 # saving the eyetracking data when doing so.
+
 
 # Eyetracking settings (defaults)
 
@@ -302,12 +302,12 @@ def ms_to_frames(ms, FPS):
     return round(ms / (1/FPS * 1000))
 
 def set_recalibrate():
-    global recalibrate_needed
-    recalibrate_needed = True
+    global Recalibrate
+    Recalibrate = True
 
 def clean_quit():
-    if behavfile is not None: behavfile.close()
-
+    if behavfile is not None:
+        behavfile.close()
 
     if ET:
         et_client.sendMsg(msg="Closing the client")
@@ -424,7 +424,7 @@ if ET:
     et_client.sendMsg(msg="Starting experiment")
     et_client.startRecording()
     psychopy.event.globalKeys.clear()
-    psychopy.event.globalKeys.add(forceQuitKey[0], cleanQuit)
+    psychopy.event.globalKeys.add(forceQuitKey[0], clean_quit)
 
 # start experiment
 win.flip()
@@ -446,14 +446,15 @@ for no, trial in enumerate(trialList):
 
     # initial fixation cross
     while clock.getTime() < inter_trial_interval:
-        pos = et_client.getCurSamp()  # gets current eyetracking sample, x, y,
-        pos_to_deg = pixelsToAngleWH((int(pos[0]), int(pos[1])), monDistance, (monWidth, monHeight),
-                                     (displayResolution[0], displayResolution[1]))
+        if test:
+            pos = et_client.getCurSamp()  # gets current eyetracking sample, x, y,
+            pos_to_deg = pixelsToAngleWH((int(pos[0]), int(pos[1])), monDistance, (monWidth, monHeight),
+                                         (displayResolution[0], displayResolution[1]))
 
-        gazeDot.setPos(pos_to_deg)
-        fixation.draw()
-        gazeDot.draw()
-        win.flip()
+            gazeDot.setPos(pos_to_deg)
+            fixation.draw()
+            gazeDot.draw()
+            win.flip()
         pass
 
     # Gaze Contingency Check.
@@ -479,13 +480,16 @@ for no, trial in enumerate(trialList):
             et_client.startRecording()
             et_client.startTrial(trialNr=no)  # starts eyetracking recording.
             et_client.logVar('trial_Nr', no)
-            recalibrate_needed = False
+            Recalibrate = False
 
 
         # Gaze Contingency
         correctFixation, problemWithFixation,Recalibrate, StopGC,Refocusing = et_client.waitForFixation(fixDot=fixation, maxDist=etMaxDist,
                                                                                                         maxWait=etMaxWait, nRings=etNRings,
                                                                                                         fixTime=etFixTime, test=test, gazeDot=gazeDot)  # participant need to look at fixation for 200 ms. can respond with "3" instead of space to try again.
+
+
+
         if Refocusing: # if the rings have appeared, getting the participant to refocus, its natural that
             # some time passes before other experimental stimuli is presented.
             fixation.draw()
@@ -507,7 +511,7 @@ for no, trial in enumerate(trialList):
             et_client.startRecording()
             et_client.startTrial(trialNr=no)  # starts eyetracking recording.
             et_client.logVar('trial_Nr', no)
-            recalibrate_needed = False
+            Recalibrate = False
 
 
         et_client.sendMsg(msg="problemWithFixation_prestim %s" % problemWithFixation)
@@ -544,14 +548,9 @@ for no, trial in enumerate(trialList):
     elif response[0] in recalibrateKey: # if you need to recalibrate and didn't catch it during the refocusing
         Recalibrate = True
 
-    elif response[0] in quitKeys:
-        exit_experiment = True
-
     csvWriter.writerow(trial.values());behavfile.flush()
     et_client.stopTrial()
 
-    if exit_experiment:
-        break
 
 instruction_text.setText("Experiment Complete")
 instruction_text.draw()
