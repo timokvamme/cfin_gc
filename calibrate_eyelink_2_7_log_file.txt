@@ -1,0 +1,9 @@
+running script with arguments:
+edf_path: 'py27_calibration.edf'
+displayResolution: [1920, 1080]
+monWidth: 67.5
+monDistance: 90.0
+monHeight: 37.5
+foregroundColor: [0, 0, 0]
+backgroundColor: [1, 1, 1]
+textHeightETclient: 0.5

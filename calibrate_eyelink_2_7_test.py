@@ -1,23 +1,8 @@
 # -*- coding: utf-8 -*-
-"""
-calibrate_eyelink_2_7
-
-#TODO doc
-
-"""
-
-# Imports
-import os, time, sys, argparse
-from cfin_psychoLink import pixelsToAngleWH
-import cfin_psychoLink as pl
-import psychopy, psychopy.visual
 
 
-# parsed arguments
 
-print("This Log File, contains the print arguments from the calibrate_eyelink_2_7.py script"
-      "if the calibration in 27 is not working, this is a usefull log to read through")
-
+import argparse
 # defined command line options
 # this also generates --help and error handling
 CLI=argparse.ArgumentParser()
@@ -93,46 +78,4 @@ print("foregroundColor: %r" % args.foregroundColor)
 print("backgroundColor: %r" % args.backgroundColor)
 print("textHeightETclient: %r" % args.textHeightETclient)
 
-saveFileEDF = args.edf_path
-displayResolution = args.displayResolution
-monWidth = args.monWidth
-monDistance = args.monDistance
-monHeight = args.monHeight
-foregroundColor = args.foregroundColor
-backgroundColor = args.backgroundColor
-textHeightETclient = args.textHeightETclient
 
-
-print("Creating Psychopy Window in 2.7")
-myMon = psychopy.monitors.Monitor("Default", width=monWidth, distance=monDistance)
-myMon.setSizePix((displayResolution[0],displayResolution[1]))
-myMon.saveMon()
-win27 = psychopy.visual.Window(size=displayResolution, monitor=myMon,  # name of the PsychoPy Monitor Config file if used.
-                             units="deg",  # coordinate space to use.
-                             fullscr=True,  # We need full screen mode.
-                             allowGUI=False,  # We wanta it to be borderless
-                             colorSpace='rgb',
-                             screen=1, color=backgroundColor,viewScale = 1.0)
-
-print('Writing to EDF file {0}'.format(saveFileEDF))
-
-print("Creating eyelink in 2.7")
-et_client_27 = pl.eyeLink(win27, fileName=saveFileEDF, screenWidth=monWidth, screenHeight=monHeight, screenDist=monDistance
-                           , displayResolution=displayResolution, textSize=textHeightETclient)
-
-
-print("Running calibration in 27")
-et_client_27.calibrate()
-try:
-    et_client_27.hz = win27.getActualFrameRate()
-except:
-    print("Setting hz to to 120.000")
-    et_client_27.hz = 120.000
-
-print("Done with create_n_calibrate_eyelink_client function")
-
-et_client_27.cleanUp()
-print("attemping to close win27dow")
-win27.close()
-print("os._exit(0)")
-os._exit(0)

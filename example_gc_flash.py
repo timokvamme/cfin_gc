@@ -126,7 +126,7 @@ import numpy as np
 import cfin_psychoLink as pl
 from cfin_psychoLink import pixelsToAngleWH
 from math import atan2, degrees
-from constants import *
+
 
 
 # --------------- SETTINGS ---------------------------#
@@ -135,15 +135,14 @@ saveFolder = os.getcwd() + "/data"
 if not os.path.isdir(saveFolder): os.makedirs(saveFolder)  # Creates save folder if it doesn't exist
 
 # display settings
-
 displayResolution = [1920,1080]
 monWidth = 67.5 # get the correct values in cm
-monDistance = 90
+monDistance = 90.0
 monHeight = 37.5
 
 foregroundColor  = flashColor = [1,1,1]
 backgroundColor = [0,0,0] #
-textHeightETclient = 0.3
+textHeightETclient = 0.5
 
 
 fullscreen = True
@@ -329,28 +328,22 @@ def gaze_out_of_bounds(gaze, max_dist, mid=(0,0)):
     return distance > max_dist
 
 def calibrate_using_2_7(edf_path="py27_calibration.edf"):
-    from subprocess import call
 
-
-    script = os.getcwd() + '/calibrate_eyelink_2_7.py'
-
+    script = os.getcwd() + '/calibrate_eyelink_2_7_test.py'
     call_script =  interpreter_python27 + " " + script
+    edf_arg = " --edf_path " + edf_path + " "
+    con_args1 = "--displayResolution " + str(displayResolution[0]) + " " + str(displayResolution[1]) + " "
+    con_args2 = "--monWidth " + str(monWidth) + " "
+    con_args3 = "--monDistance " + str(monDistance) + " "
+    con_args4 = "--monHeight " + str(monHeight) + " "
+    con_args5 = "--foregroundColor " + str(foregroundColor[0]) + " " + str(foregroundColor[1]) + " " + str(foregroundColor[2]) + " "
+    con_args6 = "--foregroundColor " + str(backgroundColor[0]) + " " + str(backgroundColor[1]) + " " + str(backgroundColor[2]) + " "
+    con_args7 = "--textHeightETclient " + str(textHeightETclient) + " "
 
-    CLI=argparse.ArgumentParser()
-
-    CLI.add_argument(
-        call_script,
-        type=str)
-
-    CLI.add_argument(
-        edf_path,
-        type=str)
-
-    args = CLI.parse_args()
-
+    final_call=call_script+edf_arg+con_args1+con_args2+con_args3+con_args4+con_args5+con_args6+con_args7
 
     with open('calibrate_eyelink_2_7_log_file.txt', 'w') as f:
-        call(args=args, stdout=f)
+        subprocess.call(args=final_call, stdout=f)
 
 def calibration_test(client, calibrateTestTime=calibrateTestTime):
     client.startRecording()
