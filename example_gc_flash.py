@@ -339,17 +339,12 @@ def calibrate_using_2_7(edf_path="py27_calibration.edf"):
     CLI=argparse.ArgumentParser()
 
     CLI.add_argument(
-        call_script,  # name on the CLI - drop the `--` for positional/required parameters
-        type=str,
-
-    )
-
+        call_script,
+        type=str)
 
     CLI.add_argument(
         edf_path,
-        type=str
-    )
-
+        type=str)
 
     args = CLI.parse_args()
 
