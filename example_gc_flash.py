@@ -120,7 +120,7 @@ and 2 EDF files (eyetracking files), where a recalibration was tested after the 
 
 # -------------- IMPORTS -----------------------------#
 from __future__ import division
-import os, psychopy, random, time, csv, subprocess
+import os, psychopy, random, time, csv, subprocess, argparse
 from psychopy import gui
 import numpy as np
 import cfin_psychoLink as pl
@@ -135,7 +135,16 @@ saveFolder = os.getcwd() + "/data"
 if not os.path.isdir(saveFolder): os.makedirs(saveFolder)  # Creates save folder if it doesn't exist
 
 # display settings
-# - see constants.py for more settings
+
+displayResolution = [1920,1080]
+monWidth = 67.5 # get the correct values in cm
+monDistance = 90
+monHeight = 37.5
+
+foregroundColor  = flashColor = [1,1,1]
+backgroundColor = [0,0,0] #
+textHeightETclient = 0.3
+
 
 fullscreen = True
 default_hz = 120.0 # the fallback refresh rate used by the eytracker if et_client.getActualFrameRate fails
@@ -321,9 +330,29 @@ def gaze_out_of_bounds(gaze, max_dist, mid=(0,0)):
 
 def calibrate_using_2_7(edf_path="py27_calibration.edf"):
     from subprocess import call
+
+
     script = os.getcwd() + '/calibrate_eyelink_2_7.py'
 
-    args =  interpreter_python27 + " " + script + " " + edf_path
+    call_script =  interpreter_python27 + " " + script
+
+    CLI=argparse.ArgumentParser()
+
+    CLI.add_argument(
+        call_script,  # name on the CLI - drop the `--` for positional/required parameters
+        type=str,
+
+    )
+
+
+    CLI.add_argument(
+        edf_path,
+        type=str
+    )
+
+
+    args = CLI.parse_args()
+
 
     with open('calibrate_eyelink_2_7_log_file.txt', 'w') as f:
         call(args=args, stdout=f)

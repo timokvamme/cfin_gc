@@ -64,6 +64,7 @@ RT-MEG
 
 
 Extra
+- make install of pip.  git install packaghe.
 - make 3x python calibration work.
 - binocular
 

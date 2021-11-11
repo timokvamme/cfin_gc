@@ -9,8 +9,8 @@ calibrate_eyelink_2_7
 # Imports
 import os, time, sys
 from constants import *
-from psychoLinkHax_2_7 import pixelsToAngleWH
-import psychoLinkHax_2_7 as pl
+from cfin_psychoLink import pixelsToAngleWH
+import cfin_psychoLink as pl
 import psychopy, psychopy.visual
 
 print("This Log File, contains the print arguments from the calibrate_eyelink_2_7.py script"
