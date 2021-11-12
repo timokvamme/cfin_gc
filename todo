@@ -2,6 +2,15 @@ Gaze Contingency
 
 - documentation on parameters on info fed to the calibration27
 
+- try throwing:
+
+gaze_out_of_bounds
+calibrate_using_2_7
+calibration_test
+setup_et
+
+functions into cfin_psychoLink.py similar to ET_functions in retinostim.
+
 - fix so buttons are there when calibration dot appears, and at validation / or continue
 - fix so head is first camera image. (press enter)
 
