@@ -1,49 +1,34 @@
-
 Gaze Contingency
+
+- documentation on parameters on info fed to the calibration27
+
+- fix so buttons are there when calibration dot appears, and at validation / or continue
+- fix so head is first camera image. (press enter)
+
 
 -test  calibrate_eyelink_2_7  using  cfin_psychoLink
 - test cfin_psychoLink in general.
 
-test new example_gc_flash
-write_MEG trigger shooting
+- remove psycholinkHax, Laurits, 27, 37.
 
+- test new example_gc_flash
 
-
-
-- done - skriv email om 27 at det virker.
-- done show fb with psycholink creator to Chris.
-- done - add the global quit psychopy - make sure that ET is saved.
-        - test it
-
-- skriv til SR research.
-
-- done remove ahk
 - remove user/experimenter, just have "c", be able to change
-        - test removal of ahk
-        - test global cleanup
+        - Done test removal of ahk
+        - Done test global cleanup
         - document global cleanup.
 
-- test "c" to change user/experimenter
 
-- gui add så man kan se hvad man skal trygge
-        - Done test
-        - fix button positions
-        - fix so head is first camera image. (press enter)
-        - fix so buttons are there when calibration dot appears, and at validation / or continue
+-  complete write_MEG trigger shooting
+
+- test that EDF is saved when global key is used to quit.
+- test that EDF is saved when performing recalibration mid session.
 
 
-
-- cfin meg_trigger shooting game
-- fix shooting game documentation
-- done  red rings are not there
 - do i need to close the file to recalibrate, closing and recalibration, and saving. test that all data is there.
-
-
 - colorspace, test using different colorspaces than rgb255.
 - maybe fix so color space is recalculated if its "rgb" only
 
-- create a tutorial for dynamically rearangement of stimuli, like Laurits, but simpler.
-- create a music reward therapy example
 
 - create a PTB version of gc flash.
     - https://www.youtube.com/watch?v=NS1_lJUpWKU
@@ -55,8 +40,9 @@ write_MEG trigger shooting
 - and a documentation on the wiki. (videos?)
 
 
-- documentation
-- constants screenWidth=67, screenHeight=37.5, screenDist=90
+
+General
+Test pycharm dropframes, try increasing Vmem.
 
 
 RT-MEG
@@ -64,7 +50,12 @@ RT-MEG
 
 
 Extra
+
+- Done skriv til SR research.
+- Await response from SR research on python 3.x
+
 - make install of pip.  git install packaghe.
+
 - make 3x python calibration work.
 - binocular
 

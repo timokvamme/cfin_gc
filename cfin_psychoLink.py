@@ -2160,30 +2160,29 @@ class eyeLink:
         Recalibrate = False
         StopGC = False
         Refocusing = False
-        incorrectFixationText = 'Either you are not fixating on the target or ' + \
+        incorrectFixationText = "Either you are not fixating on the target or " + \
                                 'the eyetracker needs to be recalibrated.\n\nPleas notify the experimenter.\n\n' + \
                                 'SPACE \t: Try again\n' + \
                                 'C \t\t: Re-calibrate\n' + \
                                 'V \t\t: Validate\n' + \
-                                'Q \t\t: Continue without fixation control'
+                                "Q \t\t: Continue without fixation control"
 
-        incorrectFixationTextUser = 'Either you are not fixating on the target or \n' + \
+        incorrectFixationTextUser = "Either you are not fixating on the target or \n" + \
                                     'the eyetracker needs to be recalibrated\n\n' \
                                     'Press Green to try again\n\n' \
-                                    'else call the experimenter\n\n' \
-         \
-         \
-        incorrectFixationTextExperimenter = 'Be ready to fixate on fixation cross' \
+                                    'else call the experimenter"
+
+        incorrectFixationTextExperimenter = "Be ready to fixate on fixation cross" \
                                             '\n\n' \
                                             'Space \t\t: Retry fixation\n' \
                                             'C \t\t: Re-calibrate - in python 27!\n' + \
                                             'D \t\t: Drift-correct\n' + \
-                                            'Q \t\t: Continue without fixation control'
+                                            "Q \t\t: Continue without fixation control"
 
 
 
-        incorrectFixationrTextUserNowFixed = 'Good.\n\n' \
-                                             'Press green to continue'
+        incorrectFixationrTextUserNowFixed = "Good.\n\n" \
+                                             "Press green to continue"
 
         # get refreshRate of screen
         hz = self.hz
