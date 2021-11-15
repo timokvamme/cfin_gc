@@ -7,9 +7,10 @@ calibrate_eyelink_2_7
 """
 
 # Imports
+import psychopy, psychopy.visual
 import os, time, sys, argparse, platform
 import cfin_psychoLink as pl
-import psychopy, psychopy.visual
+
 
 print(int(platform.python_version()[0]))
 

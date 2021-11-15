@@ -375,7 +375,8 @@ def setup_et(win, hz, saveFileEDF=None):
 
         """
 
-    if saveFileEDF == None:
+    if saveFileEDF is None:
+        print("saveFileEDF was none")
         saveFileEDF = saveFolder + "/" +  "subjectID_{ID}_{t}.EDF".format(ID=subjectID,t=time.strftime('(%Y-%m-%d %H-%M-%S',time.localtime()))
     print('Writing to EDF file {0}'.format(saveFileEDF))
 
@@ -485,7 +486,7 @@ for no, trial in enumerate(trialList):
     # along with timing triggers set regarding the check.
     # furthermore it handles the scenario where you might want to
 
-    if ET and ETGC:# pre-stim GC cehck
+    if ET and ETGC:# pre-stim GC check
         if not test:et_client.startTrial(trialNr=no)
         et_client.logVar('trial_Nr', no)
 
@@ -498,8 +499,24 @@ for no, trial in enumerate(trialList):
             print("Recalibration")
             et_client.sendMsg(msg="Recalibrating mid experiment")
             et_client.cleanUp()
+
+            win.winHandle.minimize()
+            win.winHandle.set_fullscreen(False)  # disable fullscreen
+            win.flip()
+
             calibrate_using_2_7()
-            et_client = setup_et(win, fps)
+
+            psychopy.core.wait(1)
+            win.winHandle.maximize()
+            win.winHandle.activate()
+            win.winHandle.set_fullscreen(fullscreen)  # disable fullscreen
+            win.flip()
+
+            et_client = setup_et(win, fps, saveFileEDF=saveFolder + "/" +
+                                                       "subjectID_{ID}_{t}.EDF".format(ID=subjectID,
+                                                                                       t=time.strftime(
+                                                                                           '(%Y-%m-%d %H-%M-%S',
+                                                                                           time.localtime())))
             et_client.sendMsg(msg="New start of experiment")
             et_client.startRecording()
             et_client.startTrial(trialNr=no)  # starts eyetracking recording.
@@ -529,8 +546,25 @@ for no, trial in enumerate(trialList):
             print("Recalibration")
             et_client.sendMsg(msg="Recalibrating mid experiment")
             et_client.cleanUp()
+
+            win.winHandle.minimize()
+            win.winHandle.set_fullscreen(False)  # disable fullscreen
+            win.flip()
+
             calibrate_using_2_7()
-            et_client = setup_et(win, fps)
+
+            psychopy.core.wait(1)
+            win.winHandle.maximize()
+            win.winHandle.activate()
+            win.winHandle.set_fullscreen(fullscreen)  # disable fullscreen
+            win.flip()
+
+            et_client = setup_et(win, fps, saveFileEDF=saveFolder + "/" +
+                                                       "subjectID_{ID}_{t}.EDF".format(ID=subjectID,
+                                                                                       t=time.strftime(
+                                                                                           '(%Y-%m-%d %H-%M-%S',
+                                                                                           time.localtime())))
+
             et_client.sendMsg(msg="New start of experiment")
             et_client.startRecording()
             et_client.startTrial(trialNr=no)  # starts eyetracking recording.

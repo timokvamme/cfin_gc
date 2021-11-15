@@ -1534,7 +1534,7 @@ class eyeLink:
         self.sendMsg('start_trial')
         if self.mode == 'Real':
             if trialNr:
-                self.pylink.sendCommand("record_status_message=trialNr_%d" % (int(trialNr)))
+                self.pylink.sendCommand("record_status_message=trialNr_%s" % (trialNr))
             else:
                 self.pylink.sendCommand("record_status_message=trialNr_XX")
 
@@ -2177,26 +2177,23 @@ class eyeLink:
         Recalibrate = False
         StopGC = False
         Refocusing = False
-        incorrectFixationText = "Either you are not fixating on the target or " + \
-                                'the eyetracker needs to be recalibrated.\n\nPleas notify the experimenter.\n\n' + \
-                                'SPACE \t: Try again\n' + \
-                                'C \t\t: Re-calibrate\n' + \
-                                'V \t\t: Validate\n' + \
-                                "Q \t\t: Continue without fixation control"
+        # incorrectFixationText = "Either you are not fixating on the target or " + \
+        #                         'the eyetracker needs to be recalibrated.\n\nPleas notify the experimenter.\n\n' + \
+        #                         'SPACE \t: Try again\n' + \
+        #                         'C \t\t: Re-calibrate\n' + \
+        #                         'V \t\t: Validate\n' + \
+        #                         "Q \t\t: Continue without fixation control"
 
-        incorrectFixationTextUser = "Press Green to try fixation again\n\n or call experimenter to recalibrate"
+        incorrectFixationTextUser = "Press Green to try fixation again\n\n or call experimenter to recalibrate (Press C)"
 
-        incorrectFixationTextExperimenter = "Be ready to fixate on fixation cross" \
-                                            '\n\n' \
-                                            'Space \t\t: Retry fixation\n' \
-                                            'C \t\t: Re-calibrate - in python 27!\n' + \
-                                            'D \t\t: Drift-correct\n' + \
-                                            "Q \t\t: Continue without fixation control"
+        # incorrectFixationTextExperimenter = "Be ready to fixate on fixation cross" \
+        #                                     '\n\n' \
+        #                                     'Space \t\t: Retry fixation\n' \
+        #                                     'C \t\t: Re-calibrate - in python 27!\n' + \
+        #                                     'D \t\t: Drift-correct\n' + \
+        #                                     "Q \t\t: Continue without fixation control"
 
 
-
-        incorrectFixationrTextUserNowFixed = "Good.\n\n" \
-                                             "Press green to continue"
 
         # get refreshRate of screen
         hz = self.hz
@@ -2248,7 +2245,7 @@ class eyeLink:
         stopCount = fixTime / (1000.0 / hz)  # stops after approx 200 ms
         while (time.time() - trStart) < maxWait:
             if self.mode != 'Dummy':
-                print("Non-Dummy Mode")
+                #print("Non-Dummy Mode")
                 XY = self.getCurSamp()
                 avgXY = pixelsToAngleWH((int(XY[0]), int(XY[1])), self.screenDist,
                                         (self.screenWidth, self.screenHeight),
@@ -2326,6 +2323,7 @@ class eyeLink:
             fixDot.draw()
 
             if test:
+
                 gazeDot.pos = avgXY
                 gazeDot.draw()
 
@@ -2345,65 +2343,25 @@ class eyeLink:
             event.clearEvents()
             problemWithFixation = True
 
-            try:
-                reFixationProtocolFile = open(etFixProtocolPath, "r")
-                reFixationProtocol = reFixationProtocolFile.readlines()[0]
-                print("etFixProtocolPath opened and incorrectFixationProtocol set to %s" % reFixationProtocol)
-                reFixationProtocolFile.close()
-            except:
-                print("could not open etFixProtocolPath, incorrectFixationProtocol set to user")
-                reFixationProtocol = "user"
 
-            if reFixationProtocol == "user":
-                drawText(self.win, incorrectFixationTextUser, textKey=[0], textSize=self.textSize)
-                # self.win.getMovieFrame()  # Defaults to front buffer, I.e. what's on screen now.
-                # self.win.saveMovieFrames('screenshot' + "incorrectFixation" + ".png")
+            drawText(self.win, incorrectFixationTextUser, textKey=[0], textSize=self.textSize)
+            # self.win.getMovieFrame()  # Defaults to front buffer, I.e. what's on screen now.
+            # self.win.saveMovieFrames('screenshot' + "incorrectFixation" + ".png")
 
-                whatToDo = getKey(['3', 'c'])
+            whatToDo = getKey(['3', 'c'])
 
-                if whatToDo[0] == 'c':
-                    reFixationProtocol = "expr"
+            if whatToDo[0] == 'c':
+                correctFixation = False
+                problemWithFixation = True
+                Recalibrate = True
 
+            elif whatToDo[0] == '3':
+                print("recursive waitForFixation")
+                correctFixation, problemWithFixation, Recalibrate, StopGC, Refocusing = self.waitForFixation(fixDot=fixDot,
+                                                       maxDist=maxDist,maxWait=maxWait, nRings=nRings,
+                                                       fixTime=fixTime,
+                                                       etFixProtocolPath=etFixProtocolPath,test=test)
 
-                elif whatToDo[0] == '3':
-                    print("recursive waitForFixation")
-                    correctFixation = self.waitForFixation(fixDot=fixDot, maxDist=maxDist,maxWait=maxWait, nRings=nRings,
-                                                           fixTime=fixTime,
-                                                           etFixProtocolPath=etFixProtocolPath,test=test)
-
-                    drawText(self.win, incorrectFixationrTextUserNowFixed, textKey=[0], textSize=self.textSize)
-
-
-            if reFixationProtocol == "expr":
-                drawText(self.win, incorrectFixationTextExperimenter, textKey=[0], textSize=self.textSize)
-                # self.win.getMovieFrame()  # Defaults to front buffer, I.e. what's on screen now.
-                # self.win.saveMovieFrames('screenshot' + "incorrectFixation" + ".png")
-                whatToDo = getKey(['c', 'space', 'q', 'd'])
-                if whatToDo[0] == 'c':
-                    correctFixation = False
-                    problemWithFixation = True
-                    Recalibrate = True
-
-                elif whatToDo[0] == 'space':
-                    print("recursive expr waitForFixation")
-                    correctFixation = self.waitForFixation(fixDot=fixDot, maxDist=maxDist,maxWait=maxWait, nRings=nRings,
-                                                           fixTime=fixTime,
-                                                           etFixProtocolPath=etFixProtocolPath,test=test)
-                elif whatToDo[0] == 'q' or whatToDo[0] == 'escape':
-                    correctFixation = False
-                    # elif whatToDo[0] == 'v':   # removed, as i need to use 2.7 to calibrate
-                    #     calibrationValidation(self.win,
-                    #                           self,
-                    #                           nrPoints=9,
-                    #                           dotColor=self.foreCol,
-                    #                           pxPerDegree=self.pxPerDeg,
-                    #                           saveFile=False)
-                    StopGC = True
-
-                elif whatToDo[0] == 'd':
-                    drawText(self.win, "Fixate on the upcoming fixation cross", textSize=self.textSize)
-                    time.sleep(1.0)
-                    self.driftCorrect(fixDot)
 
         return correctFixation, problemWithFixation, Recalibrate, StopGC, Refocusing
 
@@ -2441,7 +2399,7 @@ class eyeLink:
                     return True
 
     # Clean up
-    def cleanUp(self):
+    def cleanUp(self,saveFileEDF = None):
         """
         Cleans up the experiment. this should be the very last function
         called in the experiment code.
@@ -2483,6 +2441,12 @@ class eyeLink:
 
                 # give the tracker time to stop
                 time.sleep(0.2)
+
+                if saveFileEDF is not None:
+                    print("overwriting saveFileEDF")
+                    print(saveFileEDF)
+                    self.EDFfileName = saveFileEDF
+
                 try:
                     os.rename(self.EDFDefaultName, self.EDFfileName)
                     print('\nEDF file was saved as', self.EDFfileName)
@@ -2503,7 +2467,9 @@ class eyeLink:
                     print('Currently saved as', self.EDFDefaultName, '!!')
         if self.mouse:
             self.mouse.setVisible(1)
-        self.win.close()
+
+        # not closing win because then recalibration in 27 is not possible
+        #self.win.close()
 
 
 # ==============================================================================
