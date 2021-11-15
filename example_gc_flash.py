@@ -124,7 +124,6 @@ import os, psychopy, random, time, csv, subprocess, argparse
 from psychopy import gui
 import numpy as np
 import cfin_psychoLink as pl
-from cfin_psychoLink import pixelsToAngleWH
 from math import atan2, degrees
 
 
@@ -153,7 +152,7 @@ ansKeys = ['1', '2', '3', '4']
 continueKeys = ['1','3']
 recalibrateKey = ['c']
 quitKeys = ["escape"]
-forceQuitKey = ["p"]
+psychopy.user_quit_key = forceQuitKey = ["p"]
 
 # stimulus settings
 fixPos = 0,0
@@ -278,30 +277,6 @@ else:
 print("dlg fine")
 
 
-# -------  Initiate Psychopy Objects -------------------#
-clock = psychopy.core.Clock()
-mon = psychopy.monitors.Monitor("Default", width=monWidth, distance=monDistance)
-mon.setSizePix((displayResolution[0], displayResolution[1]))
-mon.saveMon()
-win = psychopy.visual.Window(displayResolution, monitor=mon, units='deg', fullscr=fullscreen, color=backgroundColor)
-
-fixation = psychopy.visual.TextStim(win, color=foregroundColor, pos=fixPos, height=fixHeight, text="+",
-                                    wrapWidth=20)
-gazeDot = psychopy.visual.Circle(win, radius=gazeDotRadius, fillColorSpace='rgb255', lineColorSpace='rgb255',
-                                 lineColor=[255, 0, 0],
-                                 fillColor=[255, 0, 0], edges=50)
-
-flash_left = psychopy.visual.Circle(win=win,units="deg",radius=flash_size,fillColor=flashColor
-                                    ,lineColor=flashColor,pos=flash_pos_left)
-
-instruction_text_above = psychopy.visual.TextStim(win, color=foregroundColor, pos=textPosAbove, height=fixHeight, text=continueText,
-                                                  wrapWidth=20)
-
-instruction_text = psychopy.visual.TextStim(win, color=foregroundColor, pos=fixPos, height=fixHeight, text=continueText,
-                                            wrapWidth=20)
-
-
-
 
 # ----------------- DEFINITIONS ----------------------#
 
@@ -327,9 +302,12 @@ def gaze_out_of_bounds(gaze, max_dist, mid=(0,0)):
     distance = np.sqrt((gaze[0] - mid[0]) ** 2 + (gaze[1] - mid[1]) ** 2)
     return distance > max_dist
 
-def calibrate_using_2_7(edf_path="py27_calibration.edf"):
+def calibrate_using_2_7(edf_path="data/ET/py27_calibration.EDF"):
 
-    script = os.getcwd() + '/calibrate_eyelink_2_7_test.py'
+    ETsaveFolder = os.getcwd() + "/data/ET"
+    if not os.path.isdir(ETsaveFolder): os.makedirs(ETsaveFolder)  # Creates save folder if it doesn't exist
+
+    script = os.getcwd() + '/calibrate_eyelink_2_7.py'
     call_script =  interpreter_python27 + " " + script
     edf_arg = " --edf_path " + edf_path + " "
     con_args1 = "--displayResolution " + str(displayResolution[0]) + " " + str(displayResolution[1]) + " "
@@ -337,12 +315,12 @@ def calibrate_using_2_7(edf_path="py27_calibration.edf"):
     con_args3 = "--monDistance " + str(monDistance) + " "
     con_args4 = "--monHeight " + str(monHeight) + " "
     con_args5 = "--foregroundColor " + str(foregroundColor[0]) + " " + str(foregroundColor[1]) + " " + str(foregroundColor[2]) + " "
-    con_args6 = "--foregroundColor " + str(backgroundColor[0]) + " " + str(backgroundColor[1]) + " " + str(backgroundColor[2]) + " "
+    con_args6 = "--backgroundColor " + str(backgroundColor[0]) + " " + str(backgroundColor[1]) + " " + str(backgroundColor[2]) + " "
     con_args7 = "--textHeightETclient " + str(textHeightETclient) + " "
 
     final_call=call_script+edf_arg+con_args1+con_args2+con_args3+con_args4+con_args5+con_args6+con_args7
 
-    with open('calibrate_eyelink_2_7_log_file.txt', 'w') as f:
+    with open(ETsaveFolder + '/calibrate_eyelink_2_7_log_file.txt', 'w') as f:
         subprocess.call(args=final_call, stdout=f)
 
 def calibration_test(client, calibrateTestTime=calibrateTestTime):
@@ -398,7 +376,7 @@ def setup_et(win, hz, saveFileEDF=None):
         """
 
     if saveFileEDF == None:
-        saveFileEDF = saveFolder /  "s_{ID}_{t}.EDF".format(ID=subjectID,t=time.strftime('(%Y-%m-%d %H-%M-%S',time.localtime()))
+        saveFileEDF = saveFolder + "/" +  "subjectID_{ID}_{t}.EDF".format(ID=subjectID,t=time.strftime('(%Y-%m-%d %H-%M-%S',time.localtime()))
     print('Writing to EDF file {0}'.format(saveFileEDF))
 
     # This part tests if calibration is OK
@@ -415,6 +393,35 @@ def setup_et(win, hz, saveFileEDF=None):
     return et_client
 
 
+
+
+### Calibrate ET
+# Calibrating before setting up the window, because calibration requires py27
+if ET:
+    calibrate_using_2_7()
+
+
+# -------  Initiate Psychopy Objects -------------------#
+clock = psychopy.core.Clock()
+mon = psychopy.monitors.Monitor("Default", width=monWidth, distance=monDistance)
+mon.setSizePix((displayResolution[0], displayResolution[1]))
+mon.saveMon()
+win = psychopy.visual.Window(displayResolution, monitor=mon, units='deg', fullscr=fullscreen, color=backgroundColor)
+
+fixation = psychopy.visual.TextStim(win, color=foregroundColor, pos=fixPos, height=fixHeight, text="+",
+                                    wrapWidth=20)
+gazeDot = psychopy.visual.Circle(win, radius=gazeDotRadius, fillColorSpace='rgb255', lineColorSpace='rgb255',
+                                 lineColor=[255, 0, 0],
+                                 fillColor=[255, 0, 0], edges=50)
+
+flash_left = psychopy.visual.Circle(win=win,units="deg",radius=flash_size,fillColor=flashColor
+                                    ,lineColor=flashColor,pos=flash_pos_left)
+
+instruction_text_above = psychopy.visual.TextStim(win, color=foregroundColor, pos=textPosAbove, height=fixHeight, text=continueText,
+                                                  wrapWidth=20)
+
+instruction_text = psychopy.visual.TextStim(win, color=foregroundColor, pos=fixPos, height=fixHeight, text=continueText,
+                                            wrapWidth=20)
 
 
 
@@ -465,7 +472,7 @@ for no, trial in enumerate(trialList):
     while clock.getTime() < inter_trial_interval:
         if test:
             pos = et_client.getCurSamp()  # gets current eyetracking sample, x, y,
-            pos_to_deg = pixelsToAngleWH((int(pos[0]), int(pos[1])), monDistance, (monWidth, monHeight),
+            pos_to_deg = pl.pixelsToAngleWH((int(pos[0]), int(pos[1])), monDistance, (monWidth, monHeight),
                                          (displayResolution[0], displayResolution[1]))
 
             gazeDot.setPos(pos_to_deg)

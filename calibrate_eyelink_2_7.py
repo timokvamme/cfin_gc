@@ -7,25 +7,22 @@ calibrate_eyelink_2_7
 """
 
 # Imports
-import os, time, sys, argparse
-from cfin_psychoLink import pixelsToAngleWH
+import os, time, sys, argparse, platform
 import cfin_psychoLink as pl
 import psychopy, psychopy.visual
 
-
-# parsed arguments
+print(int(platform.python_version()[0]))
 
 print("This Log File, contains the print arguments from the calibrate_eyelink_2_7.py script"
       "if the calibration in 27 is not working, this is a usefull log to read through")
 
-# defined command line options
-# this also generates --help and error handling
+# parsed arguments
 CLI=argparse.ArgumentParser()
 
 CLI.add_argument(
     "--edf_path",  # name on the CLI - drop the `--` for positional/required parameters
     type=str,
-    default="py27_calibration.edf",  # default if nothing is provided
+    default="py27_calibration.EDF",  # default if nothing is provided
 )
 
 
@@ -35,8 +32,6 @@ CLI.add_argument(
     type=int,
     default= [1920,1080],  # default if nothing is provided
 )
-
-
 
 
 CLI.add_argument(
@@ -70,7 +65,7 @@ CLI.add_argument(
     "--backgroundColor",  # name on the CLI - drop the `--` for positional/required parameters
     nargs="*",  # 0 or more values expected => creates a list
     type=int,
-    default= [1,1,1],  # default if nothing is provided
+    default= [0,0,0],  # default if nothing is provided
 )
 
 CLI.add_argument(
@@ -113,7 +108,7 @@ win27 = psychopy.visual.Window(size=displayResolution, monitor=myMon,  # name of
                              units="deg",  # coordinate space to use.
                              fullscr=True,  # We need full screen mode.
                              allowGUI=False,  # We wanta it to be borderless
-                             colorSpace='rgb',
+                             colorSpace='rgb255',
                              screen=1, color=backgroundColor,viewScale = 1.0)
 
 print('Writing to EDF file {0}'.format(saveFileEDF))
