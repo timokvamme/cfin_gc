@@ -11,6 +11,9 @@ setup_et
 
 functions into cfin_psychoLink.py similar to ET_functions in retinostim.
 
+
+disable pixelmode on recalibration
+
 - fix so buttons are there when calibration dot appears, and at validation / or continue
 - fix so head is first camera image. (press enter)
 
@@ -59,7 +62,7 @@ RT-MEG
 
 
 Extra
-
+- read asc f
 - Done skriv til SR research.
 - Await response from SR research on python 3.x
 
