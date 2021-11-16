@@ -1,0 +1,22 @@
+2
+This Log File, contains the print arguments from the calibrate_eyelink_2_7.py scriptif the calibration in 27 is not working, this is a usefull log to read through
+running script with arguments:
+edf_path: 'data/ET/py27_calibration.EDF'
+displayResolution: [1920, 1080]
+monWidth: 67.5
+monDistance: 90.0
+monHeight: 37.5
+foregroundColor: [1, 1, 1]
+backgroundColor: [0, 0, 0]
+textHeightETclient: 0.5
+Creating Psychopy Window in 2.7
+Writing to EDF file data/ET/py27_calibration.EDF
+Creating eyelink in 2.7
+
+The parallel port couldn't be opened
+Set to dummy mode!
+
+
+Tracker found!
+Mouse set to invissible
+Running calibration in 27

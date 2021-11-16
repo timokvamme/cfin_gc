@@ -154,6 +154,9 @@ def set_recalibrate():
     Recalibrate = True
 
 def clean_quit():
+    dp.DPxDisableDoutPixelMode()
+    dp.DPxWriteRegCache()
+    dp.DPxClose()
     if ET:
         et_client.sendMsg(msg="Closing the client")
         et_client.cleanUp()
@@ -304,9 +307,9 @@ win = visual.Window(size=SIZE, allowGUI=False, monitor=monitor,
 # visual stimuli 
 
 fix = fixation = visual.TextStim(win, '+')
-noseOn = visual.TextStim(win, 'noseON') #visual.ImageStim(win, 'images/')
-mouthOn = visual.TextStim(win, 'mouthON') #visual.ImageStim(win, 'images/')
-modOff = visual.TextStim(win, 'modulationOFF') #visual.ImageStim(win, 'images/')
+noseOn = visual.TextStim(win, 'If you are wearing the mouthpiece - please remove it.\n Please put on the nose clip.') #visual.ImageStim(win, 'images/')
+mouthOn = visual.TextStim(win, 'If you are wearing the nose clip - please remove it.\n Please put on the mouthbiece.') #visual.ImageStim(win, 'images/')
+modOff = visual.TextStim(win, 'If you are wearing the nose clip or the mouthpiece - please remove them') #visual.ImageStim(win, 'images/')
 # triggerStim = visual.Rect(
 #     win=win,
 #     color=(0,0,0),
@@ -425,6 +428,11 @@ def runBlocks(et_client, blocks):
                 et_client.sendMsg(msg="Recalibrating mid experiment")
                 et_client.cleanUp()
 
+                if platform == "Windows":
+                    dp.DPxDisableDoutPixelMode()
+                    dp.DPxWriteRegCache()
+                    dp.DPxClose()
+
                 win.winHandle.minimize()
                 win.winHandle.set_fullscreen(False)  # disable fullscreen
                 win.flip()
@@ -444,6 +452,14 @@ def runBlocks(et_client, blocks):
                 et_client.startRecording()
                 et_client.startTrial(trialNr=block)  # starts eyetracking recording.
                 et_client.logVar('trial_Nr',block)
+
+                if platform == "Windows":
+                    dp.DPxOpen()
+                    isReady = dp.DPxIsReady()
+                    if isReady:
+                        dp.DPxEnableDoutPixelMode()
+                        dp.DPxWriteRegCache()
+
                 Recalibrate = False
 
         triggerStim.draw()
