@@ -182,7 +182,6 @@ SOA = 0.100
 N_trials = 10
 
 
-
 # ----------------- DIALOG GUI -----------------------#
 print("Dlg Popup....")
 sub_info_dlg = gui.Dlg(title="cfin_gc_example")
