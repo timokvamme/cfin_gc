@@ -1,16 +1,5 @@
 Gaze Contingency
 
-- done documentation on parameters on info fed to the calibration27
-
-- done  try throwing:
-    gaze_out_of_bounds
-    calibrate_using_2_7
-    calibration_test
-    setup_et
-
-    functions into cfin_psychoLink.py similar to ET_functions in retinostim.
-
-
 disable pixelmode on recalibration
 - test this!
 
@@ -18,36 +7,8 @@ disable pixelmode on recalibration
 - fix so head is first camera image. (press enter)
 
 
--test  calibrate_eyelink_2_7  using  cfin_psychoLink
-- test cfin_psychoLink in general.
-
-- Done remove psycholinkHax, Laurits, 27, 37.
-
-- test new example_gc_flash
-
--test cleanquit after creating the "ET_functions"
-clean_quit(behavfile=None) thing
-
-- remove user/experimenter, just have "c", be able to change
-        - Done test removal of ahk
-        - Done test global cleanup
-        - document global cleanup.
-
-
--  complete write_MEG trigger shooting
-
-- Done test that EDF is saved when global key is used to quit.
-- Done  test that EDF is saved when performing recalibration mid session.
-
-
-
 - test malthes rMEG_ET
 - rewrite rMEG_ET2  now using ET_functions
-
-
-
-- colorspace, test using different colorspaces than rgb255.
-- maybe fix so color space is recalculated if its "rgb" only
 
 
 - create a PTB version of gc flash.

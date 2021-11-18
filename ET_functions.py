@@ -282,13 +282,15 @@ def calibrate_using_2_7(ETsaveFolder = "/data/ET", edf_path="py27_calibration.ED
         True or False based on whether the experimenter doesnt or does hit the recalibration key, typically "c"
 
     """
+
+
     import subprocess
 
     if not os.path.isdir(ETsaveFolder): os.makedirs(ETsaveFolder)  # Creates save folder if it doesn't exist
 
     script = os.getcwd() + '/calibrate_eyelink_2_7.py'
     call_script =  interpreter_python27 + " " + script
-    edf_arg = " --edf_path " + edf_path + " "
+    edf_arg = " --edf_path " + ETsaveFolder+"/"+edf_path + " "
     con_args1 = "--displayResolution " + str(displayResolution[0]) + " " + str(displayResolution[1]) + " "
     con_args2 = "--monWidth " + str(monWidth) + " "
     con_args3 = "--monDistance " + str(monDistance) + " "
@@ -296,6 +298,8 @@ def calibrate_using_2_7(ETsaveFolder = "/data/ET", edf_path="py27_calibration.ED
     con_args5 = "--foregroundColor " + str(foregroundColor[0]) + " " + str(foregroundColor[1]) + " " + str(foregroundColor[2]) + " "
     con_args6 = "--backgroundColor " + str(backgroundColor[0]) + " " + str(backgroundColor[1]) + " " + str(backgroundColor[2]) + " "
     con_args7 = "--textHeightETclient " + str(textHeightETclient) + " "
+
+    print("Running Calibration in Python 2.7 with call:\n%s" % call_script)
 
     final_call=call_script+edf_arg+con_args1+con_args2+con_args3+con_args4+con_args5+con_args6+con_args7
 
@@ -454,7 +458,7 @@ def create_save_file_EDF(saveFolder ="/data", subjectID = 1):
 
         import time
         saveFileEDF = saveFolder + "/" + "subjectID_{ID}_{t}.EDF".format(ID=subjectID,
-                                                                         t=time.strftime('(%Y-%m-%d %H-%M-%S', time.localtime()))
+                                                                         t=time.strftime('%Y_%m_%d_%H_%M_%S', time.localtime()))
     except:
         saveFileEDF = "edf_saved_file.EDF"
 

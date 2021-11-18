@@ -2443,8 +2443,6 @@ class eyeLink:
                 time.sleep(0.2)
 
                 if saveFileEDF is not None:
-                    print("overwriting saveFileEDF")
-                    print(saveFileEDF)
                     self.EDFfileName = saveFileEDF
 
                 try:

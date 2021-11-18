@@ -389,7 +389,8 @@ def port_nuller(sec=port_nuller_sec):
 # ----------------- Run Experiment ------------------------#
 
 # setup saving of behavioral data:
-saveFile = saveFolder + '/subject_' + str(subjectID) + '_' + time.strftime('(%Y-%m-%d %H-%M-%S',time.localtime()) + ').csv'
+saveFile = saveFolder + '/subject_' + str(subjectID) + '_' + time.strftime('%Y_%m_%d_%H_%M_%S',time.localtime()) + '.csv'
+
 
 ypos = xpos = [-1,0,1]
 xypos = [r for r in itertools.product(ypos, xpos)]

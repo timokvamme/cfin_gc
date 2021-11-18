@@ -226,26 +226,26 @@ mon.saveMon()
 win = psychopy.visual.Window(displayResolution, monitor=mon, units='deg', fullscr=fullscreen, color=backgroundColor)
 
 fixation = psychopy.visual.TextStim(win, color=foregroundColor, pos=fixPos, height=fixHeight, text="+",
-                                    wrapWidth=20)
+                                    wrapWidth=20,units="deg")
 gazeDot = psychopy.visual.Circle(win, radius=gazeDotRadius, fillColorSpace='rgb255', lineColorSpace='rgb255',
                                  lineColor=[255, 0, 0],
-                                 fillColor=[255, 0, 0], edges=50)
+                                 fillColor=[255, 0, 0], edges=50,units="deg")
 
 flash_left = psychopy.visual.Circle(win=win,units="deg",radius=flash_size,fillColor=flashColor
                                     ,lineColor=flashColor,pos=flash_pos_left)
 
 instruction_text_above = psychopy.visual.TextStim(win, color=foregroundColor, pos=textPosAbove, height=fixHeight, text=continueText,
-                                                  wrapWidth=20)
+                                                  wrapWidth=20,units="deg")
 
 instruction_text = psychopy.visual.TextStim(win, color=foregroundColor, pos=fixPos, height=fixHeight, text=continueText,
-                                            wrapWidth=20)
+                                            wrapWidth=20,units="deg")
 
 
 
 # ----------------- Run Experiment ------------------------#
 
 # setup saving of behavioral data:
-saveFile = saveFolder + '/subject_' + str(subjectID) + '_' + time.strftime('(%Y-%m-%d %H-%M-%S',time.localtime()) + ').csv'
+saveFile = saveFolder + '/subject_' + str(subjectID) + '_' + time.strftime('%Y_%m_%d_%H_%M_%S',time.localtime()) + '.csv'
 trialList = []
 for no in range(N_trials):
     trial = {"no":no,"ans":np.nan,"rt":np.nan,"problemWithFixation_prestim":False,
@@ -338,8 +338,8 @@ def clean_quit():
 if ET:
     et_client = setup_et(win, hz)
     psychopy.event.globalKeys.clear()
-    psychopy.event.globalKeys.add(forceQuitKey, clean_quit)
     psychopy.event.globalKeys.add(recalibrateKey, set_recalibrate) # Recalibrate mid experiment, 'c'
+    psychopy.event.globalKeys.add(forceQuitKey, clean_quit) # clean quits the experiment, 'p'
 
 # start experiment
 win.flip()
@@ -357,6 +357,7 @@ for no, trial in enumerate(trialList):
     win.flip()
     if ETtest and ET:
         et_client.startTrial(trialNr=no)
+        # you could send a trigger here in the MEG data to timestamp everything.
 
 
     # initial fixation cross
@@ -377,46 +378,42 @@ for no, trial in enumerate(trialList):
     # furthermore it handles the scenario where you might want to
 
     if ET and ETGC:# pre-stim GC check
-        et_client.startTrial(trialNr=no)
+        correctFixation = False
 
         print("Wait for Fixation at StimFIX - mystimfix - prestim")
         et_client.sendMsg(msg="WaitingForFixation_prestim") # this seems to arrive 3 ms after the second line gets time from et_client
         trial["time_eyelinkWaitForFixation_prestim"] = et_client.getTime()
 
-        # you could send a trigger here in the MEG data to timestamp everything.
-        if Recalibrate:
+        while correctFixation == False:
 
-            recalibrate_et(win,client=et_client, default_fullscreen=fullscreen,saveFolder=saveFolder,subjectID=subjectID)
+            if Recalibrate:
+                recalibrate_et(win,client=et_client, default_fullscreen=fullscreen,saveFolder=saveFolder,subjectID=subjectID)
 
-            et_client = setup_et(win, hz, saveFileEDF=create_save_file_EDF(saveFolder, subjectID))
-            et_client.sendMsg(msg="New start of experiment")
-            et_client.startTrial(trialNr=no)  # starts eyetracking recording.
-            Recalibrate = False
+                et_client = setup_et(win, hz, saveFileEDF=create_save_file_EDF(saveFolder, subjectID))
+                et_client.sendMsg(msg="New start of experiment")
+                et_client.startTrial(trialNr=no)  # starts eyetracking recording.
+                Recalibrate = False
+
+            # Gaze Contingency
+            correctFixation, problemWithFixation,Recalibrate, StopGC,Refocusing = et_client.waitForFixation(fixDot=fixation, maxDist=etMaxDist,
+                                                                                                            maxWait=etMaxWait, nRings=etNRings,
+                                                                                                            fixTime=etFixTime, test=ETtest, gazeDot=gazeDot)  # participant need to look at fixation for 200 ms. can respond with "3" instead of space to try again.
 
 
-        # Gaze Contingency
-        correctFixation, problemWithFixation,Recalibrate, StopGC,Refocusing = et_client.waitForFixation(fixDot=fixation, maxDist=etMaxDist,
-                                                                                                        maxWait=etMaxWait, nRings=etNRings,
-                                                                                                        fixTime=etFixTime, test=ETtest, gazeDot=gazeDot)  # participant need to look at fixation for 200 ms. can respond with "3" instead of space to try again.
 
-        if Refocusing: # if the rings have appeared, getting the participant to refocus, its natural that
-            # some time passes before other experimental stimuli is presented.
-            fixation.draw()
-            win.flip()
-            psychopy.core.wait(refocusingTime)
+            if Refocusing: # if the rings have appeared, getting the participant to refocus, its natural that
+                # some time passes before other experimental stimuli is presented.
+                fixation.draw()
+                win.flip()
+                psychopy.core.wait(refocusingTime)
 
-        if StopGC:
-            print("stop GC")
-            ETGC = False
-            et_client.sendMsg(msg="experimenter pressed q - stopping GC")
+            if StopGC:
+                print("stop GC")
+                ETGC = False
+                correctFixation=True
+                et_client.sendMsg(msg="experimenter pressed q - stopping GC")
 
-        if Recalibrate:
-            recalibrate_et(win,client=et_client, default_fullscreen=fullscreen,saveFolder=saveFolder,subjectID=subjectID)
 
-            et_client = setup_et(win, hz, saveFileEDF=create_save_file_EDF(saveFolder, subjectID))
-            et_client.sendMsg(msg="New start of experiment")
-            et_client.startTrial(trialNr=no)  # starts eyetracking recording.
-            Recalibrate = False
 
         et_client.sendMsg(msg="problemWithFixation_prestim %s" % problemWithFixation)
 
@@ -451,7 +448,7 @@ for no, trial in enumerate(trialList):
     if response[0] in ansKeys:
         trial['ans'] = response = int(response[0])
 
-    if response[0] == recalibrateKey:
+    elif response[0] in [recalibrateKey]:
         Recalibrate = True
 
 
