@@ -10,6 +10,13 @@ disable pixelmode on recalibration
 - test malthes rMEG_ET
 - rewrite rMEG_ET2  now using ET_functions
 
+- make a clean version of CFIN GC, with more documentation, names of scripts that makes sense
+- and a documentation on the wiki. (videos?)
+
+videos.
+- calibration video (in meg)
+- writing the example gc flash - adding eyetracking functions.
+- analysing the edf file.
 
 - create a PTB version of gc flash.
     - https://www.youtube.com/watch?v=NS1_lJUpWKU
@@ -17,8 +24,7 @@ disable pixelmode on recalibration
     - https://www.youtube.com/watch?v=bhZyCCT0HTI
     - document these on the wiki
 
-- make a clean versiokn of CFIN GC, with more documentation, names of scripts that makes sense
-- and a documentation on the wiki. (videos?)
+
 
 
 RT-MEG
