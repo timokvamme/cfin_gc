@@ -256,8 +256,9 @@ behavfile = open(saveFile,"w")
 csvWriter = csv.writer(behavfile, delimiter=',', lineterminator="\n")
 
 
-hz = win.getActualFrameRate(nIdentical=50, nMaxFrames=200, nWarmUpFrames=25, threshold=0.5) if calculateFPS else default_hz
-
+# ---------- Eyetracking Functions in Script -----------#
+# ---- put this after you created a win = psychopy.visual.Window ----
+#-------------------------------------------------------#
 
 def set_recalibrate():
     """
@@ -335,10 +336,14 @@ def clean_quit():
 
 # setup ET
 if ET:
+    hz = win.getActualFrameRate(nIdentical=50, nMaxFrames=200, nWarmUpFrames=25, threshold=0.5) if calculateFPS else default_hz
     et_client = setup_et(win, hz)
     psychopy.event.globalKeys.clear()
     psychopy.event.globalKeys.add(recalibrateKey, set_recalibrate) # Recalibrate mid experiment, 'c'
     psychopy.event.globalKeys.add(forceQuitKey, clean_quit) # clean quits the experiment, 'p'
+
+# -------------------------------------------------------
+
 
 # start experiment
 win.flip()
@@ -354,7 +359,7 @@ for no, trial in enumerate(trialList):
     clock.reset()
     fixation.draw()
     win.flip()
-    if ETtest and ET:
+    if ET:
         et_client.startTrial(trialNr=no)
         # you could send a trigger here in the MEG data to timestamp everything.
 

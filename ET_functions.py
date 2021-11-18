@@ -77,6 +77,8 @@ backgroundColor = [0,0,0] #
 textHeightETclient = 0.5
 fullscreen = True
 
+gazeDot = None
+
 # eyetracking stimulus settings
 
 fixPos = 0,0
