@@ -135,10 +135,21 @@ saveFolder = os.getcwd() + "/data"
 if not os.path.isdir(saveFolder): os.makedirs(saveFolder)  # Creates save folder if it doesn't exist
 
 # display settings
-displayResolution = [1920,1080]
-monWidth = 67.5 # get the correct values in cm
-monDistance = 90.0
-monHeight = 37.5
+
+if  platform.node() == "stimpc-8": # CFIN MEG stimpc
+    displayResolution = [1920,1080]
+    monWidth = 67.5
+    monDistance = 90.0
+    monHeight = 37.5
+
+
+elif platform.node() == "stimpc-10": # stimpc in the TMS-EEG room
+    displayResolution = [1920,1080]
+    monWidth = 51.0
+    monDistance = 60.0
+    monHeight = 29.0
+
+
 foregroundColor  = flashColor = [1,1,1]
 backgroundColor = [0,0,0] #
 textHeightETclient = 0.5
@@ -163,8 +174,9 @@ fixHeight = 1.5
 gazeDotRadius = 0.3
 flash_size = 1.0
 continueText = "press %s to continue"% continueKeys[0]
-flashText = "How Many Flashes?\n\n press %s to recalibrate eyetracker" % recalibrateKey
+flashText = "How Many Flashes?\npress 1, 2, 3, or 4 \n\npress %s to recalibrate eyetracker" % recalibrateKey
 inter_trial_interval = 3.000 # in seconds
+SOA = 0.100
 
 # execution settings
 N_trials = 10
@@ -246,6 +258,81 @@ csvWriter = csv.writer(behavfile, delimiter=',', lineterminator="\n")
 
 
 hz = win.getActualFrameRate(nIdentical=50, nMaxFrames=200, nWarmUpFrames=25, threshold=0.5) if calculateFPS else default_hz
+
+
+def set_recalibrate():
+    """
+        Sets a global variable, "Recalibrate" to True - typically done using psychopy.event.globalkeys
+        PUT THIS FUNCTION INTO YOUR SCRIPT
+        typical use (set in the beginning of the experiment)
+
+        if ET:
+            recalibrateKey = 'c'
+            psychopy.event.globalKeys.add(recalibrateKey, set_recalibrate)
+            # Recalibrate mid experiment, 'c'
+
+
+        typical use (at the start of a trial)
+
+        if Recalibrate:
+
+            recalibrate_et(win, default_fullscreen=fullscreen,saveFolder=saveFolder,subjectID=subjectID)
+
+            et_client = setup_et(win, hz, saveFileEDF=create_save_file_EDF(saveFolder, subjectID))
+            et_client.sendMsg(msg="New start of experiment")
+            et_client.startTrial(trialNr=no)  # starts eyetracking recording.
+            Recalibrate = False # set it back to false
+
+    """
+
+    global Recalibrate
+    Recalibrate = True
+
+def clean_quit():
+    """
+    PUT THIS FUNCTION INTO YOUR SCRIPT - name your et_client "et_client" and name your csv savefile "behavfile"
+    clean quit is advised when running ET; to save ET-data if anything happens during the experiment which quires this
+    it means that a key can be hit during the eksperiment, for example "p", and then
+    the behavioral data is saved, the pixel mode in the pypixx is disabled, and the
+    et_client performs a cleanup (i.e it stops recording and saves the data)
+
+    before it performs a psychopy.core.quit()
+
+    typical use:
+    if ET:
+        forceQuitKey = "p"
+        psychopy.event.globalKeys.add(forceQuitKey, clean_quit)
+
+
+    """
+
+    try:
+        if behavfile is not None:
+            behavfile.close()
+        else:
+            print("behaveFile is None")
+    except:
+        print("no 'behavfile' - can't close")
+
+    if ET:
+        try:
+            et_client.sendMsg(msg="Closing the client")
+            et_client.cleanUp()
+        except:
+            print("exception during cleanup")
+
+
+    print("attempting to disable pixelmode on VPixx projector")
+    try:
+        from pypixxlib import _libdpx as dp
+        dp.DPxDisableDoutPixelMode()
+        dp.DPxWriteRegCache()
+        dp.DPxClose()
+    except:
+        print("attempted failed - invalid triggers may appear in MEG file")
+
+    psychopy.core.quit()
+
 
 # setup ET
 if ET:
@@ -342,10 +429,13 @@ for no, trial in enumerate(trialList):
         # send MEG data trigger here if possible
 
     flash_left.draw()
-    win.callOnFlip(et_client.sendMsg(msg="stimulus shown %s" % str(no)))
     win.flip()
 
-    psychopy.core.wait(0.100)
+    et_client.sendMsg(msg="stimulus shown %s" % str(no))
+
+    while clock.getTime() < SOA:
+        pass
+
     win.flip()
     psychopy.core.wait(1.000)
 
@@ -356,10 +446,14 @@ for no, trial in enumerate(trialList):
 
     psychopy.event.clearEvents()
 
-    response = psychopy.event.waitKeys(keyList=ansKeys + quitKeys)
+    response = psychopy.event.waitKeys(keyList=ansKeys + quitKeys + [recalibrateKey])
     trial['rt'] = clock.getTime()
     if response[0] in ansKeys:
         trial['ans'] = response = int(response[0])
+
+    if response[0] == recalibrateKey:
+        Recalibrate = True
+
 
     csvWriter.writerow(trial.values());behavfile.flush()
     et_client.stopTrial()

@@ -59,10 +59,19 @@ refocusingTime = 0.800 # in seconds.  following a "refocusing" scenario, where t
 
 # eyetracking display settings (for calibration):
 
-displayResolution = [1920,1080]
-monWidth = 67.5 # get the correct values in cm
-monDistance = 90.0
-monHeight = 37.5
+if  platform.node() == "stimpc-8": # CFIN MEG stimpc
+    displayResolution = [1920,1080]
+    monWidth = 67.5
+    monDistance = 90.0
+    monHeight = 37.5
+
+
+elif platform.node() == "stimpc-10":
+    displayResolution = [1920,1080]
+    monWidth = 51.0
+    monDistance = 60.0
+    monHeight = 29.0
+
 foregroundColor  = flashColor = [1,1,1]
 backgroundColor = [0,0,0] #
 textHeightETclient = 0.5
@@ -122,7 +131,7 @@ interpreter_python27 = 'C:/Program Files (x86)/PsychoPy2/python.exe'
 def set_recalibrate():
     """
         Sets a global variable, "Recalibrate" to True - typically done using psychopy.event.globalkeys
-
+        PUT THIS FUNCTION INTO YOUR SCRIPT
         typical use (set in the beginning of the experiment)
 
         if ET:
@@ -147,8 +156,9 @@ def set_recalibrate():
     global Recalibrate
     Recalibrate = True
 
-def clean_quit(behavfile=None):
+def clean_quit():
     """
+    PUT THIS FUNCTION INTO YOUR SCRIPT - name your et_client "et_client" and name your csv savefile "behavfile"
     clean quit is advised when running ET; to save ET-data if anything happens during the experiment which quires this
     it means that a key can be hit during the eksperiment, for example "p", and then
     the behavioral data is saved, the pixel mode in the pypixx is disabled, and the
@@ -167,6 +177,8 @@ def clean_quit(behavfile=None):
     try:
         if behavfile is not None:
             behavfile.close()
+        else:
+            print("behaveFile is None")
     except:
         print("no 'behavfile' - can't close")
 
@@ -188,6 +200,7 @@ def clean_quit(behavfile=None):
         print("attempted failed - invalid triggers may appear in MEG file")
 
     psychopy.core.quit()
+
 
 def gaze_out_of_bounds(gaze, max_dist, mid=(0,0)):
     """
@@ -393,13 +406,12 @@ def setup_et(win, hz=None, saveFileEDF=None):
                                displayResolution=displayResolution, textSize=textHeightETclient)
         et_client.hz = hz
 
-        satisfying_cali = calibration_test(et_client)
+        satisfying_cali = calibration_test(win,et_client)
         if not satisfying_cali:
-            et_client.cleanUp(saveFileEDF = saveFileEDF)
-            calibrate_using_2_7()
+            recalibrate_et(win, et_client, default_fullscreen=True, pypixpixelmode=True,saveFileEDF=saveFileEDF)
 
-        et_client.sendMsg(msg="Starting experiment")
-        et_client.startRecording()
+    et_client.sendMsg(msg="Starting experiment")
+    et_client.startRecording()
 
 
     return et_client
@@ -451,7 +463,7 @@ def create_save_file_EDF(saveFolder ="/data", subjectID = 1):
 
 
 
-def recalibrate_et(win, client, default_fullscreen=True, pypixpixelmode=True,saveFolder="/data", subjectID=1):
+def recalibrate_et(win, client, default_fullscreen=True, pypixpixelmode=True,saveFileEDF=None, saveFolder="/data", subjectID=1):
     """
     "recalibrate_et" recalibrates the eyetracker, used during the experiment.
     the function sends a message to the currently used "et_client" assumed to be the name during the experiment
@@ -485,6 +497,10 @@ def recalibrate_et(win, client, default_fullscreen=True, pypixpixelmode=True,sav
         whether pypixx is running in pixelmode, (a mode where the Vpixx projector reads the topmost pixel of the screen
             and uses that to send meg triggers, needs to be disabled during recalibration / end of the program)
 
+    saveFileEDF : string
+        the full filepath for the EDF file. if this is specified then the following arguments: (saveFolder+subjectID)
+        will not be used
+
     saveFolder : string
         the folder where the file is to be saved
 
@@ -498,7 +514,11 @@ def recalibrate_et(win, client, default_fullscreen=True, pypixpixelmode=True,sav
 
     print("Recalibration")
     client.sendMsg(msg="Recalibrating mid experiment")
-    client.cleanUp(saveFileEDF = create_save_file_EDF(saveFolder, subjectID))
+
+    if saveFileEDF is None:
+        saveFileEDF = create_save_file_EDF(saveFolder, subjectID)
+
+    client.cleanUp(saveFileEDF = saveFileEDF)
 
     if pypixpixelmode:
         print("attempting to disable pixelmode on VPixx projector")
