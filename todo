@@ -1,16 +1,16 @@
 Gaze Contingency
 
 test stimpc8
-disable pixelmode on recalibration
-- test this!
+
 
 - fix so buttons are there when calibration dot appears, and at validation / or continue
 - fix so head is first camera image. (press enter)
 
 
-
-- test malthes rMEG_ET
-- rewrite rMEG_ET2  now using ET_functions
+- Done test malthes rMEG_ET
+- Done rewrite rMEG_ET2  now using ET_functions
+disable pixelmode on recalibration
+- test this!
 
 
 - rewrite example_gc_flash without ET.
@@ -21,7 +21,7 @@ disable pixelmode on recalibration
 
 videos.
 - insallations
-- calibration video (in meg),  using phone, settings on eyetracker
+- calibration video (in meg),  using phone, settings on eyetracker - and then show the gc example
 - writing the example gc flash - adding eyetracking functions. compare two versions of the script
 - analysing the edf file.
 

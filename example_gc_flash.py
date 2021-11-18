@@ -136,7 +136,7 @@ if not os.path.isdir(saveFolder): os.makedirs(saveFolder)  # Creates save folder
 
 # display settings
 
-if  platform.node() == "stimpc-8": # CFIN MEG stimpc
+if  platform.node() == "stimpc-08": # CFIN MEG stimpc
     displayResolution = [1920,1080]
     monWidth = 67.5
     monDistance = 90.0

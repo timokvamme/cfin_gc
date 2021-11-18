@@ -8,7 +8,7 @@
 library(eyelinker)
 library("tibble")
 
-
+# edf2asc64 e.EDF
 
 data <- read.csv("C:/code/projects/cfin_gc/events_diff.csv")
 
