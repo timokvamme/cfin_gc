@@ -9,6 +9,7 @@ library(eyelinker)
 library("tibble")
 
 
+
 data <- read.csv("C:/code/projects/cfin_gc/events_diff.csv")
 
 dat <- read.asc("C:/code/projects/cfin_gc/e.asc", parse_all = TRUE)

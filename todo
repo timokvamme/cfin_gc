@@ -1,18 +1,18 @@
 Gaze Contingency
 
-- documentation on parameters on info fed to the calibration27
+- done documentation on parameters on info fed to the calibration27
 
-- try throwing:
+- done  try throwing:
+    gaze_out_of_bounds
+    calibrate_using_2_7
+    calibration_test
+    setup_et
 
-gaze_out_of_bounds
-calibrate_using_2_7
-calibration_test
-setup_et
-
-functions into cfin_psychoLink.py similar to ET_functions in retinostim.
+    functions into cfin_psychoLink.py similar to ET_functions in retinostim.
 
 
 disable pixelmode on recalibration
+- test this!
 
 - fix so buttons are there when calibration dot appears, and at validation / or continue
 - fix so head is first camera image. (press enter)
@@ -21,9 +21,12 @@ disable pixelmode on recalibration
 -test  calibrate_eyelink_2_7  using  cfin_psychoLink
 - test cfin_psychoLink in general.
 
-- remove psycholinkHax, Laurits, 27, 37.
+- Done remove psycholinkHax, Laurits, 27, 37.
 
 - test new example_gc_flash
+
+-test cleanquit after creating the "ET_functions"
+clean_quit(behavfile=None) thing
 
 - remove user/experimenter, just have "c", be able to change
         - Done test removal of ahk
@@ -33,8 +36,8 @@ disable pixelmode on recalibration
 
 -  complete write_MEG trigger shooting
 
-- test that EDF is saved when global key is used to quit.
-- test that EDF is saved when performing recalibration mid session.
+- Done test that EDF is saved when global key is used to quit.
+- Done  test that EDF is saved when performing recalibration mid session.
 
 
 - do i need to close the file to recalibrate, closing and recalibration, and saving. test that all data is there.
@@ -50,11 +53,6 @@ disable pixelmode on recalibration
 
 - make a clean versiokn of CFIN GC, with more documentation, names of scripts that makes sense
 - and a documentation on the wiki. (videos?)
-
-
-
-General
-Test pycharm dropframes, try increasing Vmem.
 
 
 RT-MEG

@@ -2343,17 +2343,17 @@ class eyeLink:
             event.clearEvents()
             problemWithFixation = True
 
-
             drawText(self.win, incorrectFixationTextUser, textKey=[0], textSize=self.textSize)
-            # self.win.getMovieFrame()  # Defaults to front buffer, I.e. what's on screen now.
-            # self.win.saveMovieFrames('screenshot' + "incorrectFixation" + ".png")
 
-            whatToDo = getKey(['3', 'c'])
+            whatToDo = getKey(['3', 'c', 'q'])
 
             if whatToDo[0] == 'c':
                 correctFixation = False
-                problemWithFixation = True
                 Recalibrate = True
+
+            if whatToDo[0] == 'q':
+                correctFixation = False
+                StopGC = True
 
             elif whatToDo[0] == '3':
                 print("recursive waitForFixation")
