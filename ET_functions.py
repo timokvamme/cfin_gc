@@ -322,10 +322,10 @@ def calibration_test(win,client, calibrateTestTime=calibrateTestTime):
 
 
     fixation = psychopy.visual.TextStim(win, color=foregroundColor, pos=fixPos, height=fixHeight, text="+",
-                                        wrapWidth=20)
+                                        wrapWidth=20,units="deg")
     gazeDot = psychopy.visual.Circle(win, radius=gazeDotRadius, fillColorSpace='rgb255', lineColorSpace='rgb255',
                                      lineColor=[255, 0, 0],
-                                     fillColor=[255, 0, 0], edges=50)
+                                     fillColor=[255, 0, 0], edges=50,units="deg")
 
 
     client.startRecording()

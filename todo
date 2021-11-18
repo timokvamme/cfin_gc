@@ -40,7 +40,12 @@ clean_quit(behavfile=None) thing
 - Done  test that EDF is saved when performing recalibration mid session.
 
 
-- do i need to close the file to recalibrate, closing and recalibration, and saving. test that all data is there.
+
+- test malthes rMEG_ET
+- rewrite rMEG_ET2  now using ET_functions
+
+
+
 - colorspace, test using different colorspaces than rgb255.
 - maybe fix so color space is recalculated if its "rgb" only
 
