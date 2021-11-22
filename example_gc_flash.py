@@ -16,15 +16,15 @@ It uses Python with the packages Psychopy for stimuluation, and uses the psychol
 which is a gaze contingent package for the 1000hz eyelink eyetracker compatible with psychopy.
 we have renamed this cfin_psychoLink.py and made some modifications (tested Nov 22, 2021).
 
-Gaze Contingency is usefull if want to present stimuli dependent on where the participant is looking, like for example
+Gaze Contingency is usefull if you want to present stimuli dependent on where the participant is looking, like for example
 a fixation cross. The example in this script is based of the double flash experiment
 (https://pubmed.ncbi.nlm.nih.gov/23407974/) where a white disk is presented in the
 periphery of the participants visual field, while (ideally) the participant is remaining their gaze on
-a central fixation cross. To ensure that this is actually the case, one can use the eyetracker to ask just before
+a central fixation cross. To ensure that this is actually the case, one can use the eyetracker to "ask" just before
 the presentation whether the participant is actually looking at the fixation cross.
 In the psycholink function "waitForFixation", the eyetracker waits until the participants gaze is within a certain
 amount of degrees of the fixation cross, for a variable amount of time. If it is not within (i.e. the participant is
-not looking at the fixation cross), some white circles appear around the cross, reminding the participant
+not looking at the fixation cross), some red circles appear around the cross, reminding the participant
 to look at the cross.
 
 (in my oppinion) The psycholink scripts are not fully developed to handle the situation where the eyetracker needs to
@@ -45,9 +45,9 @@ The script also features some examples of how to make triggers (epochs) in the e
 the stimulation or behavior of the participant, and the example can be a good guide for eyetracking in general
 even without gaze contingency.
 
-The script has been tested at the MEG lab at Skejby by Timo Kvamme & Chris Bailey on the 22/101/2021
+The script has been tested at the MEG lab at Skejby by Timo Kvamme & Chris Bailey on the 22/11/2021
 IMPORTANT: Eyetracking is difficult - It is therefore critical that you test the calibration and the
-saving of data (check triggers) before use (especially midway calibration).
+saving of data (check triggers, MEG/ ET) before use (especially if you use midway calibration).
 
 Also if you use pixelmode
 (a trigger mode used by the MEG which uses the topleft coror pixel to send triggers).
@@ -56,8 +56,10 @@ Else you might get invalid triggers.
 
 
 Psycholink has been written for python version 2.7, however it is possible to use run python 3.6 or higher.
-This can be achived by using 2.7 to calibrate the eyetracker and switch to 3.6 once calibration has been performed.
-Therefore it is important to calibrate the using 27 using the function calibrate_using_2_7 before you create your own
+We have been unable to get psycholink to work in 3.6 during calibration, so we use
+2.7 to calibrate the eyetracker and switch to 3.6 once calibration has been performed.
+This is all handled by the cfin_psycholink script.
+BUT, it is  is important to calibrate the using 27 using the function calibrate_using_2_7 before you create your own
 psychopy window
 
 recalbration during the experiment is possible in alot of ways.
@@ -68,15 +70,12 @@ recalibration will start (Although you will need to press it before the particpa
 
 note: hitting "p" will quit the program, can be changed using the varible "forceQuitKey"
 
-the scripts were tested using a miniconda env running 3.6 python with psychopy, pylink and pypixxlib located here:
-C:\Users\stimuser.stimpc-08\Miniconda3\envs\rtmeg
-
 """
 
 # -------------- IMPORTS -----------------------------#
 from __future__ import division
-import os, psychopy, random, time, csv, subprocess, argparse
-from psychopy import gui
+import os, psychopy, random, time, csv, subprocess, argparse,platform
+from psychopy import gui,core, monitors, visual
 import numpy as np
 from ET_functions import *
 import cfin_psychoLink as pl
@@ -168,7 +167,7 @@ print("dlg fine")
 
 ### Calibrate ET
 # Calibrating before setting up the window, because calibration requires py27
-if ET:
+if ET and ETCalibration:
     calibrate_using_2_7(
     displayResolution=displayResolution,
     monWidth=monWidth,
@@ -180,25 +179,25 @@ if ET:
 
 
 # -------  Initiate Psychopy Objects -------------------#
-clock = psychopy.core.Clock()
-mon = psychopy.monitors.Monitor("Default", width=monWidth, distance=monDistance)
+clock = core.Clock()
+mon = monitors.Monitor("Default", width=monWidth, distance=monDistance)
 mon.setSizePix((displayResolution[0], displayResolution[1]))
 mon.saveMon()
-win = psychopy.visual.Window(displayResolution, monitor=mon, units='deg', fullscr=fullscreen, color=backgroundColor)
+win = visual.Window(displayResolution, monitor=mon, units='deg', fullscr=fullscreen, color=backgroundColor)
 
-fixation = psychopy.visual.TextStim(win, color=foregroundColor, pos=fixPos, height=fixHeight, text="+",
+fixation = visual.TextStim(win, color=foregroundColor, pos=fixPos, height=fixHeight, text="+",
                                     wrapWidth=20,units="deg")
-gazeDot = psychopy.visual.Circle(win, radius=gazeDotRadius, fillColorSpace='rgb255', lineColorSpace='rgb255',
+gazeDot = visual.Circle(win, radius=gazeDotRadius, fillColorSpace='rgb255', lineColorSpace='rgb255',
                                  lineColor=[255, 0, 0],
                                  fillColor=[255, 0, 0], edges=50,units="deg")
 
-flash_left = psychopy.visual.Circle(win=win,units="deg",radius=flash_size,fillColor=flashColor
+flash_left = visual.Circle(win=win,units="deg",radius=flash_size,fillColor=flashColor
                                     ,lineColor=flashColor,pos=flash_pos_left)
 
-instruction_text_above = psychopy.visual.TextStim(win, color=foregroundColor, pos=textPosAbove, height=fixHeight, text=continueText,
+instruction_text_above = visual.TextStim(win, color=foregroundColor, pos=textPosAbove, height=fixHeight, text=continueText,
                                                   wrapWidth=20,units="deg")
 
-instruction_text = psychopy.visual.TextStim(win, color=foregroundColor, pos=fixPos, height=fixHeight, text=continueText,
+instruction_text = visual.TextStim(win, color=foregroundColor, pos=fixPos, height=fixHeight, text=continueText,
                                             wrapWidth=20,units="deg")
 
 
@@ -219,7 +218,7 @@ csvWriter = csv.writer(behavfile, delimiter=',', lineterminator="\n")
 
 
 # ---------- Eyetracking Functions in Script -----------#
-# ---- put this after you created a win = psychopy.visual.Window ----
+# ---- put this after you created a win = visual.Window ----
 #-------------------------------------------------------#
 
 def set_recalibrate():

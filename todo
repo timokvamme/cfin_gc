@@ -1,11 +1,15 @@
 Gaze Contingency
 
 
-- rewrite example_gc_flash without ET.
+- done - rewrite example_gc_flash without ET.
+- done make two versions versions of the script
+
+test example_gc completely calibration,
+video of it.
 
 - make a documentation on the wiki. (videos?)
+-  make install of pip.  git install packaghe.
 
-- make two versions versions of the script
 
 videos.
 - insallations
@@ -20,7 +24,8 @@ videos.
     - https://www.youtube.com/watch?v=bhZyCCT0HTI
     - document these on the wiki
 
-
+- cleanup files
+- look through all of the files
 
 
 RT-MEG

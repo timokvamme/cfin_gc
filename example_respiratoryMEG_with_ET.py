@@ -1,10 +1,13 @@
-
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Created on Mon Oct 25 2021
 
 @author: au281249
+
+
+
+
 """
 from datetime import datetime  # uncoment to use data and time in output file names
 from psychopy import gui, monitors, visual, event, core

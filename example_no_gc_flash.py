@@ -13,7 +13,7 @@ this file is acomparison file to the "example_gc_flash"
 # -------------- IMPORTS -----------------------------#
 from __future__ import division
 import os, psychopy, random, time, csv, subprocess, argparse,platform
-from psychopy import gui
+from psychopy import gui,core, monitors, visual
 import numpy as np
 from math import atan2, degrees
 
@@ -89,22 +89,22 @@ print("dlg fine")
 
 
 # -------  Initiate Psychopy Objects -------------------#
-clock = psychopy.core.Clock()
-mon = psychopy.monitors.Monitor("Default", width=monWidth, distance=monDistance)
+clock = core.Clock()
+mon = monitors.Monitor("Default", width=monWidth, distance=monDistance)
 mon.setSizePix((displayResolution[0], displayResolution[1]))
 mon.saveMon()
-win = psychopy.visual.Window(displayResolution, monitor=mon, units='deg', fullscr=fullscreen, color=backgroundColor)
+win = visual.Window(displayResolution, monitor=mon, units='deg', fullscr=fullscreen, color=backgroundColor)
 
-fixation = psychopy.visual.TextStim(win, color=foregroundColor, pos=fixPos, height=fixHeight, text="+",
+fixation = visual.TextStim(win, color=foregroundColor, pos=fixPos, height=fixHeight, text="+",
                                     wrapWidth=20,units="deg")
 
-flash_left = psychopy.visual.Circle(win=win,units="deg",radius=flash_size,fillColor=flashColor
+flash_left = visual.Circle(win=win,units="deg",radius=flash_size,fillColor=flashColor
                                     ,lineColor=flashColor,pos=flash_pos_left)
 
-instruction_text_above = psychopy.visual.TextStim(win, color=foregroundColor, pos=textPosAbove, height=fixHeight, text=continueText,
+instruction_text_above = visual.TextStim(win, color=foregroundColor, pos=textPosAbove, height=fixHeight, text=continueText,
                                                   wrapWidth=20,units="deg")
 
-instruction_text = psychopy.visual.TextStim(win, color=foregroundColor, pos=fixPos, height=fixHeight, text=continueText,
+instruction_text = visual.TextStim(win, color=foregroundColor, pos=fixPos, height=fixHeight, text=continueText,
                                             wrapWidth=20,units="deg")
 
 
