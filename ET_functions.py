@@ -59,7 +59,7 @@ refocusingTime = 0.800 # in seconds.  following a "refocusing" scenario, where t
 
 # eyetracking display settings (for calibration):
 
-if  platform.node() == "stimpc-8": # CFIN MEG stimpc
+if  platform.node() == "stimpc-08": # CFIN MEG stimpc
     displayResolution = [1920,1080]
     monWidth = 67.5
     monDistance = 90.0
@@ -242,7 +242,14 @@ def gaze_out_of_bounds(gaze, max_dist, mid=(0,0)):
     distance = np.sqrt((gaze[0] - mid[0]) ** 2 + (gaze[1] - mid[1]) ** 2)
     return distance > max_dist
 
-def calibrate_using_2_7(ETsaveFolder = "/data/ET", edf_path="py27_calibration.EDF",calibrate_console_output_file="calibrate_eyelink_2_7_log_file.txt"):
+def calibrate_using_2_7(ETsaveFolder = "/data/ET", edf_path="py27_calibration.EDF",calibrate_console_output_file="calibrate_eyelink_2_7_log_file.txt",
+                        displayResolution=displayResolution,
+                        monWidth=monWidth,
+                        monDistance=monDistance,
+                        monHeight=monHeight,
+                        foregroundColor=foregroundColor,
+                        backgroundColor=backgroundColor,
+                        textHeightETclient=textHeightETclient):
     """
         Performs a calibration of eyetracker which uses python 27
         perfoms a subprocess call, using a python27 interpreter
@@ -469,7 +476,14 @@ def create_save_file_EDF(saveFolder ="/data", subjectID = 1):
 
 
 
-def recalibrate_et(win, client, default_fullscreen=True, pypixpixelmode=True,saveFileEDF=None, saveFolder="/data", subjectID=1):
+def recalibrate_et(win, client, default_fullscreen=True, pypixpixelmode=True,saveFileEDF=None, saveFolder="/data", subjectID=1,
+                   displayResolution=displayResolution,
+                   monWidth=monWidth,
+                   monDistance=monDistance,
+                   monHeight=monHeight,
+                   foregroundColor=foregroundColor,
+                   backgroundColor=backgroundColor,
+                   textHeightETclient=textHeightETclient):
     """
     "recalibrate_et" recalibrates the eyetracker, used during the experiment.
     the function sends a message to the currently used "et_client" assumed to be the name during the experiment
@@ -510,7 +524,6 @@ def recalibrate_et(win, client, default_fullscreen=True, pypixpixelmode=True,sav
     saveFolder : string
         the folder where the file is to be saved
 
-
     subjectID : int / string
         the "ID" of the subject used to create the path of the save file
         default = 1
@@ -540,7 +553,14 @@ def recalibrate_et(win, client, default_fullscreen=True, pypixpixelmode=True,sav
     win.winHandle.set_fullscreen(False)  # disable fullscreen
     win.flip()
 
-    calibrate_using_2_7()
+    calibrate_using_2_7(
+        displayResolution=displayResolution,
+        monWidth=monWidth,
+        monDistance=monDistance,
+        monHeight=monHeight,
+        foregroundColor=foregroundColor,
+        backgroundColor=backgroundColor,
+        textHeightETclient=textHeightETclient)
 
     psychopy.core.wait(1.5) # very important <-
     win.winHandle.maximize()

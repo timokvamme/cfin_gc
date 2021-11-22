@@ -214,7 +214,14 @@ print("dlg fine")
 ### Calibrate ET
 # Calibrating before setting up the window, because calibration requires py27
 if ET:
-    calibrate_using_2_7()
+    calibrate_using_2_7(
+    displayResolution=displayResolution,
+    monWidth=monWidth,
+    monDistance=monDistance,
+    monHeight=monHeight,
+    foregroundColor=foregroundColor,
+    backgroundColor=backgroundColor,
+    textHeightETclient=textHeightETclient)
 
 
 # -------  Initiate Psychopy Objects -------------------#
@@ -391,7 +398,14 @@ for no, trial in enumerate(trialList):
         while correctFixation == False:
 
             if Recalibrate:
-                recalibrate_et(win,client=et_client, default_fullscreen=fullscreen,saveFolder=saveFolder,subjectID=subjectID)
+                recalibrate_et(win,client=et_client, default_fullscreen=fullscreen,saveFolder=saveFolder,subjectID=subjectID,
+                               displayResolution=displayResolution,
+                               monWidth=monWidth,
+                               monDistance=monDistance,
+                               monHeight=monHeight,
+                               foregroundColor=foregroundColor,
+                               backgroundColor=backgroundColor,
+                               textHeightETclient=textHeightETclient)
 
                 et_client = setup_et(win, hz, saveFileEDF=create_save_file_EDF(saveFolder, subjectID))
                 et_client.sendMsg(msg="New start of experiment")
