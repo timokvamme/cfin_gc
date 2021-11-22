@@ -96,33 +96,6 @@ calibrateTestTime = 5 # in seconds. After calibration, how long should you test 
 # to evaluate the calibration, and to potentially retry it.
 interpreter_python27 = 'C:/Program Files (x86)/PsychoPy2/python.exe'
 
-# During the calibration proceedure, a small script is started that capture
-# the response box inputs and redirects it for the input used by psycholink.
-# this is to allow for the possibility of more than one button press.
-
-# (alternatively you could make a hack to the psycholink script itself)
-
-# the script allows the following responsebox presses to lead to control the psycholink interface
-# Eye tracking Cheat Sheet
-
-# (1) Red one tap = Space
-# (1) Red two taps = Enter
-# (1) Red three taps = Escape
-
-# (2) Blue = LEFT - change image
-# (3) Yellow = a – auto threshold
-# (4) Green = c – calibrate
-# (4) Green two taps = v - validate
-
-
-
-# this means that the only thing you need to do at outside the MSR during calibration, is to press on the participants
-# eye, with the mouse on the eyetracking PC. This is done after the participants head is fully in the helmet,
-# and you have asked them that they are sitting comfortably (i.e in a position they can sit for ~1 hour).
-
-#Important to remeber is to have the light conditions (amount of light) / (close the door)
-# to be the same when you calibrate and use auto threshold as how it is when you run the experiment.
-# the auto-threshold and eyetracking in general is very senitive to light.
 
 
 
