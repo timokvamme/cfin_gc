@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Title: A Gaze Contingent Eyetracking Example Experiment using the Eyelink 1000 and Python using Psychopy and Psycholink
-Script: " cfin_gc_example"
+Script: " example_gc_flash"
 Author: Timo Kvamme
 Email: Timokvamme@gmail.com / Timo@cfin.au.dk
 (do not hesitate to contact me if you need some tips on how to implement GC)
@@ -12,8 +12,9 @@ Description:
 This script features an implementation of gaze-contingent eyetracking for designed to run at the MEG
 Lab at CFIN Nord (Skejby) (Aarhus University).
 It uses Python with the packages Psychopy for stimuluation, and uses the psycholink scripts
-(https://github.com/jonathanvanleeuwen/psychoLink) # from Jan 17, 2020
+(https://github.com/jonathanvanleeuwen/psychoLink) # from Nov 1, 2021
 which is a gaze contingent package for the 1000hz eyelink eyetracker compatible with psychopy.
+we have renamed this cfin_psychoLink.py and made some modifications (tested Nov 22, 2021).
 
 Gaze Contingency is usefull if want to present stimuli dependent on where the participant is looking, like for example
 a fixation cross. The example in this script is based of the double flash experiment
@@ -31,35 +32,33 @@ be calibrated "midway" or during the experiment. Therefore this example experime
 with some wrapper functions (see "DEFINITIONS" further below for those), to handle the instance
 where a re-calibration would be required.
 
-(I've also disabled some uses of the psycholink script that takes a tkinter.filedialog for inputting participant infor
-mation, which didnt work and caused import errors.)
 
 Furthermore, the psycholink package requires that you press keyboard inputs like "space"  "c", and "enter", while
 calibrating the eyetracker. At the MEG lab at skejby, this would require that you are outside of the
 Magnetically Shielded Room (MSR) while calibrating. This is quite a hassle compared to being able to calibrate the
 eyetracker while inside the MSR, where you can 1. adjust the eyetracker to make the calibration more smooth,
 2. better instruct the participant during the setup before the calibration, 3. potentially calibrate the eyetracker
-just before you yourself act as a participant for testing purposes. For those reasons I made a "hack" called
-"waitForfixation" which I adopted from the psycholink "waitForFixation" function.
+just before you yourself act as a participant for testing purposes.
 
 Some wrapper functions are also created that setup the ET, along with saving of eyetracking data.
 The script also features some examples of how to make triggers (epochs) in the eyetracking data based on
 the stimulation or behavior of the participant, and the example can be a good guide for eyetracking in general
 even without gaze contingency.
 
-The script has been tested at the MEG lab at Skejby by Timo Kvamme & Chris Bailey on the 20/10/2020
+The script has been tested at the MEG lab at Skejby by Timo Kvamme & Chris Bailey on the 22/101/2021
 IMPORTANT: Eyetracking is difficult - It is therefore critical that you test the calibration and the
-saving of data (check triggers) before use.
+saving of data (check triggers) before use (especially midway calibration).
 
-note:
-during calibration, when the white dot is in the center, you will need to press "space", i.e. the red button
-once to start the calibration procedure.
-At the start (of calibration), its important not to tripple press the red button as this means escape,
-and you will skip calibration, usually this can only be fixed by a restart. 3
+Also if you use pixelmode
+(a trigger mode used by the MEG which uses the topleft coror pixel to send triggers).
+then make sure to test out the disabling of pixelmode during a potential recalibration.
+Else you might get invalid triggers.
+
 
 Psycholink has been written for python version 2.7, however it is possible to use run python 3.6 or higher.
 This can be achived by using 2.7 to calibrate the eyetracker and switch to 3.6 once calibration has been performed.
-This is how it is currently, although in the future we might make this simpler.
+Therefore it is important to calibrate the using 27 using the function calibrate_using_2_7 before you create your own
+psychopy window
 
 recalbration during the experiment is possible in alot of ways.
 First a recalibrationkey is set. default is "c" in this script.
@@ -67,56 +66,12 @@ First a recalibrationkey is set. default is "c" in this script.
 1. If this is pressed while the participant gets the prompt that they were not attending to fixation cross,
 recalibration will start (Although you will need to press it before the particpant presses 3 (the default continue key))
 
-2. Currently in this script, if the recalibration key is pressed during collection of responses
-i.e. when the particpant is deciding how many flashes they saw, as part of the paradigm (recalibration starts).
-
-3. You can also opt to change this line:
-etFixProtocolPath = os.getcwd() + "\etFixProtocol.txt"
-This is only necessary, if you are generally not faster than your participant in pressing the recalibration key.
-
-if this path was to be changed to a location on the network. (check access to the network when the stimpc is booted)
-you could save the etFixProtocol.txt on the network.
-
-During every attempt fixation test, it tests if "etFixProcol" is set to "user" or "expr"
-if you use another computer, say you're own laptop, and change the content's of the txt file from the default user
-to "expr". it means that when the particpant is asked to refocus, you have control over what happens, are they
-allowed to try again, or do you want to perform a recalibration, driftcorrect, or continue without GC.
-this is particular usefull if you are dealing with a participant where you are concerned that they can't focus
-that particularly well on the fixation cross, or issues with eyetracking collection, like wearing glasses.
-
-you could also set the default procedure to "expr", when editing this line:
-defaultReFixationProtocol = "user"
-althought that would mean that if the participant isn't looking at the fixation cross, you need to be present
-to continue, recalibrate, driftcorrect or continue without gc, if they are unattentive for a moment
-(which just me, will happen). I.e. sometimes participants just need an extra change, other times, the ET
-needs to recalibrate.
-
 note: hitting "p" will quit the program, can be changed using the varible "forceQuitKey"
 
-
-Dependencies:
-
-Pylink:
-    the only working package version I found to work was in MEG service: (stim pc)
-    X:/MEG_service/Eye_Tracking/pylink_forPython3.6_x64
-
-    none of the packages worked at:
-    C:/Users/Public\/Documents/EyeLink/SampleExperiments/Python
-
-
-Psycholink:
-    download "psycholink.py" from here: https://github.com/jonathanvanleeuwen/psychoLink/blob/master/PsychoLink/psychoLink.py
-    and put it in the same directory as this script.
-Psychopy:
-    https://www.psychopy.org
-
-
-# Dateset in data.
-the 3 files in data, contains 1 csv of behavioral data,
-and 2 EDF files (eyetracking files), where a recalibration was tested after the 2ed trial.
+the scripts were tested using a miniconda env running 3.6 python with psychopy, pylink and pypixxlib located here:
+C:\Users\stimuser.stimpc-08\Miniconda3\envs\rtmeg
 
 """
-
 
 # -------------- IMPORTS -----------------------------#
 from __future__ import division

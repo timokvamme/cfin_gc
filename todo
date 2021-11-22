@@ -1,13 +1,6 @@
 Gaze Contingency
 
 
-
-- Done test malthes rMEG_ET
-- Done rewrite rMEG_ET2  now using ET_functions
-disable pixelmode on recalibration
-- done  test this!
-
-
 - rewrite example_gc_flash without ET.
 
 - make a documentation on the wiki. (videos?)
