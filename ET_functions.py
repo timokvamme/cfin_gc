@@ -31,7 +31,7 @@ continueText = "press %s to continue"% continueKeys[0]
 
 # core eyetracking settings:
 
-ETtest = False
+ETtest = True
 ET = True # whether to collect ET data
 ETGC = True # whether to make stimulus presentation Gaze contingent, i.e dependent on the eye-gaze position.
 # it is a good idea to have it as a variable, that potentially can be turned off, if for some reason it causes problems
