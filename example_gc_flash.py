@@ -343,7 +343,7 @@ def clean_quit():
 
 # setup ET
 if ET:
-    hz = win.getActualFrameRate(nIdentical=50, nMaxFrames=200, nWarmUpFrames=25, threshold=0.5) if calculateFPS else default_hz
+    hz = win.getActualFrameRate(nIdentical=50, nMaxFrames=200, nWarmUpFrames=25, threshold=0.5)
     et_client = setup_et(win, hz,saveFileEDF=create_save_file_EDF(saveFolder, subjectID),
                          displayResolution=displayResolution,
                          monWidth=monWidth,

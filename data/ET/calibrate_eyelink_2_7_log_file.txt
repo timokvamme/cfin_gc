@@ -20,3 +20,9 @@ Set to dummy mode!
 Tracker found!
 Mouse set to invissible
 Running calibration in 27
+Done with create_n_calibrate_eyelink_client function
+('\nEDF file was saved as', 'data/ET/py27_calibration.EDF')
+attemping to close win27dow
+2.2922 	WARNING 	Requested an unavailable screen number - using first available.
+os._exit(0)
+writing file to XX.EDF 

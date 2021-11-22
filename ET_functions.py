@@ -31,9 +31,9 @@ continueText = "press %s to continue"% continueKeys[0]
 
 # core eyetracking settings:
 
-ETtest = True
-ET = True # whether to collect ET data
-ETGC = True # whether to make stimulus presentation Gaze contingent, i.e dependent on the eye-gaze position.
+#ETtest = False
+#ET = True # whether to collect ET data
+#ETGC = True # whether to make stimulus presentation Gaze contingent, i.e dependent on the eye-gaze position.
 # it is a good idea to have it as a variable, that potentially can be turned off, if for some reason it causes problems
 ETCalibration =True # whether to calibrate, if false it's assumed the ET has already been calibrated sufficiently
 calculateFPS = False # Calculate your own fps or use default
@@ -198,8 +198,9 @@ def clean_quit():
         dp.DPxDisableDoutPixelMode()
         dp.DPxWriteRegCache()
         dp.DPxClose()
+        print("pixelmode closed")
     except:
-        print("attempted failed - invalid triggers may appear in MEG file")
+        print("attempted close of pixelmode failed - invalid triggers may appear in MEG file")
 
     psychopy.core.quit()
 
@@ -654,8 +655,6 @@ def recalibrate_et(win, client, default_fullscreen=True, pypixpixelmode=True,sav
         but can be overwritten by the script calling the calibrate_using_2_7/recalibrate_et/setup_et function
 
 
-
-
     """
 
     print("Recalibration")
@@ -673,8 +672,10 @@ def recalibrate_et(win, client, default_fullscreen=True, pypixpixelmode=True,sav
             dp.DPxDisableDoutPixelMode()
             dp.DPxWriteRegCache()
             dp.DPxClose()
+            print("pixelmode closed")
         except:
-            print("attempted failed - invalid triggers may appear in MEG file")
+            print("attempted close of pixelmode failed - invalid triggers may appear in MEG file")
+
 
     win.winHandle.minimize()
     win.winHandle.set_fullscreen(False)  # disable fullscreen

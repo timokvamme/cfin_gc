@@ -8,6 +8,7 @@ Created on Mon Oct 25 2021
 """
 from datetime import datetime  # uncoment to use data and time in output file names
 from psychopy import gui, monitors, visual, event, core
+import psychopy
 import platform
 
 from ET_functions import *
@@ -18,7 +19,7 @@ import cfin_psychoLink as pl
 ############                Things you might want to set                ############
 ####################################################################################
 # keys
-instructionsOKkey = 'space'
+instructionsOKkey = ['space','1']
 quitKey = 'q'
 # timing
 blockTime = 0.1 # minutes
@@ -42,12 +43,14 @@ saveFolder = os.getcwd() + "/data"
 if dialogBox:
     #fields in the dialog box
     dlgOrder = ['Subject ID','Age',"Gender"]
-    dlgDict ={"Subject ID":"Zero padded int, 4 characters long",
+    dlgDict ={"Subject ID":"0001",
             "Age" : "int",
             "Gender" : ["female","male","other"],
             "Airway manipulation":[False,True],
             "Full screen":[True,False],
-            "Eyetracking":[True, False]
+            "Eyetracking":[True, False],
+            "ET_gaze_contingency":[True, False],
+            "ET_Test":[True, False]
             }
 
     # create the box
@@ -67,6 +70,9 @@ if dialogBox:
         gender=dlgDict['Gender']
         fullScreen = True if dlgDict['Full screen']=="True" else False
         ET = dlgDict["Eyetracking"]
+        ETGC = dlgDict["ET_gaze_contingency"]
+        ETtest = dlgDict["ET_Test"]
+
     else:
         print('User Cancelled')
 else:
@@ -78,6 +84,9 @@ else:
     # Full screen
     fullScreen = True
     ET = True
+    ETGC = True
+    ETtest = True
+
 
 ####################################################################################
 ############                    OS and path things                      ############
@@ -144,28 +153,44 @@ print(blocks)
 ### Calibrate ET
 # Calibrating before setting up the window, because calibration requires py27
 if ET:
+    print("ET is True")
     calibrate_using_2_7()
 
 # window
-win = visual.Window(monitorSizePix, fullscr=fullScreen)
-triggerSize = [200,200]
-triggerLocation = [-monitorSizePix[0] // 2, monitorSizePix[1] // 2] 
+REFRESH = 120.
+SIZE = displayResolution
+fullScreen = True
+monitor = monitors.Monitor('MEGmonitor')
+# fetch the most recent calib for this monitor
+monitor.setDistance(monDistance)
+monitor.setWidth(monWidth)
+monitor.setSizePix(SIZE)
 
-# visual stimuli 
+# win = visual.Window(monitorSizePix, fullscr=fullScreen)
+win = psychopy.visual.Window(size=SIZE, allowGUI=False, monitor=monitor,
+                    fullscr=fullScreen,units="deg")
 
-fix = visual.TextStim(win, '+')
-noseOn = visual.TextStim(win, 'noseON') #visual.ImageStim(win, 'images/')
-mouthOn = visual.TextStim(win, 'mouthON') #visual.ImageStim(win, 'images/')
-modOff = visual.TextStim(win, 'modulationOFF') #visual.ImageStim(win, 'images/')
-triggerStim = visual.Rect(
-    win=win,
-    color=(0,0,0),
-    size=triggerSize,
-    colorSpace='rgb255',
-    pos=triggerLocation,
-    units="pix",
-    
-)
+
+fix = fixation = visual.TextStim(win, '+')
+noseOn = visual.TextStim(win, 'If you are wearing the mouthpiece - please remove it.\n Please put on the nose clip.') #visual.ImageStim(win, 'images/')
+mouthOn = visual.TextStim(win, 'If you are wearing the nose clip - please remove it.\n Please put on the mouthbiece.') #visual.ImageStim(win, 'images/')
+modOff = visual.TextStim(win, 'If you are wearing the nose clip or the mouthpiece - please remove them') #visual.ImageStim(win, 'images/')
+# triggerStim = visual.Rect(
+#     win=win,
+#     color=(0,0,0),
+#     size=triggerSize,
+#     colorSpace='rgb255',
+#     pos=triggerLocation,
+#     units="pix",
+#
+# )
+
+px_location = [-displayResolution[0] // 2, displayResolution[1] // 2]
+px_size = [2, 2]
+triggerStim = visual.Rect(win=win, fillColor=(0, 0, 0), size=px_size, colorSpace='rgb255', pos=px_location, units='pix', autoDraw=True)
+
+
+
 triggerStim.color=(0,0,0)
 
 # clock
@@ -177,6 +202,7 @@ clock = core.Clock()
 # ---------- Eyetracking Functions in Script -----------#
 # ---- put this after you created a win = psychopy.visual.Window ----
 #-------------------------------------------------------#
+Recalibrate = False
 
 def set_recalibrate():
     """
@@ -246,19 +272,12 @@ def clean_quit():
         dp.DPxDisableDoutPixelMode()
         dp.DPxWriteRegCache()
         dp.DPxClose()
+        print("pixelmode closed")
     except:
-        print("attempted failed - invalid triggers may appear in MEG file")
+        print("attempted close of pixelmode failed - invalid triggers may appear in MEG file")
 
     psychopy.core.quit()
 
-
-# setup ET
-if ET:
-    hz = win.getActualFrameRate(nIdentical=50, nMaxFrames=200, nWarmUpFrames=25, threshold=0.5) if calculateFPS else 120
-    et_client = setup_et(win, hz)
-    psychopy.event.globalKeys.clear()
-    psychopy.event.globalKeys.add(recalibrateKey, set_recalibrate) # Recalibrate mid experiment, 'c'
-    psychopy.event.globalKeys.add(forceQuitKey, clean_quit) # clean quits the experiment, 'p'
 
 # -------------------------------------------------------
 
@@ -308,13 +327,14 @@ def instructions(block):
     triggerStim.draw()
     win.flip()
 
-def runBlocks(blocks):
+def runBlocks(blocks,et_client,ET,ETGC,Recalibrate):
     for block in blocks:
         print(block)
         instructions(block)
-        et_client.startTrial(trialNr=block)
+
 
         if ET and ETGC:# pre-stim GC check
+            et_client.startTrial(trialNr=block)
             correctFixation = False
 
             print("Wait for Fixation at StimFIX - mystimfix - prestim")
@@ -323,9 +343,24 @@ def runBlocks(blocks):
             while correctFixation == False:
 
                 if Recalibrate:
-                    recalibrate_et(win,client=et_client, default_fullscreen=fullscreen,saveFolder=saveFolder,subjectID=subjectID)
+                    recalibrate_et(win,client=et_client, default_fullscreen=fullscreen,saveFolder=saveFolder,subjectID=subjectID,
+                                   displayResolution=displayResolution,
+                                   monWidth=monWidth,
+                                   monHeight=monHeight,
+                                   monDistance=monDistance,
+                                   foregroundColor=foregroundColor,
+                                   backgroundColor=backgroundColor,
+                                   textHeightETclient=textHeightETclient)
 
-                    et_client = setup_et(win, hz, saveFileEDF=create_save_file_EDF(saveFolder, subjectID))
+                    et_client = setup_et(win, hz, saveFileEDF=create_save_file_EDF(saveFolder, subjectID),
+                                         displayResolution=displayResolution,
+                                         monWidth=monWidth,
+                                         monHeight=monHeight,
+                                         monDistance=monDistance,
+                                         foregroundColor=foregroundColor,
+                                         backgroundColor=backgroundColor,
+                                         textHeightETclient=textHeightETclient)
+
                     et_client.sendMsg(msg="New start of experiment")
                     et_client.startTrial(trialNr=block)  # starts eyetracking recording.
                     Recalibrate = False
@@ -400,8 +435,26 @@ if __name__ == '__main__':
             dp.DPxEnableDoutPixelMode()
             dp.DPxWriteRegCache()
 
+    # setup ET
+    print("ET is {0}".format(ET))
+    if ET:
+        hz = win.getActualFrameRate(nIdentical=50, nMaxFrames=200, nWarmUpFrames=25, threshold=0.5)
+        et_client = setup_et(win, hz,saveFileEDF=create_save_file_EDF(saveFolder, subjectID),
+                             displayResolution=displayResolution,
+                             monWidth=monWidth,
+                             monHeight=monHeight,
+                             monDistance=monDistance,
+                             foregroundColor=foregroundColor,
+                             backgroundColor=backgroundColor,
+                             textHeightETclient=textHeightETclient)
+        psychopy.event.globalKeys.clear()
+        psychopy.event.globalKeys.add(recalibrateKey, set_recalibrate) # Recalibrate mid experiment, 'c'
+        psychopy.event.globalKeys.add(forceQuitKey, clean_quit) # clean quits the experiment, 'p'
+    else:
+        et_client = None
+
     blank()
-    runBlocks(blocks)
+    runBlocks(blocks,et_client,ET,ETGC,Recalibrate)
 
     
     if platform == "Windows":

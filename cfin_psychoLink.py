@@ -3103,6 +3103,7 @@ class EyeLinkCoreGraphicsPsychopy(pl.EyeLinkCustomDisplay):
         self.window = window
         window.winHandle.maximize()
         window.winHandle.activate()
+        self.display_size = window.size
         self.tracker = tracker
         self.imgstim_size = None
         self.rgb_index_array = None
@@ -3406,6 +3407,42 @@ class EyeLinkCoreGraphicsPsychopy(pl.EyeLinkCustomDisplay):
         elif pylink_sound_index == pl.CAL_GOOD_BEEP:
             txt = 'Press "v" or "Enter" to continue'
             self.textmsg.draw(txt)
+            line_count = 25
+            font_height = self.display_size[1] / 50
+            buttons_radius = font_height / 2.5
+
+
+            space_per_lines = int(font_height * 2.5)
+            total_line_height = space_per_lines * line_count
+
+
+
+            b1 = visual.Circle(self.window, radius=buttons_radius, fillColorSpace='rgb255', lineColorSpace='rgb255',
+                                                     lineColor=[0, 0, 255],
+                                                     fillColor=[0, 0, 255], edges=50,units='deg',
+                                                     pos=(2,-2))
+            b2 = visual.Circle(self.window, radius=buttons_radius, fillColorSpace='rgb255', lineColorSpace='rgb255',
+                               lineColor=[0, 0, 255],
+                               fillColor=[0, 0, 255], edges=50,units='deg',
+                               pos=(2.5,-2))
+
+
+            y1 = visual.Circle(self.window, radius=buttons_radius, fillColorSpace='rgb255', lineColorSpace='rgb255',
+                                                 lineColor=[255, 0, 0],
+                                                 fillColor=[255, 0, 0], edges=50,units='deg',
+                                                 pos=(-2,-2))
+
+            y2 = visual.Circle(self.window, radius=buttons_radius, fillColorSpace='rgb255', lineColorSpace='rgb255',
+                               lineColor=[255, 0, 0],
+                               fillColor=[255, 0, 0], edges=50,units='deg',
+                               pos=(-2.5,-2))
+            b1.draw()
+            b2.draw()
+            y1.draw()
+            y2.draw()
+
+
+
             self.window.flip()
 
     def draw_line(self, x1, y1, x2, y2, color_index):
