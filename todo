@@ -1,18 +1,5 @@
 Gaze Contingency
 
-- done - test stimpc8
-
-- document, recalibrate_et
-        displayResolution=displayResolution,
-        monWidth=monWidth,
-        monDistance=monDistance,
-        monHeight=monHeight,
-        foregroundColor=foregroundColor,
-        backgroundColor=backgroundColor,
-        textHeightETclient=textHeightETclient
-
-- fix so buttons are there when calibration dot appears, and at validation / or continue
-- fix so head is first camera image. (press enter)
 
 
 - Done test malthes rMEG_ET

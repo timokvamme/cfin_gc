@@ -217,8 +217,8 @@ if ET:
     calibrate_using_2_7(
     displayResolution=displayResolution,
     monWidth=monWidth,
-    monDistance=monDistance,
     monHeight=monHeight,
+    monDistance=monDistance,
     foregroundColor=foregroundColor,
     backgroundColor=backgroundColor,
     textHeightETclient=textHeightETclient)
@@ -344,7 +344,14 @@ def clean_quit():
 # setup ET
 if ET:
     hz = win.getActualFrameRate(nIdentical=50, nMaxFrames=200, nWarmUpFrames=25, threshold=0.5) if calculateFPS else default_hz
-    et_client = setup_et(win, hz)
+    et_client = setup_et(win, hz,saveFileEDF=create_save_file_EDF(saveFolder, subjectID),
+                         displayResolution=displayResolution,
+                         monWidth=monWidth,
+                         monHeight=monHeight,
+                         monDistance=monDistance,
+                         foregroundColor=foregroundColor,
+                         backgroundColor=backgroundColor,
+                         textHeightETclient=textHeightETclient)
     psychopy.event.globalKeys.clear()
     psychopy.event.globalKeys.add(recalibrateKey, set_recalibrate) # Recalibrate mid experiment, 'c'
     psychopy.event.globalKeys.add(forceQuitKey, clean_quit) # clean quits the experiment, 'p'
@@ -401,13 +408,20 @@ for no, trial in enumerate(trialList):
                 recalibrate_et(win,client=et_client, default_fullscreen=fullscreen,saveFolder=saveFolder,subjectID=subjectID,
                                displayResolution=displayResolution,
                                monWidth=monWidth,
-                               monDistance=monDistance,
                                monHeight=monHeight,
+                               monDistance=monDistance,
                                foregroundColor=foregroundColor,
                                backgroundColor=backgroundColor,
                                textHeightETclient=textHeightETclient)
 
-                et_client = setup_et(win, hz, saveFileEDF=create_save_file_EDF(saveFolder, subjectID))
+                et_client = setup_et(win, hz, saveFileEDF=create_save_file_EDF(saveFolder, subjectID),
+                                     displayResolution=displayResolution,
+                                     monWidth=monWidth,
+                                     monHeight=monHeight,
+                                     monDistance=monDistance,
+                                     foregroundColor=foregroundColor,
+                                     backgroundColor=backgroundColor,
+                                     textHeightETclient=textHeightETclient)
                 et_client.sendMsg(msg="New start of experiment")
                 et_client.startTrial(trialNr=no)  # starts eyetracking recording.
                 Recalibrate = False

@@ -245,8 +245,8 @@ def gaze_out_of_bounds(gaze, max_dist, mid=(0,0)):
 def calibrate_using_2_7(ETsaveFolder = "/data/ET", edf_path="py27_calibration.EDF",calibrate_console_output_file="calibrate_eyelink_2_7_log_file.txt",
                         displayResolution=displayResolution,
                         monWidth=monWidth,
-                        monDistance=monDistance,
                         monHeight=monHeight,
+                        monDistance=monDistance,
                         foregroundColor=foregroundColor,
                         backgroundColor=backgroundColor,
                         textHeightETclient=textHeightETclient):
@@ -285,6 +285,44 @@ def calibrate_using_2_7(ETsaveFolder = "/data/ET", edf_path="py27_calibration.ED
         calibrate_console_output_file : string
             the calibration txt file where the output of 27 is written to
             default "calibrate_eyelink_2_7_log_file.txt
+
+
+        displayResolution: tuple/list
+            of x and y pixel size of the screen used for calibration
+            the ET_functions.py has a default for this, which depends on the stim pc used.
+            but can be overwritten by the script calling the calibrate_using_2_7/recalibrate_et/setup_et function
+
+        monWidth: float/int
+            the realworld width of the display in centimeters
+            the ET_functions.py has a default for this, which depends on the stim pc used.
+            but can be overwritten by the script calling the calibrate_using_2_7/recalibrate_et/setup_et function
+
+        monHeight: float/int
+            the realworld height of the display in centimeters
+            the ET_functions.py has a default for this, which depends on the stim pc used.
+            but can be overwritten by the script calling the calibrate_using_2_7/recalibrate_et/setup_et function
+
+        monDistance: float/int
+            the realworld width of the display in centimeters
+            the ET_functions.py has a default for this, which depends on the stim pc used.
+            but can be overwritten by the script calling the calibrate_using_2_7/recalibrate_et/setup_et function
+
+        foregroundColor: tuple, list 
+            the color of the foreground in rgb255, default is [1,1,1] e.g. white
+            the ET_functions.py has a default for this, which depends on the stim pc used.
+            but can be overwritten by the script calling the calibrate_using_2_7/recalibrate_et/setup_et function
+
+
+        backgroundColor: tuple, list
+            the color of the foreground in rgb255, default is [0,0,0] e.g. grey
+            the ET_functions.py has a default for this, which depends on the stim pc used.
+            but can be overwritten by the script calling the calibrate_using_2_7/recalibrate_et/setup_et function
+
+        textHeightETclient: float/int
+            the size of the text stim used in the recalibration in degrees, default is 1.
+            the ET_functions.py has a default for this, which depends on the stim pc used.
+            but can be overwritten by the script calling the calibrate_using_2_7/recalibrate_et/setup_et function
+
 
 
 
@@ -381,7 +419,14 @@ def calibration_test(win,client, calibrateTestTime=calibrateTestTime):
     client.stopTrial()
     return True
 
-def setup_et(win, hz=None, saveFileEDF=None):
+def setup_et(win, hz=None, saveFileEDF=None,
+             displayResolution=displayResolution,
+             monWidth=monWidth,
+             monHeight=monHeight,
+             monDistance=monDistance,
+             foregroundColor=foregroundColor,
+             backgroundColor=backgroundColor,
+             textHeightETclient=textHeightETclient):
     """
         Sets up Eyetracking and creates an eyelink client, to communicate with the eyetracker
         it does so thorugh two subfunctions, calibration uses calibration_test and calibrate_using_2_7.
@@ -398,6 +443,43 @@ def setup_et(win, hz=None, saveFileEDF=None):
         saveFileEDF : string
             Path to where eyetracking data is saved, should end with the extension ".EDF"
             If None (default), a timestamped data file is saved in a folder called data in the same folder as this script
+
+
+        displayResolution: tuple/list
+            of x and y pixel size of the screen used for calibration
+            the ET_functions.py has a default for this, which depends on the stim pc used.
+            but can be overwritten by the script calling the calibrate_using_2_7/recalibrate_et/setup_et function
+
+        monWidth: float/int
+            the realworld width of the display in centimeters
+            the ET_functions.py has a default for this, which depends on the stim pc used.
+            but can be overwritten by the script calling the calibrate_using_2_7/recalibrate_et/setup_et function
+
+        monHeight: float/int
+            the realworld height of the display in centimeters
+            the ET_functions.py has a default for this, which depends on the stim pc used.
+            but can be overwritten by the script calling the calibrate_using_2_7/recalibrate_et/setup_et function
+
+        monDistance: float/int
+            the realworld width of the display in centimeters
+            the ET_functions.py has a default for this, which depends on the stim pc used.
+            but can be overwritten by the script calling the calibrate_using_2_7/recalibrate_et/setup_et function
+
+        foregroundColor: tuple, list
+            the color of the foreground in rgb255, default is [1,1,1] e.g. white
+            the ET_functions.py has a default for this, which depends on the stim pc used.
+            but can be overwritten by the script calling the calibrate_using_2_7/recalibrate_et/setup_et function
+
+
+        backgroundColor: tuple, list
+            the color of the foreground in rgb255, default is [0,0,0] e.g. grey
+            the ET_functions.py has a default for this, which depends on the stim pc used.
+            but can be overwritten by the script calling the calibrate_using_2_7/recalibrate_et/setup_et function
+
+        textHeightETclient: float/int
+            the size of the text stim used in the recalibration in degrees, default is 1.
+            the ET_functions.py has a default for this, which depends on the stim pc used.
+            but can be overwritten by the script calling the calibrate_using_2_7/recalibrate_et/setup_et function
 
 
         Returns
@@ -421,7 +503,14 @@ def setup_et(win, hz=None, saveFileEDF=None):
 
         satisfying_cali = calibration_test(win,et_client)
         if not satisfying_cali:
-            recalibrate_et(win, et_client, default_fullscreen=True, pypixpixelmode=True,saveFileEDF=saveFileEDF)
+            recalibrate_et(win, et_client, default_fullscreen=True, pypixpixelmode=True,saveFileEDF=saveFileEDF,
+                           displayResolution=displayResolution,
+                           monWidth=monWidth,
+                           monHeight=monHeight,
+                           monDistance=monDistance,
+                           foregroundColor=foregroundColor,
+                           backgroundColor=backgroundColor,
+                           textHeightETclient=textHeightETclient)
 
     et_client.sendMsg(msg="Starting experiment")
     et_client.startRecording()
@@ -479,8 +568,8 @@ def create_save_file_EDF(saveFolder ="/data", subjectID = 1):
 def recalibrate_et(win, client, default_fullscreen=True, pypixpixelmode=True,saveFileEDF=None, saveFolder="/data", subjectID=1,
                    displayResolution=displayResolution,
                    monWidth=monWidth,
-                   monDistance=monDistance,
                    monHeight=monHeight,
+                   monDistance=monDistance,
                    foregroundColor=foregroundColor,
                    backgroundColor=backgroundColor,
                    textHeightETclient=textHeightETclient):
@@ -527,6 +616,44 @@ def recalibrate_et(win, client, default_fullscreen=True, pypixpixelmode=True,sav
     subjectID : int / string
         the "ID" of the subject used to create the path of the save file
         default = 1
+
+    displayResolution: tuple/list
+        of x and y pixel size of the screen used for calibration
+        the ET_functions.py has a default for this, which depends on the stim pc used.
+        but can be overwritten by the script calling the calibrate_using_2_7/recalibrate_et/setup_et function
+
+    monWidth: float/int
+        the realworld width of the display in centimeters
+        the ET_functions.py has a default for this, which depends on the stim pc used.
+        but can be overwritten by the script calling the calibrate_using_2_7/recalibrate_et/setup_et function
+
+    monHeight: float/int
+        the realworld height of the display in centimeters
+        the ET_functions.py has a default for this, which depends on the stim pc used.
+        but can be overwritten by the script calling the calibrate_using_2_7/recalibrate_et/setup_et function
+
+    monDistance: float/int
+        the realworld width of the display in centimeters
+        the ET_functions.py has a default for this, which depends on the stim pc used.
+        but can be overwritten by the script calling the calibrate_using_2_7/recalibrate_et/setup_et function
+
+    foregroundColor: tuple, list
+        the color of the foreground in rgb255, default is [1,1,1] e.g. white
+        the ET_functions.py has a default for this, which depends on the stim pc used.
+        but can be overwritten by the script calling the calibrate_using_2_7/recalibrate_et/setup_et function
+
+
+    backgroundColor: tuple, list
+        the color of the foreground in rgb255, default is [0,0,0] e.g. grey
+        the ET_functions.py has a default for this, which depends on the stim pc used.
+        but can be overwritten by the script calling the calibrate_using_2_7/recalibrate_et/setup_et function
+
+    textHeightETclient: float/int
+        the size of the text stim used in the recalibration in degrees, default is 1.
+        the ET_functions.py has a default for this, which depends on the stim pc used.
+        but can be overwritten by the script calling the calibrate_using_2_7/recalibrate_et/setup_et function
+
+
 
 
     """
