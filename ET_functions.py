@@ -408,7 +408,7 @@ def setup_et(win, hz=None, saveFileEDF=None,
         Parameters
         ----------
         win : object
-            psychopy visual win (Window)
+            psychopy visual win (Window) - suggested to use units="deg"
 
         hz : float
             the framerate of your monitor. Calculate it with getActualFrameRate() or give a default value
