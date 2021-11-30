@@ -1,11 +1,17 @@
 Gaze Contingency
 
+test shooting game.
+ask CB about pyeparse
 
-- done - rewrite example_gc_flash without ET.
-- done make two versions versions of the script
+video
 
-test example_gc completely calibration,
-video of it.
+-write something about
+- gc, realtime eyetracking (link to matlab below)
+- psychopy, (may develop gc but not yet)
+- eyelink, pylink,
+- psycholink
+- cfin_psycholink
+
 
 - make a documentation on the wiki. (videos?)
 -  make install of pip.  git install packaghe.
