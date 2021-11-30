@@ -8,10 +8,16 @@
 library(eyelinker)
 library("tibble")
 
+
+
+
 # edf2asc64 e.EDF
 
-data <- read.csv("C:/code/projects/cfin_gc/events_diff.csv")
+# data <- read.csv("C:/code/projects/cfin_gc/events_diff.csv")
+#
+# dat <- read.asc("C:/code/projects/cfin_gc/e.asc", parse_all = TRUE)
 
+dat <- read.asc("C:/Users/stimuser.stimpc-08/Desktop/Malthe/data/sub_0001/subjectID_0001_2021_11_30_13_04_02.asc")
 dat <- read.asc("C:/code/projects/cfin_gc/e.asc", parse_all = TRUE)
 
 raw <- as.data.frame(dat["raw"][1])

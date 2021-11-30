@@ -208,7 +208,8 @@ instruction_text = visual.TextStim(win, color=foregroundColor, pos=fixPos, heigh
 saveFile = saveFolder + '/subject_' + str(subjectID) + '_' + time.strftime('%Y_%m_%d_%H_%M_%S',time.localtime()) + '.csv'
 trialList = []
 for no in range(N_trials):
-    trial = {"no":no,"ans":np.nan,"rt":np.nan,"problemWithFixation_prestim":False,
+    trial = {"no":no,"ans":np.nan,"rt":np.nan,
+             "problemWithFixation_prestim":False,
              "time_eyelinkWaitForFixation_prestim":np.nan,
              'time_eyelinkBeginTrial':np.nan}
     trialList += [trial]
