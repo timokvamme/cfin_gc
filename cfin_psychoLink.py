@@ -10,7 +10,13 @@ except:
     import warnings
 
     pl = False
-    warnings.warn('Pylink not found, running dummy mode', Warning)
+    warnings.warn('Pylink not found, running dummy mode - you might have installed the wrong pylink'
+                  'see installation here: https://www.sr-support.com/thread-48.html'
+                  ''
+                  'for a conda env use this command:   "pip install --index-url=https://pypi.sr-support.com sr-research-pylink" ', Warning)
+
+
+
 import os, sys, platform, time
 import numpy as np
 from psychopy import visual, core, event
