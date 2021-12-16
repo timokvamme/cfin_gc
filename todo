@@ -10,34 +10,20 @@ make a python 3.9
 write a doc for how you installed the environment.
 
 
+- Ask CB
+
+doc on cfin.wiki /  show CB the .docx / show vieos
 ask CB about SR research Dev Kit.
-show CB the .docx
 how would he make the github part of cfin ?  the ET_functions should be in cwd?.
+
+ask CB install zoom for installing dependencies and analysing the data
 
 ask CB about pyeparse
 
 
-
-video
-
--write something about
-- gc, realtime eyetracking (link to matlab below)
-- psychopy, (may develop gc but not yet)
-- eyelink, pylink,
-- psycholink
-- cfin_psycholink
-
-
-- make a documentation on the wiki. (videos?)
--  make install of pip.  git install packaghe.
-
-
 videos.
-- insallations
-- calibration video (in meg),  using phone, settings on eyetracker - and then show the gc example
-- writing the example gc flash - adding eyetracking functions. compare two versions of the script
-- analysing the edf file.
-
+- make video on installing dependencies,
+- make video on analysing the data / edf file
 
 - create a PTB version of gc flash.
     - https://www.youtube.com/watch?v=NS1_lJUpWKU
@@ -47,19 +33,3 @@ videos.
 
 - cleanup files
 - look through all of the files
-
-
-RT-MEG
-- rt_meg
-
-
-Extra
-- read asc f
-- Done skriv til SR research.
-- Await response from SR research on python 3.x
-
-- make install of pip.  git install packaghe.
-
-- make 3x python calibration work.
-- binocular
-
