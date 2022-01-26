@@ -193,7 +193,6 @@ px_size = [2, 2]
 triggerStim = visual.Rect(win=win, fillColor=(0, 0, 0), size=px_size, colorSpace='rgb255', pos=px_location, units='pix', autoDraw=True)
 
 
-
 triggerStim.color=(0,0,0)
 
 # clock

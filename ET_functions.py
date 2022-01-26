@@ -475,6 +475,9 @@ def setup_et(win, hz=None, saveFileEDF=None,
                                displayResolution=displayResolution, textSize=textHeightETclient)
         et_client.hz = hz
 
+        # test:
+        #et_client.calibrate()
+
         satisfying_cali = calibration_test(win,et_client)
         if not satisfying_cali:
             recalibrate_et(win, et_client, default_fullscreen=True, pypixpixelmode=True,saveFileEDF=saveFileEDF,

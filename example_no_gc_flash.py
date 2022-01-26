@@ -8,6 +8,9 @@ Email: Timokvamme@gmail.com / Timo@cfin.au.dk
 
 this file is acomparison file to the "example_gc_flash"
 
+wiki link:
+http://wiki.pet.auh.dk/wiki/Eyetracking_at_the_CFIN_MEG_Lab_(2021)#Calibrating_and_running_the_eyetracking
+
 """
 
 # -------------- IMPORTS -----------------------------#

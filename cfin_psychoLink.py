@@ -2875,6 +2875,8 @@ class IntroScreen(object):
                                                italic=False,
                                                alignHoriz='left',
                                                alignVert='center',
+                                               # anchorVert="top",
+                                               # anchorHoriz="left",
                                                wrapWidth=self.display_size[0] * .8))
 
         self.introlines.append(visual.TextStim(self.window,
@@ -2886,8 +2888,12 @@ class IntroScreen(object):
                                                color=color, colorSpace='rgb',
                                                opacity=1.0, contrast=1.0, units='pix',
                                                ori=0.0, antialias=True,
-                                               bold=False, italic=False, alignHoriz='left',
-                                               alignVert='center', wrapWidth=self.display_size[0] * .8))
+                                               bold=False, italic=False,
+                                               alignHoriz='left',
+                                               alignVert='center',
+                                               # anchorVert="top",
+                                               # anchorHoriz="left",
+                                               wrapWidth=self.display_size[0] * .8))
 
         # enter button
 
@@ -2922,6 +2928,8 @@ class IntroScreen(object):
                                                italic=False,
                                                alignHoriz='left',
                                                alignVert='center',
+                                               # anchorVert="top",
+                                               # anchorHoriz="left",
                                                wrapWidth=self.display_size[0] * .8))
 
         self.respboxbuttons.append(visual.Circle(self.window, radius=buttons_radius, fillColorSpace='rgb255', lineColorSpace='rgb255',
@@ -2938,8 +2946,12 @@ class IntroScreen(object):
                                                color=color, colorSpace='rgb',
                                                opacity=1.0, contrast=1.0, units='pix',
                                                ori=0.0, antialias=True,
-                                               bold=False, italic=False, alignHoriz='left',
-                                               alignVert='center', wrapWidth=self.display_size[0] * .8))
+                                               bold=False, italic=False,
+                                               alignHoriz='left',
+                                               alignVert='center',
+                                               # anchorVert="top",
+                                               # anchorHoriz="left",
+                                               wrapWidth=self.display_size[0] * .8))
 
         self.respboxbuttons.append(visual.Circle(self.window, radius=buttons_radius, fillColorSpace='rgb255', lineColorSpace='rgb255',
                                          lineColor=[255, 0, 0],
@@ -2961,8 +2973,12 @@ class IntroScreen(object):
                                                color=color, colorSpace='rgb',
                                                opacity=1.0, contrast=1.0, units='pix',
                                                ori=0.0, antialias=True,
-                                               bold=False, italic=False, alignHoriz='left',
-                                               alignVert='center', wrapWidth=self.display_size[0] * .8))
+                                               bold=False, italic=False,
+                                               alignHoriz='left',
+                                               alignVert='center',
+                                               # anchorVert="top",
+                                               # anchorHoriz="left",
+                                               wrapWidth=self.display_size[0] * .8))
 
         self.respboxbuttons.append(visual.Circle(self.window, radius=buttons_radius, fillColorSpace='rgb255', lineColorSpace='rgb255',
                                          lineColor=[0, 0, 255],
@@ -2992,8 +3008,12 @@ class IntroScreen(object):
                                                color=color, colorSpace='rgb',
                                                opacity=1.0, contrast=1.0, units='pix',
                                                ori=0.0, antialias=True,
-                                               bold=False, italic=False, alignHoriz='left',
-                                               alignVert='center', wrapWidth=self.display_size[0] * .8))
+                                               bold=False, italic=False,
+                                               alignHoriz='left',
+                                               alignVert='center',
+                                               # anchorVert="top",
+                                               # anchorHoriz="left",
+                                               wrapWidth=self.display_size[0] * .8))
 
         self.respboxbuttons.append(visual.Circle(self.window, radius=buttons_radius, fillColorSpace='rgb255', lineColorSpace='rgb255',
                                          lineColor=[255, 255, 0],
@@ -3011,8 +3031,12 @@ class IntroScreen(object):
                                                color=color, colorSpace='rgb',
                                                opacity=1.0, contrast=1.0, units='pix',
                                                ori=0.0, antialias=True,
-                                               bold=False, italic=False, alignHoriz='left',
-                                               alignVert='center', wrapWidth=self.display_size[0] * .8))
+                                               bold=False, italic=False,
+                                               alignHoriz='left',
+                                               alignVert='center',
+                                               # anchorVert="top",
+                                               # anchorHoriz="left",
+                                               wrapWidth=self.display_size[0] * .8))
 
 
         self.respboxbuttons.append(visual.Circle(self.window, radius=buttons_radius, fillColorSpace='rgb255', lineColorSpace='rgb255',
@@ -3031,8 +3055,12 @@ class IntroScreen(object):
                                                color=color, colorSpace='rgb',
                                                opacity=1.0, contrast=1.0, units='pix',
                                                ori=0.0, antialias=True,
-                                               bold=False, italic=False, alignHoriz='left',
-                                               alignVert='center', wrapWidth=self.display_size[0] * .8))
+                                               bold=False, italic=False,
+                                               alignHoriz='left',
+                                               alignVert='center',
+                                               # anchorVert="top",
+                                               # anchorHoriz="left",
+                                               wrapWidth=self.display_size[0] * .8))
 
         self.introlines.append(visual.TextStim(self.window,
                                                text="+ or -: Adjust CR Threshold.",
@@ -3043,8 +3071,13 @@ class IntroScreen(object):
                                                color=color, colorSpace='rgb',
                                                opacity=1.0, contrast=1.0, units='pix',
                                                ori=0.0, antialias=True,
-                                               bold=False, italic=False, alignHoriz='left',
-                                               alignVert='center', wrapWidth=self.display_size[0] * .8))
+                                               bold=False, italic=False,
+                                               alignHoriz='left',
+                                               alignVert='center',
+                                               # anchorVert="top",
+                                               # anchorHoriz="left",
+                                               wrapWidth=self.display_size[0] * .8))
+
         self.introlines.append(visual.TextStim(self.window,
                                                text="I: Toggle extra information.",
                                                pos=(
@@ -3054,8 +3087,13 @@ class IntroScreen(object):
                                                color=color, colorSpace='rgb',
                                                opacity=1.0, contrast=1.0, units='pix',
                                                ori=0.0, antialias=True,
-                                               bold=False, italic=False, alignHoriz='left',
-                                               alignVert='center', wrapWidth=self.display_size[0] * .8))
+                                               bold=False, italic=False,
+                                               alignHoriz='left',
+                                               alignVert='center',
+                                               # anchorVert="top",
+                                               # anchorHoriz="left",
+
+                                               wrapWidth=self.display_size[0] * .8))
 
         self.introlines.append(visual.TextStim(self.window,
                                                text="SPACE (used later)",
@@ -3066,8 +3104,13 @@ class IntroScreen(object):
                                                color=color, colorSpace='rgb',
                                                opacity=1.0, contrast=1.0, units='pix',
                                                ori=0.0, antialias=True,
-                                               bold=False, italic=False, alignHoriz='left',
-                                               alignVert='center', wrapWidth=self.display_size[0] * .8))
+                                               bold=False, italic=False,
+                                               alignHoriz='left',
+                                               alignVert='center',
+                                               # anchorVert="top",
+                                               # anchorHoriz="left",
+
+                                               wrapWidth=self.display_size[0] * .8))
 
         self.respboxbuttons.append(
             visual.Circle(self.window, radius=buttons_radius, fillColorSpace='rgb255', lineColorSpace='rgb255',

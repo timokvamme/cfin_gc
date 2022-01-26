@@ -6,7 +6,8 @@ Author: Timo Kvamme
 Email: Timokvamme@gmail.com / Timo@cfin.au.dk
 (do not hesitate to contact me if you need some tips on how to implement GC)
 
-TODO link to wiki
+wiki link:
+http://wiki.pet.auh.dk/wiki/Eyetracking_at_the_CFIN_MEG_Lab_(2021)#Calibrating_and_running_the_eyetracking
 
 Description:
 This script features an implementation of gaze-contingent eyetracking for designed to run at the MEG
@@ -83,6 +84,8 @@ from math import atan2, degrees
 
 
 
+
+
 # --------------- SETTINGS ---------------------------#
 # folder settings
 saveFolder = os.getcwd() + "/data"
@@ -92,9 +95,9 @@ if not os.path.isdir(saveFolder): os.makedirs(saveFolder)  # Creates save folder
 
 if  platform.node() == "stimpc-08": # CFIN MEG stimpc
     displayResolution = [1920,1080]
-    monWidth = 67.5
+    monWidth = 66.5
     monDistance = 90.0
-    monHeight = 37.5
+    monHeight = 37.5133231
 
 
 elif platform.node() == "stimpc-10": # stimpc in the TMS-EEG room
@@ -335,7 +338,7 @@ for no, trial in enumerate(trialList):
 
     # initial fixation cross
     while clock.getTime() < inter_trial_interval:
-        if ETtest:
+        if ETtest and ET:
             pos = et_client.getCurSamp()  # gets current eyetracking sample, x, y,
             pos_to_deg = pl.pixelsToAngleWH((int(pos[0]), int(pos[1])), monDistance, (monWidth, monHeight),
                                          (displayResolution[0], displayResolution[1]))
@@ -415,7 +418,8 @@ for no, trial in enumerate(trialList):
     flash_left.draw()
     win.flip()
 
-    et_client.sendMsg(msg="stimulus shown %s" % str(no))
+    if ET:
+        et_client.sendMsg(msg="stimulus shown %s" % str(no))
 
     while clock.getTime() < SOA:
         pass
@@ -440,7 +444,7 @@ for no, trial in enumerate(trialList):
 
 
     csvWriter.writerow(trial.values());behavfile.flush()
-    et_client.stopTrial()
+    if ET: et_client.stopTrial()
 
 
 instruction_text.setText("Experiment Complete")
@@ -448,7 +452,7 @@ instruction_text.draw()
 win.flip()
 
 print("performing et_client cleanUp. Transfering the file over the network form the eyetracking PC to Stim PC")
-et_client.cleanUp(saveFileEDF = create_save_file_EDF(saveFolder, subjectID))
+if ET: et_client.cleanUp(saveFileEDF = create_save_file_EDF(saveFolder, subjectID))
 print("closing")
 psychopy.core.quit()
 

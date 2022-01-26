@@ -10,8 +10,17 @@ library("tibble")
 
 
 
+# to convert an .EDF file to asc, you can (on the stim pc)
+# open a command line, (search for "cmd") and then you can
+# write "cd" and the folder where you have the file
+# so for example "cd C:/Users/stimuser.stimpc-08/Desktop/Malthe/data/sub_0001"  - without quotation
+# will go to the data folder of subject one.
+# now you have changed directory here.
 
-# edf2asc64 e.EDF
+# then you can write the following
+# "edf2asc64 name_of_edf_file.EDF"
+
+#example:  "edf2asc64 subjectID_0001_2021_11_30_13_04_02.EDF"
 
 # data <- read.csv("C:/code/projects/cfin_gc/events_diff.csv")
 #
@@ -23,6 +32,11 @@ dat <- read.asc("C:/code/projects/cfin_gc/e.asc", parse_all = TRUE)
 raw <- as.data.frame(dat["raw"][1])
 msg <- as.data.frame(dat["msg"][1])
 
+# here messages from the
+# et_client.sendMsg(msg="Closing the client") # for example
+# should be shown along with the timestamp of the message
+# and in the raw, there should be x and y coordinates, along with the timestamp
+# which can be used to crossreference raw->timestamp->mesage/trigger
 
 cat_list <- c()
 
